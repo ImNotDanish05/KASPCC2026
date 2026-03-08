@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.5">
   <diagram name="Page-1" id="hYR3gAgKbTYbxonARGWc">
-    <mxGraphModel dx="983" dy="1612" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1188" dy="1719" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -29,7 +29,13 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-13" parent="l5eJF3EYvzsERVuO7n-M-1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="&lt;div&gt;&lt;div&gt;Input tiap anggota:&lt;/div&gt;&lt;/div&gt;&lt;div&gt;- Nama (Checklist)&lt;/div&gt;&lt;div&gt;- Nominal Uang&lt;/div&gt;&lt;div&gt;- Bukti bayar&lt;/div&gt;" vertex="1">
-          <mxGeometry height="100" width="165" x="65" y="430" as="geometry" />
+          <mxGeometry height="100" width="165" x="67.5" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-14" edge="1" parent="l5eJF3EYvzsERVuO7n-M-1" source="l5eJF3EYvzsERVuO7n-M-11" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-13" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="160" y="470" as="sourcePoint" />
+            <mxPoint x="210" y="420" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-2" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Bendahara Internal" vertex="1">
           <mxGeometry height="200" width="200" x="580" y="150" as="geometry" />
