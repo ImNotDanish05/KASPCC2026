@@ -308,76 +308,6 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-75" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Bendahara Internal" vertex="1">
           <mxGeometry height="1020" width="550" x="2120" y="220" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-76" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pencet Whatsapp Chat Generator" vertex="1">
-          <mxGeometry height="60" width="120" x="250" y="240" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-77" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;spacingLeft=30;spacingRight=30;" value="Mengingatkan lewat ?" vertex="1">
-          <mxGeometry height="120" width="120" x="80" y="210" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-78" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-77" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-76" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="300" y="380" as="sourcePoint" />
-            <mxPoint x="250" y="270" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-79" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Seluruh bendahara Eksternal" vertex="1">
-          <mxGeometry height="40" width="80" x="170" y="200" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-80" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Copy Chat" vertex="1">
-          <mxGeometry height="60" width="120" x="250" y="340" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-81" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-76" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-80" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="130" y="340" as="sourcePoint" />
-            <mxPoint x="180" y="290" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-82" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pilih Divisi/Department" vertex="1">
-          <mxGeometry height="60" width="120" x="249.99999999999955" y="510" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-83" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-77" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-82" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <Array as="points">
-              <mxPoint x="140" y="540" />
-            </Array>
-            <mxPoint x="130" y="420" as="sourcePoint" />
-            <mxPoint x="240" y="500" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-84" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Per bendahara eksternal" vertex="1">
-          <mxGeometry height="40" width="80" x="50" y="330" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-85" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pencet Whatsapp Chat Generator" vertex="1">
-          <mxGeometry height="60" width="120" x="250" y="620" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-86" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Copy Chat" vertex="1">
-          <mxGeometry height="60" width="120" x="250" y="730" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-87" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-82" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-85" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="230" y="720" as="sourcePoint" />
-            <mxPoint x="280" y="670" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-88" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-85" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-86" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="350" y="640" as="sourcePoint" />
-            <mxPoint x="350" y="690" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-89" parent="l5eJF3EYvzsERVuO7n-M-75" style="ellipse;whiteSpace=wrap;html=1;" value="Selesai" vertex="1">
-          <mxGeometry height="80" width="120" x="400" y="900" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-90" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-80" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-89" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <Array as="points">
-              <mxPoint x="310" y="470" />
-              <mxPoint x="460" y="470" />
-            </Array>
-            <mxPoint x="340" y="740" as="sourcePoint" />
-            <mxPoint x="390" y="690" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="2820" y="280" as="sourcePoint" />
@@ -392,21 +322,6 @@
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-94" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Bendahara buka Dashboard (Lihat Department dan Divisi yang belum bayar)" vertex="1">
           <mxGeometry height="100" width="160" x="2180" y="270" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-95" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-94" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-77" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="2260" y="480" as="sourcePoint" />
-            <mxPoint x="2310" y="430" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-96" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-86" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <Array as="points">
-              <mxPoint x="2430" y="1050" />
-            </Array>
-            <mxPoint x="2460" y="960" as="sourcePoint" />
-            <mxPoint x="2580" y="1050" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
