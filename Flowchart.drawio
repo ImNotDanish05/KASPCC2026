@@ -19,7 +19,7 @@
             <mxPoint x="230" y="250" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-11" parent="l5eJF3EYvzsERVuO7n-M-1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-11" parent="l5eJF3EYvzsERVuO7n-M-1" style="rounded=0;whiteSpace=wrap;html=1;" value="Buka halaman Bayar KAS" vertex="1">
           <mxGeometry height="60" width="120" x="90" y="340" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-12" edge="1" parent="l5eJF3EYvzsERVuO7n-M-1" source="l5eJF3EYvzsERVuO7n-M-9" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-11" value="">
