@@ -127,7 +127,7 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-44" parent="l5eJF3EYvzsERVuO7n-M-2" style="shape=datastore;whiteSpace=wrap;html=1;" value="Table list bayar per bulan (Kemungkinan uang lebih jika bayar langsung 2-3 bulan)" vertex="1">
           <mxGeometry height="140" width="130" x="280" y="1120" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-45" parent="l5eJF3EYvzsERVuO7n-M-2" style="shape=datastore;whiteSpace=wrap;html=1;" value="&lt;div&gt;TABUNGAN&lt;/div&gt;Uang sisa per anggota jika tidak cukup untuk membayar KAS per bulan" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-45" parent="l5eJF3EYvzsERVuO7n-M-2" style="shape=datastore;whiteSpace=wrap;html=1;" value="&lt;div&gt;TABUNGAN PER ANGGOTA&lt;/div&gt;Uang sisa per anggota jika tidak cukup untuk membayar KAS per bulan" vertex="1">
           <mxGeometry height="140" width="130" x="280" y="1340" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-4" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Anggota STO" vertex="1">
