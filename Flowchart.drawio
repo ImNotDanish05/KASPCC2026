@@ -122,7 +122,7 @@
           <mxGeometry height="30" width="60" x="50" y="1320" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-43" parent="l5eJF3EYvzsERVuO7n-M-2" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Ya" vertex="1">
-          <mxGeometry height="30" width="60" x="160" y="1220" as="geometry" />
+          <mxGeometry height="30" width="60" x="180" y="1265" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-44" parent="l5eJF3EYvzsERVuO7n-M-2" style="shape=datastore;whiteSpace=wrap;html=1;" value="Table list bayar per bulan (Kemungkinan uang lebih jika bayar langsung 2-3 bulan)" vertex="1">
           <mxGeometry height="140" width="130" x="280" y="1120" as="geometry" />
