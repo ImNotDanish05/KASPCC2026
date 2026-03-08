@@ -311,6 +311,9 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-94" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Buka halaman Tarik Dana" vertex="1">
           <mxGeometry height="95" width="160" x="50" y="52.5" as="geometry" />
         </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-97" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="80" x="90" y="210" as="geometry" />
+        </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="2820" y="280" as="sourcePoint" />
@@ -318,7 +321,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-92" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Management Tarik Dana&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;font-size: 12px; font-weight: 400;&quot;&gt;Sistem Bendahara Internal tarik Uang dari KAS atau hanya sekedar memanagement informasi&lt;/span&gt;&lt;/h1&gt;" vertex="1">
-          <mxGeometry height="200" width="210" x="1920" y="90" as="geometry" />
+          <mxGeometry height="200" width="210" x="1940" y="80" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-93" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Start" vertex="1">
           <mxGeometry height="80" width="120" x="1970" y="280" as="geometry" />
