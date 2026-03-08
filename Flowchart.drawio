@@ -184,7 +184,7 @@
             <mxPoint x="180" y="290" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-66" parent="l5eJF3EYvzsERVuO7n-M-4" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-66" parent="l5eJF3EYvzsERVuO7n-M-4" style="rounded=0;whiteSpace=wrap;html=1;" value="Pilih Divisi/Department" vertex="1">
           <mxGeometry height="60" width="120" x="249.99999999999955" y="510" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-65" edge="1" parent="l5eJF3EYvzsERVuO7n-M-4" source="l5eJF3EYvzsERVuO7n-M-55" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-66" value="">
