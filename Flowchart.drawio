@@ -311,8 +311,8 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-94" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Buka halaman Tarik Dana" vertex="1">
           <mxGeometry height="95" width="160" x="50" y="52.5" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-97" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="" vertex="1">
-          <mxGeometry height="80" width="80" x="90" y="210" as="geometry" />
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-97" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Menarik Dana Divisi/Department" vertex="1">
+          <mxGeometry height="140" width="130" x="65" y="210" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-98" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-94" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-97" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
