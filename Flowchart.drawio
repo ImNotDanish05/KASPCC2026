@@ -427,7 +427,13 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-131" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Bukti Wajib dan Belum ada Bukti ?" vertex="1">
-          <mxGeometry height="110" width="110" x="385" y="1360" as="geometry" />
+          <mxGeometry height="110" width="110" x="385" y="1390" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-133" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-125" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-131" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="220" y="1280" as="sourcePoint" />
+            <mxPoint x="270" y="1230" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
