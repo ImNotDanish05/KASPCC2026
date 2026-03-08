@@ -118,6 +118,9 @@
             <mxPoint x="-10" y="1010" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-42" parent="l5eJF3EYvzsERVuO7n-M-2" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Tidak" vertex="1">
+          <mxGeometry height="30" width="60" x="50" y="1320" as="geometry" />
+        </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-4" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Anggota STO" vertex="1">
           <mxGeometry height="200" width="200" x="150" y="-170" as="geometry" />
         </mxCell>
