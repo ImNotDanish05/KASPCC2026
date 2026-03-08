@@ -317,8 +317,8 @@
             <mxPoint x="3240" y="320" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-92" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tarik Dana&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;font-size: 12px; font-weight: 400;&quot;&gt;Sistem Bendahara Internal tarik Uang dari KAS&lt;/span&gt;&lt;/h1&gt;" vertex="1">
-          <mxGeometry height="120" width="250" x="1920" y="90" as="geometry" />
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-92" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Management Tarik Dana&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;font-size: 12px; font-weight: 400;&quot;&gt;Sistem Bendahara Internal tarik Uang dari KAS atau hanya sekedar memanagement informasi&lt;/span&gt;&lt;/h1&gt;" vertex="1">
+          <mxGeometry height="200" width="210" x="1920" y="90" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-93" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Start" vertex="1">
           <mxGeometry height="80" width="120" x="1970" y="280" as="geometry" />
