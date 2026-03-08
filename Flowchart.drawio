@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.5">
   <diagram name="Page-1" id="hYR3gAgKbTYbxonARGWc">
-    <mxGraphModel dx="1665" dy="425" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1991" dy="594" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -323,7 +323,7 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-99" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pilih Divisi/Department" vertex="1">
           <mxGeometry height="60" width="120" x="230" y="270" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-102" parent="l5eJF3EYvzsERVuO7n-M-75" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="Input Nominal, Alasan penarikan, Checklist bukti harus ada atau tidak ada" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-102" parent="l5eJF3EYvzsERVuO7n-M-75" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="Input Nominal, Alasan penarikan" vertex="1">
           <mxGeometry height="100" width="165" x="207.5" y="380" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-103" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Mau ?" vertex="1">
@@ -414,7 +414,7 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-122" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="User wajib Checklist jika dia akan bertanggung jawab jika terjadi kesalahan kedepannya" vertex="1">
           <mxGeometry height="80" width="140" x="220" y="1090" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-123" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tentang Bukti Wajib&lt;/h1&gt;&lt;p&gt;Meskipun bukti wajib, tidak harus diupload sekarang. Tapi tetap ada warning di Halaman utama untuk mengingatkan segera upload&lt;/p&gt;" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-123" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tentang Bukti Wajib&lt;/h1&gt;&lt;p&gt;Upload foto nota/struk belanja. Jika tidak ada nota resmi (misal: warung pinggir jalan, bayar parkir), silakan upload &lt;b data-path-to-node=&quot;10,0&quot; data-index-in-node=&quot;119&quot;&gt;foto barang yang dibeli&lt;/b&gt;, &lt;b data-path-to-node=&quot;10,0&quot; data-index-in-node=&quot;144&quot;&gt;screenshot chat kesepakatan&lt;/b&gt;, atau &lt;b data-path-to-node=&quot;10,0&quot; data-index-in-node=&quot;178&quot;&gt;foto kuitansi tulisan tangan&lt;/b&gt;.&lt;/p&gt;" vertex="1">
           <mxGeometry height="120" width="247.5" x="390" y="440" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-124" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-117" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-122" value="">
