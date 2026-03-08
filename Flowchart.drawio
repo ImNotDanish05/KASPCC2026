@@ -203,7 +203,19 @@
           <mxGeometry height="60" width="120" x="250" y="620" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-69" parent="l5eJF3EYvzsERVuO7n-M-4" style="rounded=0;whiteSpace=wrap;html=1;" value="Copy Chat" vertex="1">
-          <mxGeometry height="60" width="120" x="250" y="720" as="geometry" />
+          <mxGeometry height="60" width="120" x="250" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-70" edge="1" parent="l5eJF3EYvzsERVuO7n-M-4" source="l5eJF3EYvzsERVuO7n-M-66" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-68" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="230" y="720" as="sourcePoint" />
+            <mxPoint x="280" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-71" edge="1" parent="l5eJF3EYvzsERVuO7n-M-4" source="l5eJF3EYvzsERVuO7n-M-68" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-69" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="350" y="640" as="sourcePoint" />
+            <mxPoint x="350" y="690" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Start" vertex="1">
           <mxGeometry height="80" width="120" x="10" y="280" as="geometry" />
