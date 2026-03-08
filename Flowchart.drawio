@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.5">
   <diagram name="Page-1" id="hYR3gAgKbTYbxonARGWc">
-    <mxGraphModel dx="2351" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2038" dy="619" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -172,11 +172,32 @@
             <mxPoint x="250" y="270" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-58" parent="l5eJF3EYvzsERVuO7n-M-4" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Seluruh bendahara Inti" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-58" parent="l5eJF3EYvzsERVuO7n-M-4" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Seluruh bendahara Eksternal" vertex="1">
           <mxGeometry height="40" width="80" x="170" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-59" parent="l5eJF3EYvzsERVuO7n-M-4" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
-          <mxGeometry height="60" width="120" x="410" y="240" as="geometry" />
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-59" parent="l5eJF3EYvzsERVuO7n-M-4" style="rounded=0;whiteSpace=wrap;html=1;" value="Copy Chat" vertex="1">
+          <mxGeometry height="60" width="120" x="250" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-63" edge="1" parent="l5eJF3EYvzsERVuO7n-M-4" source="l5eJF3EYvzsERVuO7n-M-52" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-59" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="130" y="340" as="sourcePoint" />
+            <mxPoint x="180" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-66" parent="l5eJF3EYvzsERVuO7n-M-4" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="120" x="249.99999999999955" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-65" edge="1" parent="l5eJF3EYvzsERVuO7n-M-4" source="l5eJF3EYvzsERVuO7n-M-55" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-66" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="540" />
+            </Array>
+            <mxPoint x="130" y="420" as="sourcePoint" />
+            <mxPoint x="240" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-67" parent="l5eJF3EYvzsERVuO7n-M-4" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Per bendahara eksternal" vertex="1">
+          <mxGeometry height="40" width="80" x="50" y="430" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Start" vertex="1">
           <mxGeometry height="80" width="120" x="10" y="280" as="geometry" />
@@ -240,6 +261,9 @@
             <mxPoint x="1510" y="480" as="sourcePoint" />
             <mxPoint x="1560" y="430" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-64" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Selesai" vertex="1">
+          <mxGeometry height="80" width="120" x="1980" y="490" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
