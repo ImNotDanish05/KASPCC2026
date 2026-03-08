@@ -311,14 +311,14 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-94" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Buka halaman Tarik Dana" vertex="1">
           <mxGeometry height="95" width="160" x="50" y="52.5" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-97" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Menarik Dana Divisi/Department" vertex="1">
-          <mxGeometry height="140" width="130" x="65" y="210" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-98" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-94" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-97" value="">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-98" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-94" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-99" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="-500" y="190" as="sourcePoint" />
-            <mxPoint x="-500" y="250" as="targetPoint" />
+            <mxPoint x="130" y="210" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-99" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pilih Divisi/Department" vertex="1">
+          <mxGeometry height="60" width="120" x="70" y="200" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
