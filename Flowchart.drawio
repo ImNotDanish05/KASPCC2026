@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.5">
   <diagram name="Page-1" id="hYR3gAgKbTYbxonARGWc">
-    <mxGraphModel dx="3227" dy="2338" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1991" dy="1694" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -142,6 +142,9 @@
             <mxPoint x="345" y="1260" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-51" parent="l5eJF3EYvzsERVuO7n-M-2" style="rounded=0;whiteSpace=wrap;html=1;" value="Bendahara buka Dashboard (Lihat Department dan Divisi yang belum bayar)" vertex="1">
+          <mxGeometry height="100" width="160" x="50" y="2090" as="geometry" />
+        </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-4" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Anggota STO" vertex="1">
           <mxGeometry height="200" width="200" x="150" y="-170" as="geometry" />
         </mxCell>
@@ -188,10 +191,16 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-48" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Bendahara Follow Up&lt;/span&gt;&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;font-size: 12px; font-weight: 400;&quot;&gt;Kondisi dimana Bendahara Internal mau follow up di group ke Bendahara Eksternal&lt;/span&gt;&lt;/h1&gt;" vertex="1">
-          <mxGeometry height="120" width="250" x="-100" y="2140" as="geometry" />
+          <mxGeometry height="120" width="250" x="-90" y="2140" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-49" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="" vertex="1">
-          <mxGeometry height="80" width="120" x="-10" y="2270" as="geometry" />
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-49" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Start" vertex="1">
+          <mxGeometry height="80" width="120" x="-10" y="2320" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-50" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-49" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-51" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="190" y="2320" as="sourcePoint" />
+            <mxPoint x="610" y="2360" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
