@@ -468,7 +468,7 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-142" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Edit data" vertex="1">
           <mxGeometry height="30" width="60" x="140" y="1780" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-143" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-143" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pilih salah satu data Narik Uang yang telah dibuat" vertex="1">
           <mxGeometry height="60" width="120" x="207.5" y="1790" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
@@ -498,7 +498,7 @@
             <mxPoint x="2270" y="2200" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-141" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-141" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-143" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="2270" y="2040" as="sourcePoint" />
             <mxPoint x="2330" y="2040" as="targetPoint" />
