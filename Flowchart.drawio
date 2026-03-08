@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.5">
   <diagram name="Page-1" id="hYR3gAgKbTYbxonARGWc">
-    <mxGraphModel dx="4415" dy="1858" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2751" dy="991" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -486,9 +486,6 @@
             <mxPoint x="82.5" y="1330" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-162" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tentang Bukti Wajib&lt;/h1&gt;&lt;p&gt;Meskipun bukti wajib, tidak harus diupload sekarang. Tapi tetap ada warning di Halaman utama untuk mengingatkan segera upload&lt;/p&gt;" vertex="1">
-          <mxGeometry height="120" width="247.5" x="370" y="1130" as="geometry" />
-        </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-141" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-143" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="130" y="970" as="sourcePoint" />
@@ -497,6 +494,9 @@
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-142" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Edit data" vertex="1">
           <mxGeometry height="30" width="60" x="140" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-204" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tentang Bukti Wajib&lt;/h1&gt;&lt;p&gt;Upload foto nota/struk belanja. Jika tidak ada nota resmi (misal: warung pinggir jalan, bayar parkir), silakan upload &lt;b data-path-to-node=&quot;10,0&quot; data-index-in-node=&quot;119&quot;&gt;foto barang yang dibeli&lt;/b&gt;, &lt;b data-path-to-node=&quot;10,0&quot; data-index-in-node=&quot;144&quot;&gt;screenshot chat kesepakatan&lt;/b&gt;, atau &lt;b data-path-to-node=&quot;10,0&quot; data-index-in-node=&quot;178&quot;&gt;foto kuitansi tulisan tangan&lt;/b&gt;.&lt;/p&gt;" vertex="1">
+          <mxGeometry height="120" width="247.5" x="380" y="1080" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
