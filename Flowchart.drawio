@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.5">
   <diagram name="Page-1" id="hYR3gAgKbTYbxonARGWc">
-    <mxGraphModel dx="815" dy="1525" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1358" dy="1808" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -128,7 +128,7 @@
           <mxGeometry height="140" width="130" x="280" y="1120" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-45" parent="l5eJF3EYvzsERVuO7n-M-2" style="shape=datastore;whiteSpace=wrap;html=1;" value="&lt;div&gt;TABUNGAN PER ANGGOTA&lt;/div&gt;Uang sisa per anggota jika tidak cukup untuk membayar KAS per bulan" vertex="1">
-          <mxGeometry height="140" width="130" x="280" y="1340" as="geometry" />
+          <mxGeometry height="140" width="130" x="280" y="1320" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-46" edge="1" parent="l5eJF3EYvzsERVuO7n-M-2" source="l5eJF3EYvzsERVuO7n-M-27" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-44" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
