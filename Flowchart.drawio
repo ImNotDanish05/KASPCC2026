@@ -130,6 +130,18 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-45" parent="l5eJF3EYvzsERVuO7n-M-2" style="shape=datastore;whiteSpace=wrap;html=1;" value="&lt;div&gt;TABUNGAN PER ANGGOTA&lt;/div&gt;Uang sisa per anggota jika tidak cukup untuk membayar KAS per bulan" vertex="1">
           <mxGeometry height="140" width="130" x="280" y="1340" as="geometry" />
         </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-46" edge="1" parent="l5eJF3EYvzsERVuO7n-M-2" source="l5eJF3EYvzsERVuO7n-M-27" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-44" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="90" y="1340" as="sourcePoint" />
+            <mxPoint x="140" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-47" edge="1" parent="l5eJF3EYvzsERVuO7n-M-2" source="l5eJF3EYvzsERVuO7n-M-27" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-45" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="240" y="1350" as="sourcePoint" />
+            <mxPoint x="345" y="1260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-4" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Anggota STO" vertex="1">
           <mxGeometry height="200" width="200" x="150" y="-170" as="geometry" />
         </mxCell>
