@@ -345,10 +345,10 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-107" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Bukti Wajib ?" vertex="1">
-          <mxGeometry height="80" width="80" x="50" y="600" as="geometry" />
+          <mxGeometry height="80" width="80" x="250" y="680" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-109" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
-          <mxGeometry height="60" width="120" x="230" y="720" as="geometry" />
+          <mxGeometry height="60" width="120" x="190" y="820" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-111" parent="l5eJF3EYvzsERVuO7n-M-75" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="Input bukti Submit (jika wajib ada)" vertex="1">
           <mxGeometry height="100" width="165" x="207.5" y="530" as="geometry" />
