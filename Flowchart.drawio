@@ -405,8 +405,8 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-122" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="User wajib Checklist jika dia akan bertanggung jawab jika terjadi kesalahan kedepannya" vertex="1">
           <mxGeometry height="60" width="120" x="230" y="1090" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-123" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tentang Bukti Wajib&lt;/h1&gt;&lt;p&gt;Meskipun bukti wajib, tidak harus diupload sekarang. Tapi tetap ada warning di Halaman utama untuk mengingatkan.&lt;/p&gt;" vertex="1">
-          <mxGeometry height="120" width="180" x="372.5" y="470" as="geometry" />
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-123" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Tentang Bukti Wajib&lt;/h1&gt;&lt;p&gt;Meskipun bukti wajib, tidak harus diupload sekarang. Tapi tetap ada warning di Halaman utama untuk mengingatkan segera upload&lt;/p&gt;" vertex="1">
+          <mxGeometry height="120" width="247.5" x="372.5" y="470" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
