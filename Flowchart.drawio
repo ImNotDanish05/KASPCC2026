@@ -306,7 +306,7 @@
           <mxGeometry height="140" width="350" x="2920" y="60" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-75" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Bendahara Internal" vertex="1">
-          <mxGeometry height="1290" width="680" x="2140" y="220" as="geometry" />
+          <mxGeometry height="1410" width="680" x="2140" y="220" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-94" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Buka halaman Tarik Dana, Muncul beberapa list narik uang yang telah dibuat (Ada Warning jika bukti belum ada)" vertex="1">
           <mxGeometry height="95" width="160" x="50" y="52.5" as="geometry" />
@@ -415,16 +415,16 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-125" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Submit" vertex="1">
-          <mxGeometry height="60" width="120" x="450" y="1210" as="geometry" />
+          <mxGeometry height="60" width="120" x="380" y="1210" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-128" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Sudah ada Bukti ?" vertex="1">
-          <mxGeometry height="80" width="80" x="410" y="680" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-126" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-107" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-128" value="">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-126" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-107" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="70" y="780" as="sourcePoint" />
-            <mxPoint x="400" y="720" as="targetPoint" />
+            <mxPoint x="410" y="720" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-130" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Submit" vertex="1">
+          <mxGeometry height="60" width="120" x="390" y="830" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-91" edge="1" parent="1" source="l5eJF3EYvzsERVuO7n-M-93" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="l5eJF3EYvzsERVuO7n-M-94" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
@@ -437,6 +437,9 @@
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-93" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Start" vertex="1">
           <mxGeometry height="80" width="120" x="1970" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-131" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Sudah ada Bukti ?" vertex="1">
+          <mxGeometry height="80" width="80" x="2940" y="980" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
