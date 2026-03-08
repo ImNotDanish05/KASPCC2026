@@ -5,7 +5,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="l5eJF3EYvzsERVuO7n-M-1" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Bendahara Eksternal" vertex="1">
-          <mxGeometry height="1570" width="310" x="190" y="220" as="geometry" />
+          <mxGeometry height="1700" width="310" x="190" y="220" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-8" parent="l5eJF3EYvzsERVuO7n-M-1" style="rounded=0;whiteSpace=wrap;html=1;" value="Buka Dashboard (ngecek anggota divisi/departmentnya yang belum bayar)" vertex="1">
           <mxGeometry height="60" width="120" x="90" y="70" as="geometry" />
@@ -57,6 +57,15 @@
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-31" parent="l5eJF3EYvzsERVuO7n-M-1" style="rounded=0;whiteSpace=wrap;html=1;" value="Melihat komentar kenapa ditolak" vertex="1">
           <mxGeometry height="60" width="120" x="140" y="1430" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-35" parent="l5eJF3EYvzsERVuO7n-M-1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="120" x="140" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-36" edge="1" parent="l5eJF3EYvzsERVuO7n-M-1" source="l5eJF3EYvzsERVuO7n-M-31" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-35" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="250" y="1370" as="sourcePoint" />
+            <mxPoint x="300" y="1320" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-2" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Bendahara Internal" vertex="1">
           <mxGeometry height="1490" width="650" x="500" y="220" as="geometry" />
