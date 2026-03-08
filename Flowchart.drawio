@@ -323,7 +323,7 @@
         <mxCell id="l5eJF3EYvzsERVuO7n-M-99" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Pilih Divisi/Department" vertex="1">
           <mxGeometry height="60" width="120" x="230" y="270" as="geometry" />
         </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-102" parent="l5eJF3EYvzsERVuO7n-M-75" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="Input Nominal, Alasan penarikan" vertex="1">
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-102" parent="l5eJF3EYvzsERVuO7n-M-75" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="Input Nominal, Alasan penarikan, bukti Submit (jika wajib ada)" vertex="1">
           <mxGeometry height="100" width="165" x="207.5" y="380" as="geometry" />
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-103" parent="l5eJF3EYvzsERVuO7n-M-75" style="rhombus;whiteSpace=wrap;html=1;" value="Mau ?" vertex="1">
@@ -358,21 +358,6 @@
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-109" parent="l5eJF3EYvzsERVuO7n-M-75" style="rounded=0;whiteSpace=wrap;html=1;" value="Warning Apakah Beneran tanpa Bukti ?" vertex="1">
           <mxGeometry height="60" width="120" x="230" y="830" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-111" parent="l5eJF3EYvzsERVuO7n-M-75" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;spacingLeft=20;spacingRight=20;" value="Input bukti Submit (jika wajib ada)" vertex="1">
-          <mxGeometry height="100" width="165" x="207.5" y="530" as="geometry" />
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-112" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-102" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-111" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="70" y="590" as="sourcePoint" />
-            <mxPoint x="120" y="540" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="l5eJF3EYvzsERVuO7n-M-113" edge="1" parent="l5eJF3EYvzsERVuO7n-M-75" source="l5eJF3EYvzsERVuO7n-M-111" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="l5eJF3EYvzsERVuO7n-M-107" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="70" y="680" as="sourcePoint" />
-            <mxPoint x="120" y="630" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="l5eJF3EYvzsERVuO7n-M-114" parent="l5eJF3EYvzsERVuO7n-M-75" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Ya" vertex="1">
           <mxGeometry height="30" width="60" x="350" y="680" as="geometry" />
@@ -726,6 +711,12 @@
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="2270" y="2040" as="sourcePoint" />
             <mxPoint x="2330" y="2040" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5eJF3EYvzsERVuO7n-M-194" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="2440" y="940" as="sourcePoint" />
+            <mxPoint x="2490" y="890" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
