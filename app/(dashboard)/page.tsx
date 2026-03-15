@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import ComponentCard from "@/components/common/ComponentCard";
+import Button from "@/components/ui/button/Button";
+import { ArrowRightIcon, BoxCubeIcon, TableIcon, UserCircleIcon } from "@/icons";
 
 type ChartPoint = {
   label: string;
@@ -146,187 +151,226 @@ export default function DashboardPage() {
   }, [stats]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Dashboard Overview
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold text-zinc-900">
-              Ringkasan KAS Organisasi
-            </h1>
-            <p className="mt-2 text-sm text-zinc-500">
-              Pantau saldo kas, setoran, dan pengajuan dana secara real-time.
-            </p>
-          </div>
-          <div className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700">
-            Sistem Aktif
-          </div>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Dashboard" />
 
       {error ? (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
           {error}
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            Saldo Kas
-          </p>
-          <div className="mt-3 text-2xl font-semibold text-zinc-900">
-            {loading || !stats ? "-" : `Rp ${formatRupiah(stats.saldo_kas)}`}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 md:gap-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+          <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
+            <TableIcon className="text-gray-800 size-6 dark:text-white/90" />
           </div>
-          <p className="mt-2 text-xs text-zinc-500">
-            Total kas setelah pemasukan diverifikasi dan pengeluaran disetujui.
-          </p>
+          <div className="flex items-end justify-between mt-5">
+            <div>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Saldo Kas
+              </span>
+              <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+                {loading || !stats ? "-" : `Rp ${formatRupiah(stats.saldo_kas)}`}
+              </h4>
+            </div>
+          </div>
         </div>
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            Setoran Pending
-          </p>
-          <div className="mt-3 text-2xl font-semibold text-zinc-900">
-            {loading || !stats ? "-" : stats.pending_setoran}
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+          <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
+            <UserCircleIcon className="text-gray-800 size-6 dark:text-white/90" />
           </div>
-          <p className="mt-2 text-xs text-zinc-500">
-            Menunggu verifikasi bendahara internal.
-          </p>
+          <div className="flex items-end justify-between mt-5">
+            <div>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Setoran Pending
+              </span>
+              <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+                {loading || !stats ? "-" : stats.pending_setoran}
+              </h4>
+            </div>
+          </div>
         </div>
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            Pengajuan Tarik Dana
-          </p>
-          <div className="mt-3 text-2xl font-semibold text-zinc-900">
-            {loading || !stats ? "-" : stats.pending_tarik_dana}
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+          <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
+            <BoxCubeIcon className="text-gray-800 size-6 dark:text-white/90" />
           </div>
-          <p className="mt-2 text-xs text-zinc-500">
-            Pengajuan yang perlu disetujui.
-          </p>
+          <div className="flex items-end justify-between mt-5">
+            <div>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Pengajuan Tarik Dana
+              </span>
+              <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+                {loading || !stats ? "-" : stats.pending_tarik_dana}
+              </h4>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-900">
-                Grafik Kas 6 Bulan Terakhir
-              </h2>
-              <p className="mt-1 text-xs text-zinc-500">
-                Pemasukan diverifikasi vs pengeluaran disetujui.
-              </p>
-            </div>
-            <div className="text-xs text-zinc-400">
-              {loading || !stats ? "-" : `${stats.anggota_total} anggota`}
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-3">
-            {(stats?.grafik_kas ?? []).map((item: ChartPoint) => (
-              <div key={item.label} className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-zinc-500">
-                  <span>{item.label}</span>
-                  <span>
-                    Rp {formatRupiah(item.pemasukan_total)} / Rp{" "}
-                    {formatRupiah(item.pengeluaran_total)}
-                  </span>
-                </div>
-                <div className="flex h-3 overflow-hidden rounded-full bg-zinc-100">
-                  <div
-                    className="bg-emerald-500"
-                    style={{
-                      width: `${(item.pemasukan_total / maxValue) * 100}%`,
-                    }}
-                  />
-                  <div
-                    className="bg-red-400"
-                    style={{
-                      width: `${(item.pengeluaran_total / maxValue) * 100}%`,
-                    }}
-                  />
-                </div>
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <div className="col-span-12 xl:col-span-8">
+          <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+              <div>
+                <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
+                  Grafik Kas 6 Bulan Terakhir
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Pemasukan diverifikasi vs pengeluaran disetujui.
+                </p>
               </div>
-            ))}
-            {loading && !stats ? (
-              <div className="text-xs text-zinc-500">Memuat grafik...</div>
-            ) : null}
+              <div className="text-xs text-gray-400">
+                {loading || !stats ? "-" : `${stats.anggota_total} anggota`}
+              </div>
+            </div>
+            <div className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {(stats?.grafik_kas ?? []).map((item: ChartPoint) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/40"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {item.label}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Rp {formatRupiah(item.pemasukan_total)}
+                      </span>
+                    </div>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                      <div
+                        className="h-full bg-brand-500"
+                        style={{
+                          width: `${(item.pemasukan_total / maxValue) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Pengeluaran
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Rp {formatRupiah(item.pengeluaran_total)}
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                      <div
+                        className="h-full bg-error-500"
+                        style={{
+                          width: `${(item.pengeluaran_total / maxValue) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                {loading && !stats ? (
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    Memuat grafik...
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-zinc-900">
-              Aktivitas Cepat
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              Jalankan proses utama KAS dengan satu klik.
-            </p>
-            <div className="mt-5 grid gap-3">
+        <div className="col-span-12 xl:col-span-4 space-y-6">
+          <ComponentCard
+            title="Aktivitas Cepat"
+            desc="Jalankan proses utama KAS dengan satu klik."
+          >
+            <div className="grid gap-3">
               {actions.map((action: ActionLink) => (
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 text-sm text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                  className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900/40 dark:text-gray-300"
                 >
                   <div>
-                    <div className="font-semibold text-zinc-900">
+                    <div className="font-semibold text-gray-800 dark:text-white/90">
                       {action.label}
                     </div>
-                    <div className="text-xs text-zinc-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       {action.description}
                     </div>
                   </div>
-                  <span className="text-xs font-semibold text-zinc-400">→</span>
+                  <ArrowRightIcon className="text-gray-400" />
                 </Link>
               ))}
             </div>
-          </div>
+          </ComponentCard>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-zinc-900">
-                Anggota Nunggak
-              </h2>
-              <span className="text-xs font-semibold text-zinc-400">
+          <ComponentCard
+            title="Anggota Nunggak"
+            desc="Belum memiliki setoran terverifikasi."
+          >
+            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+              <span>Total</span>
+              <span className="font-semibold text-gray-800 dark:text-white/90">
                 {loading || !stats ? "-" : stats.nunggak_total}
               </span>
             </div>
-            <p className="mt-2 text-sm text-zinc-500">
-              Belum memiliki setoran terverifikasi.
-            </p>
-            <div className="mt-4 space-y-2">
-              {nunggak.length === 0 && !loading ? (
-                <div className="rounded-lg border border-dashed border-zinc-200 px-3 py-3 text-xs text-zinc-500">
-                  Semua anggota sudah pernah setor.
-                </div>
-              ) : (
-                nunggak.map((anggota: Anggota) => (
-                  <div
-                    key={anggota.id}
-                    className="flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 text-xs text-zinc-600"
-                  >
-                    <div>
-                      <div className="font-semibold text-zinc-900">
-                        {anggota.nama}
-                      </div>
-                      <div className="text-[11px] text-zinc-500">
-                        {anggota.nim} · {anggota.jabatan?.nama_jabatan ?? "-"}
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">
-                      Nunggak
-                    </span>
-                  </div>
-                ))
-              )}
-              {loading ? (
-                <div className="text-xs text-zinc-500">Memuat data...</div>
-              ) : null}
+            <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+              <Table>
+                <TableHeader className="bg-gray-50 dark:bg-gray-800">
+                  <TableRow>
+                    <TableCell isHeader className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400">
+                      Anggota
+                    </TableCell>
+                    <TableCell isHeader className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400">
+                      Jabatan
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {nunggak.length === 0 && !loading ? (
+                    <TableRow>
+                      <TableCell className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        Semua anggota sudah pernah setor.
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        -
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    nunggak.map((anggota: Anggota) => (
+                      <TableRow key={anggota.id}>
+                        <TableCell className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">
+                          <div className="font-semibold">{anggota.nama}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {anggota.nim}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                          {anggota.jabatan?.nama_jabatan ?? "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                  {loading ? (
+                    <TableRow>
+                      <TableCell className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        Memuat data...
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        -
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
             </div>
-          </div>
+            <div className="pt-2">
+              <Link href="/kas/history">
+                <Button variant="outline" size="sm" className="w-full">
+                  Lihat Riwayat Setoran
+                </Button>
+              </Link>
+            </div>
+          </ComponentCard>
         </div>
       </div>
     </div>

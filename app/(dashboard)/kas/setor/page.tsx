@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ComponentCard from "@/components/common/ComponentCard";
+import Input from "@/components/form/input/InputField";
+import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 
 type Jabatan = {
   id: number;
@@ -247,37 +253,31 @@ export default function SetorKasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold text-zinc-900">Setor KAS</h1>
-          <p className="mt-2 text-sm text-zinc-500">
-            Pilih anggota yang sudah membayar dan masukkan nominalnya.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Setor KAS" />
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex flex-1 flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">
-                  Cari anggota
-                </label>
-                <input
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <div className="col-span-12 xl:col-span-8 space-y-6">
+          <ComponentCard
+            title="Daftar Anggota"
+            desc="Pilih anggota yang sudah membayar dan masukkan nominalnya."
+          >
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Cari anggota</Label>
+                <Input
+                  placeholder="Cari nama atau NIM"
+                  type="text"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Cari nama atau NIM"
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
                 />
               </div>
-              <div className="flex flex-col gap-2 sm:w-56">
-                <label className="text-sm font-medium text-zinc-700">
-                  Filter jabatan
-                </label>
+              <div>
+                <Label>Filter jabatan</Label>
                 <select
                   value={selectedJabatanId}
                   onChange={(event) => setSelectedJabatanId(event.target.value)}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                  className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
                 >
                   <option value="">Semua jabatan</option>
                   {jabatans.map((jabatan: Jabatan) => (
@@ -289,144 +289,186 @@ export default function SetorKasPage() {
               </div>
             </div>
 
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[640px] border-separate border-spacing-y-2">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
-                    <th className="px-3">Pilih</th>
-                    <th className="px-3">Nama</th>
-                    <th className="px-3">NIM</th>
-                    <th className="px-3">Jabatan</th>
-                    <th className="px-3">Nominal</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+              <Table>
+                <TableHeader className="bg-gray-50 dark:bg-gray-800">
+                  <TableRow>
+                    <TableCell
+                      isHeader
+                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      Pilih
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      Nama
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      NIM
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      Jabatan
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      Nominal
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {loadingAnggota ? (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="rounded-lg bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-500"
-                      >
+                    <TableRow>
+                      <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                         Memuat data anggota...
-                      </td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                    </TableRow>
                   ) : anggotas.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="rounded-lg bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-500"
-                      >
+                    <TableRow>
+                      <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                         Tidak ada anggota ditemukan.
-                      </td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                      <TableCell className="px-4 py-4">-</TableCell>
+                    </TableRow>
                   ) : (
                     anggotas.map((anggota: Anggota) => {
                       const checked = selectedIds.has(anggota.id);
                       return (
-                        <tr
-                          key={anggota.id}
-                          className="rounded-lg bg-zinc-50 text-sm text-zinc-700"
-                        >
-                          <td className="px-3 py-3">
+                        <TableRow key={anggota.id}>
+                          <TableCell className="px-4 py-3">
                             <input
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleAnggota(anggota.id)}
-                              className="h-4 w-4 rounded border-zinc-300"
+                              className="h-4 w-4 rounded border-gray-300"
                             />
-                          </td>
-                          <td className="px-3 py-3 font-medium text-zinc-900">
-                            {anggota.nama}
-                          </td>
-                          <td className="px-3 py-3">{anggota.nim}</td>
-                          <td className="px-3 py-3">
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">
+                            <div className="font-semibold">{anggota.nama}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {anggota.no_telepon || "-"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {anggota.nim}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                             {anggota.jabatan?.nama_jabatan ?? "-"}
-                          </td>
-                          <td className="px-3 py-3">
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
                             <input
                               type="number"
                               min={0}
                               disabled={!checked}
                               value={nominalById[anggota.id] ?? ""}
                               onChange={(event) =>
-                                handleNominalChange(anggota.id, event.target.value)
+                                handleNominalChange(
+                                  anggota.id,
+                                  event.target.value,
+                                )
                               }
-                              className="w-32 rounded-lg border border-zinc-200 px-2 py-1 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none disabled:bg-zinc-100"
+                              className="h-10 w-32 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                             />
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     })
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
-          </div>
+          </ComponentCard>
 
-          <div className="flex flex-col gap-6">
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900">
-                Bukti Transfer
-              </h2>
-              <p className="mt-2 text-sm text-zinc-500">
-                Upload bukti transfer atau tempelkan link gambar.
-              </p>
-              <div className="mt-4 flex flex-col gap-3">
+          <ComponentCard
+            title="Bukti Transfer"
+            desc="Upload bukti transfer atau tempelkan link gambar."
+          >
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label>Upload bukti transfer</Label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(event) =>
                     handleFileChange(event.target.files?.[0] ?? null)
                   }
-                  className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600"
+                  className="h-11 w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-600 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                 />
                 {buktiFileName ? (
-                  <div className="text-xs text-zinc-500">
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     File terpilih: {buktiFileName}
                   </div>
                 ) : null}
-                <input
+              </div>
+              <div>
+                <Label>URL bukti transfer</Label>
+                <Input
+                  placeholder="Masukkan URL bukti transfer"
+                  type="text"
                   value={buktiTransfer}
                   onChange={(event) => setBuktiTransfer(event.target.value)}
-                  placeholder="Atau masukkan URL bukti transfer"
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
                 />
               </div>
             </div>
+          </ComponentCard>
+        </div>
 
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-zinc-900">Ringkasan</h2>
-              <div className="mt-4 flex items-center justify-between text-sm text-zinc-600">
-                <span>Jumlah anggota dipilih</span>
-                <span className="font-semibold text-zinc-900">
-                  {selectedIds.size}
-                </span>
-              </div>
-              <div className="mt-2 flex items-center justify-between text-sm text-zinc-600">
-                <span>Total nominal</span>
-                <span className="font-semibold text-zinc-900">
-                  Rp {formatRupiah(totalNominal)}
-                </span>
-              </div>
-              {error ? (
-                <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              ) : null}
-              {message ? (
-                <div className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                  {message}
-                </div>
-              ) : null}
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="mt-5 w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
-              >
-                {submitting ? "Mengirim..." : "Kirim Setoran"}
-              </button>
+        <div className="col-span-12 xl:col-span-4 space-y-6">
+          <ComponentCard title="Ringkasan" desc="Pastikan data sudah lengkap.">
+            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+              <span>Jumlah anggota dipilih</span>
+              <span className="font-semibold text-gray-800 dark:text-white/90">
+                {selectedIds.size}
+              </span>
             </div>
-          </div>
+            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+              <span>Total nominal</span>
+              <span className="font-semibold text-gray-800 dark:text-white/90">
+                Rp {formatRupiah(totalNominal)}
+              </span>
+            </div>
+            {error ? (
+              <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
+                {error}
+              </div>
+            ) : null}
+            {message ? (
+              <div className="rounded-lg bg-success-50 px-4 py-3 text-sm text-success-600 dark:bg-success-500/10 dark:text-success-400">
+                {message}
+              </div>
+            ) : null}
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full"
+              size="sm"
+            >
+              {submitting ? "Mengirim..." : "Kirim Setoran"}
+            </Button>
+          </ComponentCard>
+
+          <ComponentCard title="Info" desc="Catatan penting untuk setoran.">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Nominal otomatis dijumlahkan dari anggota yang dipilih. Pastikan
+              bukti transfer sudah sesuai sebelum dikirim.
+            </div>
+          </ComponentCard>
         </div>
       </div>
     </div>

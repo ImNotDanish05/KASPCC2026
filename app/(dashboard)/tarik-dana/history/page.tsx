@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ComponentCard from "@/components/common/ComponentCard";
+import Label from "@/components/form/Label";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 
 type Anggota = {
   id: number;
@@ -120,120 +124,156 @@ export default function TarikDanaHistoryPage() {
   }, [status]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-zinc-900">
-          Riwayat Tarik Dana
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Pantau status pengajuan tarik dana dan catatan penolakan.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Riwayat Tarik Dana" />
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-zinc-500">Total data: {data.length}</div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-zinc-600">Status</label>
-            <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-            >
-              <option value="">Semua</option>
-              <option value="PENDING">Pending</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-            </select>
+      <ComponentCard
+        title="Daftar Pengajuan"
+        desc="Pantau status pengajuan tarik dana dan catatan penolakan."
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Total data: {data.length}
+          </div>
+          <div className="flex items-center gap-3">
+            <Label>Status</Label>
+            <div className="w-48">
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+              >
+                <option value="">Semua</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {error ? (
-          <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
             {error}
           </div>
         ) : null}
 
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full min-w-[820px] border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
-                <th className="px-3">ID</th>
-                <th className="px-3">Tanggal</th>
-                <th className="px-3">Pemohon</th>
-                <th className="px-3">Nominal</th>
-                <th className="px-3">Status</th>
-                <th className="px-3">Bukti</th>
-                <th className="px-3">Catatan</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+          <Table>
+            <TableHeader className="bg-gray-50 dark:bg-gray-800">
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  ID
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Tanggal
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Pemohon
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Nominal
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Status
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Bukti
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Catatan
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {loading ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="rounded-lg bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-500"
-                  >
+                <TableRow>
+                  <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                     Memuat data...
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                </TableRow>
               ) : data.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="rounded-lg bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-500"
-                  >
+                <TableRow>
+                  <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                     Belum ada pengajuan.
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                </TableRow>
               ) : (
                 data.map((item: Pengeluaran) => (
-                  <tr
-                    key={item.id}
-                    className="rounded-lg bg-zinc-50 text-sm text-zinc-700"
-                  >
-                    <td className="px-3 py-3 font-medium text-zinc-900">
+                  <TableRow key={item.id}>
+                    <TableCell className="px-4 py-3 text-sm font-semibold text-gray-800 dark:text-white/90">
                       #{item.id}
-                    </td>
-                    <td className="px-3 py-3">{formatDate(item.created_at)}</td>
-                    <td className="px-3 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(item.created_at)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                       {item.user?.anggota?.nama ?? item.user?.username}
-                    </td>
-                    <td className="px-3 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                       Rp {formatRupiah(item.nominal)}
-                    </td>
-                    <td className="px-3 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm">
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
                           item.status === "APPROVED"
-                            ? "bg-emerald-100 text-emerald-700"
+                            ? "bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400"
                             : item.status === "REJECTED"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-amber-100 text-amber-700"
+                            ? "bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400"
+                            : "bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400"
                         }`}
                       >
                         {item.status}
                       </span>
-                    </td>
-                    <td className="px-3 py-3">
-                      {item.bukti_nota ? (
-                        <span className="text-xs text-zinc-600">
-                          {item.bukti_nota.slice(0, 32)}...
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td className="px-3 py-3 text-xs text-zinc-500">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                      {item.bukti_nota
+                        ? `${item.bukti_nota.slice(0, 32)}...`
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                       {item.alasan_tolak ?? "-"}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </ComponentCard>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import SidebarLayout from "@/components/SidebarLayout";
+import DefaultLayout from "@/layout/DefaultLayout";
 import { AUTH_COOKIE_NAME, verifyAuthToken } from "@/lib/auth";
 
 export default async function DashboardLayout({
@@ -21,8 +21,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <SidebarLayout roles={payload.roles} username={payload.username}>
+    <DefaultLayout roles={payload.roles} username={payload.username}>
       {children}
-    </SidebarLayout>
+    </DefaultLayout>
   );
 }

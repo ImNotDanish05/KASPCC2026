@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ComponentCard from "@/components/common/ComponentCard";
+import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 
 type Jabatan = {
   id: number;
@@ -163,30 +168,24 @@ export default function KasHistoryPage() {
   }, [status]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold text-zinc-900">
-            Riwayat Setoran KAS
-          </h1>
-          <p className="mt-2 text-sm text-zinc-500">
-            Pantau status setoran dan lakukan revisi jika ditolak.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Riwayat Setoran KAS" />
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-zinc-500">
-              Total data: {data.length}
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-zinc-600">
-                Status
-              </label>
+      <ComponentCard
+        title="Daftar Setoran"
+        desc="Pantau status setoran dan lakukan revisi jika ditolak."
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Total data: {data.length}
+          </div>
+          <div className="flex items-center gap-3">
+            <Label>Status</Label>
+            <div className="w-48">
               <select
                 value={status}
                 onChange={(event) => setStatus(event.target.value)}
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
               >
                 <option value="">Semua</option>
                 <option value="PENDING">Pending</option>
@@ -195,141 +194,165 @@ export default function KasHistoryPage() {
               </select>
             </div>
           </div>
+        </div>
 
-          {error ? (
-            <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
-
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[720px] border-separate border-spacing-y-3">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
-                  <th className="px-3">ID</th>
-                  <th className="px-3">Tanggal</th>
-                  <th className="px-3">Status</th>
-                  <th className="px-3">Total</th>
-                  <th className="px-3">Bukti</th>
-                  <th className="px-3">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="rounded-lg bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-500"
-                    >
-                      Memuat data...
-                    </td>
-                  </tr>
-                ) : data.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="rounded-lg bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-500"
-                    >
-                      Belum ada setoran.
-                    </td>
-                  </tr>
-                ) : (
-                  data.map((item: Pemasukan) => (
-                    <tr
-                      key={item.id}
-                      className="rounded-lg bg-zinc-50 text-sm text-zinc-700"
-                    >
-                      <td className="px-3 py-3 font-medium text-zinc-900">
-                        #{item.id}
-                      </td>
-                      <td className="px-3 py-3">
-                        {formatDate(item.created_at)}
-                      </td>
-                      <td className="px-3 py-3">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            item.status === "VERIFIED"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : item.status === "REJECTED"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-amber-100 text-amber-700"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                        {item.alasan_tolak ? (
-                          <div className="mt-2 text-xs text-red-600">
-                            Alasan: {item.alasan_tolak}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td className="px-3 py-3">
-                        Rp {formatRupiah(item.nominal_total)}
-                      </td>
-                      <td className="px-3 py-3">
-                        {item.bukti_transfer ? (
-                          <span className="text-xs text-zinc-600">
-                            {item.bukti_transfer.slice(0, 32)}...
-                          </span>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td className="px-3 py-3">
-                        {item.status === "REJECTED" ? (
-                          <Link
-                            href={`/kas/resubmit/${item.id}`}
-                            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800"
-                          >
-                            Resubmit
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-zinc-400">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {error ? (
+          <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
+            {error}
           </div>
+        ) : null}
 
-          {data.length > 0 ? (
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
-              {data.map((item: Pemasukan) => (
-                <div
-                  key={`detail-${item.id}`}
-                  className="rounded-lg border border-zinc-200 bg-white p-4"
+        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+          <Table>
+            <TableHeader className="bg-gray-50 dark:bg-gray-800">
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-semibold text-zinc-800">
-                      Detail Setoran #{item.id}
-                    </div>
-                    <div className="text-xs text-zinc-500">
-                      {item.user?.anggota?.nama ?? item.user?.username}
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {item.details.map((detail: Detail) => (
-                      <div
-                        key={detail.id}
-                        className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-600"
+                  ID
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Tanggal
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Status
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Total
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Bukti
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
+                >
+                  Aksi
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    Memuat data...
+                  </TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                </TableRow>
+              ) : data.length === 0 ? (
+                <TableRow>
+                  <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    Belum ada setoran.
+                  </TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                  <TableCell className="px-4 py-4">-</TableCell>
+                </TableRow>
+              ) : (
+                data.map((item: Pemasukan) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="px-4 py-3 text-sm font-semibold text-gray-800 dark:text-white/90">
+                      #{item.id}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(item.created_at)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          item.status === "VERIFIED"
+                            ? "bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400"
+                            : item.status === "REJECTED"
+                            ? "bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400"
+                            : "bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400"
+                        }`}
                       >
-                        <span>
-                          {detail.anggota.nama} ({detail.anggota.nim})
-                        </span>
-                        <span className="font-semibold text-zinc-800">
-                          Rp {formatRupiah(detail.nominal_bayar)}
-                        </span>
-                      </div>
-                    ))}
+                        {item.status}
+                      </span>
+                      {item.alasan_tolak ? (
+                        <div className="mt-2 text-xs text-error-500">
+                          Alasan: {item.alasan_tolak}
+                        </div>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                      Rp {formatRupiah(item.nominal_total)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                      {item.bukti_transfer
+                        ? `${item.bukti_transfer.slice(0, 32)}...`
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm">
+                      {item.status === "REJECTED" ? (
+                        <Link href={`/kas/resubmit/${item.id}`}>
+                          <Button size="sm">Resubmit</Button>
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {data.length > 0 ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {data.map((item: Pemasukan) => (
+              <div
+                key={`detail-${item.id}`}
+                className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/40"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                    Detail Setoran #{item.id}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {item.user?.anggota?.nama ?? item.user?.username}
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
+                <div className="mt-3 space-y-2">
+                  {item.details.map((detail: Detail) => (
+                    <div
+                      key={detail.id}
+                      className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-gray-800/60 dark:text-gray-400"
+                    >
+                      <span>
+                        {detail.anggota.nama} ({detail.anggota.nim})
+                      </span>
+                      <span className="font-semibold text-gray-800 dark:text-white/90">
+                        Rp {formatRupiah(detail.nominal_bayar)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </ComponentCard>
     </div>
   );
 }

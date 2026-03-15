@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Checkbox from "@/components/form/input/Checkbox";
+import Input from "@/components/form/input/InputField";
+import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
+import { EyeCloseIcon, EyeIcon } from "@/icons";
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,79 +47,78 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-4 py-10">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 lg:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white">
-            KAS Management System
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
+      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+        <div>
+          <div className="mb-5 sm:mb-8">
+            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+              Sign In
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Masukkan username dan password untuk masuk ke dashboard KAS.
+            </p>
           </div>
-          <h1 className="text-3xl font-semibold text-zinc-900 sm:text-4xl">
-            Masuk untuk mengelola kas organisasi secara rapi dan terstruktur.
-          </h1>
-          <p className="text-sm leading-relaxed text-zinc-600">
-            Sistem ini membantu Bendahara Eksternal dan Internal memantau
-            pemasukan, verifikasi, serta status pembayaran anggota dengan cepat.
-          </p>
-          <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
-            <span className="rounded-full border border-zinc-200 px-3 py-1">
-              Role-based access
-            </span>
-            <span className="rounded-full border border-zinc-200 px-3 py-1">
-              Pencatatan transparan
-            </span>
-            <span className="rounded-full border border-zinc-200 px-3 py-1">
-              Laporan mudah dipantau
-            </span>
-          </div>
-        </div>
-
-        <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-zinc-900">Login</h2>
-          <p className="mt-2 text-sm text-zinc-500">
-            Masukkan username dan password yang sudah diberikan.
-          </p>
-
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">
-                Username
-              </label>
-              <input
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-                placeholder="contoh: bendahara"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-                placeholder="Password"
-                required
-              />
-            </div>
-
-            {error ? (
-              <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-                {error}
+          <div>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-6">
+                <div>
+                  <Label>
+                    Username <span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    placeholder="contoh: bendahara"
+                    type="text"
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>
+                    Password <span className="text-error-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Masukkan password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                    >
+                      {showPassword ? (
+                        <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
+                      ) : (
+                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Checkbox checked={remember} onChange={setRemember} />
+                    <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
+                      Keep me logged in
+                    </span>
+                  </div>
+                </div>
+                {error ? (
+                  <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
+                    {error}
+                  </div>
+                ) : null}
+                <div>
+                  <Button className="w-full" size="sm" disabled={loading}>
+                    {loading ? "Memproses..." : "Masuk"}
+                  </Button>
+                </div>
               </div>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
-            >
-              {loading ? "Memproses..." : "Masuk"}
-            </button>
-          </form>
+            </form>
+            <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
+              Hubungi Superadmin jika Anda membutuhkan akses akun.
+            </div>
+          </div>
         </div>
       </div>
     </div>

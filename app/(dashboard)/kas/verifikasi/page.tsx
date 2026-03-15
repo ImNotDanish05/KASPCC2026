@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ComponentCard from "@/components/common/ComponentCard";
+import Label from "@/components/form/Label";
+import TextArea from "@/components/form/input/TextArea";
 
 type Anggota = {
   id: number;
@@ -152,108 +156,99 @@ export default function VerifikasiKasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold text-zinc-900">
-            Verifikasi Setoran
-          </h1>
-          <p className="mt-2 text-sm text-zinc-500">
-            Tinjau setoran yang masuk dan berikan keputusan.
-          </p>
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Verifikasi Setoran" />
+
+      {error ? (
+        <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
+          {error}
         </div>
+      ) : null}
 
-        {error ? (
-          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
+      <ComponentCard
+        title="Setoran Pending"
+        desc="Tinjau setoran yang masuk dan berikan keputusan."
+      >
+        {loading ? (
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+            Memuat data...
           </div>
-        ) : null}
-
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          {loading ? (
-            <div className="text-center text-sm text-zinc-500">
-              Memuat data...
-            </div>
-          ) : data.length === 0 ? (
-            <div className="text-center text-sm text-zinc-500">
-              Tidak ada setoran pending.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {data.map((item: Pemasukan) => (
-                <div
-                  key={item.id}
-                  className="rounded-lg border border-zinc-200 bg-zinc-50 p-4"
-                >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-zinc-900">
-                        Setoran #{item.id}
-                      </div>
-                      <div className="text-xs text-zinc-500">
-                        {item.user?.anggota?.nama ?? item.user?.username} -{" "}
-                        {formatDate(item.created_at)}
-                      </div>
+        ) : data.length === 0 ? (
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+            Tidak ada setoran pending.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {data.map((item: Pemasukan) => (
+              <div
+                key={item.id}
+                className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/40"
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                      Setoran #{item.id}
                     </div>
-                    <div className="text-sm font-semibold text-zinc-800">
-                      Rp {formatRupiah(item.nominal_total)}
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.user?.anggota?.nama ?? item.user?.username} ·{" "}
+                      {formatDate(item.created_at)}
                     </div>
                   </div>
-
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {item.details.map((detail: Detail) => (
-                      <div
-                        key={detail.id}
-                        className="flex items-center justify-between rounded-md bg-white px-3 py-2 text-xs text-zinc-600"
-                      >
-                        <span>
-                          {detail.anggota.nama} ({detail.anggota.nim})
-                        </span>
-                        <span className="font-semibold text-zinc-800">
-                          Rp {formatRupiah(detail.nominal_bayar)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="text-xs font-semibold text-zinc-600">
-                      Komentar (wajib jika ditolak)
-                    </label>
-                    <textarea
-                      value={commentById[item.id] ?? ""}
-                      onChange={(event) =>
-                        setCommentById((prev) => ({
-                          ...prev,
-                          [item.id]: event.target.value,
-                        }))
-                      }
-                      rows={2}
-                      className="mt-2 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-                      placeholder="Contoh: bukti transfer tidak jelas."
-                    />
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handleVerify(item.id, "VERIFIED")}
-                      className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500"
-                    >
-                      Setujui
-                    </button>
-                    <button
-                      onClick={() => handleVerify(item.id, "REJECTED")}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-500"
-                    >
-                      Tolak
-                    </button>
+                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                    Rp {formatRupiah(item.nominal_total)}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {item.details.map((detail: Detail) => (
+                    <div
+                      key={detail.id}
+                      className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-gray-800/60 dark:text-gray-400"
+                    >
+                      <span>
+                        {detail.anggota.nama} ({detail.anggota.nim})
+                      </span>
+                      <span className="font-semibold text-gray-800 dark:text-white/90">
+                        Rp {formatRupiah(detail.nominal_bayar)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4">
+                  <Label>Komentar (wajib jika ditolak)</Label>
+                  <TextArea
+                    value={commentById[item.id] ?? ""}
+                    onChange={(value) =>
+                      setCommentById((prev) => ({
+                        ...prev,
+                        [item.id]: value,
+                      }))
+                    }
+                    rows={2}
+                    placeholder="Contoh: bukti transfer tidak jelas."
+                  />
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleVerify(item.id, "VERIFIED")}
+                    className="inline-flex items-center justify-center rounded-lg bg-success-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-success-600"
+                  >
+                    Setujui
+                  </button>
+                  <button
+                    onClick={() => handleVerify(item.id, "REJECTED")}
+                    className="inline-flex items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-error-600"
+                  >
+                    Tolak
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </ComponentCard>
     </div>
   );
 }

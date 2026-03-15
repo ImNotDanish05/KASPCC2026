@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import ComponentCard from "@/components/common/ComponentCard";
+import Input from "@/components/form/input/InputField";
+import Label from "@/components/form/Label";
+import TextArea from "@/components/form/input/TextArea";
+import Button from "@/components/ui/button/Button";
 
 type TarikDanaResponse = {
   data: {
@@ -91,105 +97,103 @@ export default function TarikDanaPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-zinc-900">
-          Pengajuan Tarik Dana
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Ajukan penarikan dana kas dengan nominal, alasan, dan bukti nota.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Pengajuan Tarik Dana" />
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Nominal</label>
-              <input
-                type="number"
-                min={0}
-                value={nominal}
-                onChange={(event) => setNominal(event.target.value)}
-                placeholder="Contoh: 500000"
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-              />
-              <p className="text-xs text-zinc-500">
-                Total: Rp {formatRupiah(Number(nominal) || 0)}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">
-                Keterangan
-              </label>
-              <textarea
-                rows={4}
-                value={keterangan}
-                onChange={(event) => setKeterangan(event.target.value)}
-                placeholder="Contoh: pembelian peralatan acara"
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">
-                Bukti Nota
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) =>
-                  handleFileChange(event.target.files?.[0] ?? null)
-                }
-                className="w-full rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600"
-              />
-              {buktiFileName ? (
-                <div className="text-xs text-zinc-500">
-                  File terpilih: {buktiFileName}
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <div className="col-span-12 xl:col-span-8 space-y-6">
+          <ComponentCard
+            title="Form Pengajuan"
+            desc="Ajukan penarikan dana kas dengan nominal, alasan, dan bukti nota."
+          >
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label>Nominal</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={nominal}
+                  onChange={(event) => setNominal(event.target.value)}
+                  placeholder="Contoh: 500000"
+                  className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Total: Rp {formatRupiah(Number(nominal) || 0)}
+                </p>
+              </div>
+              <div>
+                <Label>Keterangan</Label>
+                <TextArea
+                  value={keterangan}
+                  onChange={(value) => setKeterangan(value)}
+                  rows={4}
+                  placeholder="Contoh: pembelian peralatan acara"
+                />
+              </div>
+              <div>
+                <Label>Bukti Nota</Label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) =>
+                    handleFileChange(event.target.files?.[0] ?? null)
+                  }
+                  className="h-11 w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-600 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                />
+                {buktiFileName ? (
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    File terpilih: {buktiFileName}
+                  </div>
+                ) : null}
+                <div className="mt-3">
+                  <Label>URL bukti nota</Label>
+                  <Input
+                    placeholder="Atau masukkan URL bukti nota"
+                    type="text"
+                    value={buktiNota}
+                    onChange={(event) => setBuktiNota(event.target.value)}
+                  />
                 </div>
-              ) : null}
-              <input
-                value={buktiNota}
-                onChange={(event) => setBuktiNota(event.target.value)}
-                placeholder="Atau masukkan URL bukti nota"
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
-              />
+              </div>
             </div>
-          </div>
+          </ComponentCard>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-zinc-900">Ringkasan</h2>
-          <div className="mt-4 space-y-3 text-sm text-zinc-600">
-            <div className="flex items-center justify-between">
-              <span>Nominal</span>
-              <span className="font-semibold text-zinc-900">
-                Rp {formatRupiah(Number(nominal) || 0)}
-              </span>
+        <div className="col-span-12 xl:col-span-4 space-y-6">
+          <ComponentCard title="Ringkasan" desc="Ringkasan pengajuan dana.">
+            <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center justify-between">
+                <span>Nominal</span>
+                <span className="font-semibold text-gray-800 dark:text-white/90">
+                  Rp {formatRupiah(Number(nominal) || 0)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Status</span>
+                <span className="rounded-full bg-warning-50 px-3 py-1 text-xs font-semibold text-warning-600 dark:bg-warning-500/10 dark:text-warning-400">
+                  Pending
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span>Status</span>
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                Pending
-              </span>
-            </div>
-          </div>
-          {error ? (
-            <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
-          {message ? (
-            <div className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              {message}
-            </div>
-          ) : null}
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="mt-6 w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
-          >
-            {submitting ? "Mengirim..." : "Kirim Pengajuan"}
-          </button>
+            {error ? (
+              <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
+                {error}
+              </div>
+            ) : null}
+            {message ? (
+              <div className="rounded-lg bg-success-50 px-4 py-3 text-sm text-success-600 dark:bg-success-500/10 dark:text-success-400">
+                {message}
+              </div>
+            ) : null}
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full"
+              size="sm"
+            >
+              {submitting ? "Mengirim..." : "Kirim Pengajuan"}
+            </Button>
+          </ComponentCard>
         </div>
       </div>
     </div>
