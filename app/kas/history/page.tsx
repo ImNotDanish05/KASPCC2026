@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 type Jabatan = {
   id: number;
-  namaJabatan: string;
+  nama_jabatan: string;
   kategori: "DIVISI" | "DEPARTEMEN" | "INTI";
 };
 
@@ -13,14 +13,14 @@ type Anggota = {
   id: number;
   nim: string;
   nama: string;
-  noTelepon: string;
-  jabatanId: number;
+  no_telepon: string;
+  jabatan_id: number;
   jabatan?: Jabatan;
 };
 
 type Detail = {
   id: number;
-  nominalBayar: number;
+  nominal_bayar: number;
   anggota: Anggota;
 };
 
@@ -32,11 +32,11 @@ type User = {
 
 type Pemasukan = {
   id: number;
-  nominalTotal: number;
-  buktiTransfer: string;
+  nominal_total: number;
+  bukti_transfer: string;
   status: "PENDING" | "VERIFIED" | "REJECTED";
-  alasanTolak: string | null;
-  createdAt: string;
+  alasan_tolak: string | null;
+  created_at: string;
   details: Detail[];
   user: User;
 };
@@ -49,6 +49,80 @@ function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString("id-ID");
+}
+
+function normalizeKategori(value: unknown): Jabatan["kategori"] {
+  if (value === "DIVISI" || value === "DEPARTEMEN" || value === "INTI") {
+    return value;
+  }
+  return "DIVISI";
+}
+
+function toNumber(value: unknown) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function toString(value: unknown) {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+function mapJabatan(raw: unknown): Jabatan {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nama_jabatan: toString(data.nama_jabatan ?? data.namaJabatan),
+    kategori: normalizeKategori(data.kategori),
+  };
+}
+
+function mapAnggota(raw: unknown): Anggota {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nim: toString(data.nim),
+    nama: toString(data.nama),
+    no_telepon: toString(data.no_telepon ?? data.noTelepon),
+    jabatan_id: toNumber(data.jabatan_id ?? data.jabatanId),
+    jabatan: data.jabatan ? mapJabatan(data.jabatan) : undefined,
+  };
+}
+
+function mapDetail(raw: unknown): Detail {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nominal_bayar: toNumber(data.nominal_bayar ?? data.nominalBayar),
+    anggota: mapAnggota(data.anggota ?? {}),
+  };
+}
+
+function mapUser(raw: unknown): User {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    username: toString(data.username),
+    anggota: mapAnggota(data.anggota ?? {}),
+  };
+}
+
+function mapPemasukan(raw: unknown): Pemasukan {
+  const data = raw as Record<string, unknown>;
+  const detailsRaw = Array.isArray(data.details) ? data.details : [];
+  return {
+    id: toNumber(data.id),
+    nominal_total: toNumber(data.nominal_total ?? data.nominalTotal),
+    bukti_transfer: toString(data.bukti_transfer ?? data.buktiTransfer),
+    status: (data.status as Pemasukan["status"]) ?? "PENDING",
+    alasan_tolak: (data.alasan_tolak ?? data.alasanTolak ?? null) as
+      | string
+      | null,
+    created_at: toString(data.created_at ?? data.createdAt),
+    details: detailsRaw.map((detail: unknown) => mapDetail(detail)),
+    user: mapUser(data.user ?? {}),
+  };
 }
 
 export default function KasHistoryPage() {
@@ -68,9 +142,12 @@ export default function KasHistoryPage() {
     const url = `/api/kas/history${params.toString() ? `?${params}` : ""}`;
     fetch(url)
       .then((res) => res.json())
-      .then((payload) => {
+      .then((payload: { data?: unknown[] }) => {
         if (!active) return;
-        setData(payload.data ?? []);
+        const list = Array.isArray(payload.data)
+          ? payload.data.map((item: unknown) => mapPemasukan(item))
+          : [];
+        setData(list);
       })
       .catch(() => {
         if (!active) return;
@@ -157,7 +234,7 @@ export default function KasHistoryPage() {
                     </td>
                   </tr>
                 ) : (
-                  data.map((item) => (
+                  data.map((item: Pemasukan) => (
                     <tr
                       key={item.id}
                       className="rounded-lg bg-zinc-50 text-sm text-zinc-700"
@@ -165,7 +242,9 @@ export default function KasHistoryPage() {
                       <td className="px-3 py-3 font-medium text-zinc-900">
                         #{item.id}
                       </td>
-                      <td className="px-3 py-3">{formatDate(item.createdAt)}</td>
+                      <td className="px-3 py-3">
+                        {formatDate(item.created_at)}
+                      </td>
                       <td className="px-3 py-3">
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -178,19 +257,19 @@ export default function KasHistoryPage() {
                         >
                           {item.status}
                         </span>
-                        {item.alasanTolak ? (
+                        {item.alasan_tolak ? (
                           <div className="mt-2 text-xs text-red-600">
-                            Alasan: {item.alasanTolak}
+                            Alasan: {item.alasan_tolak}
                           </div>
                         ) : null}
                       </td>
                       <td className="px-3 py-3">
-                        Rp {formatRupiah(item.nominalTotal)}
+                        Rp {formatRupiah(item.nominal_total)}
                       </td>
                       <td className="px-3 py-3">
-                        {item.buktiTransfer ? (
+                        {item.bukti_transfer ? (
                           <span className="text-xs text-zinc-600">
-                            {item.buktiTransfer.slice(0, 32)}...
+                            {item.bukti_transfer.slice(0, 32)}...
                           </span>
                         ) : (
                           "-"
@@ -217,7 +296,7 @@ export default function KasHistoryPage() {
 
           {data.length > 0 ? (
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
-              {data.map((item) => (
+              {data.map((item: Pemasukan) => (
                 <div
                   key={`detail-${item.id}`}
                   className="rounded-lg border border-zinc-200 bg-white p-4"
@@ -231,7 +310,7 @@ export default function KasHistoryPage() {
                     </div>
                   </div>
                   <div className="mt-3 space-y-2">
-                    {item.details.map((detail) => (
+                    {item.details.map((detail: Detail) => (
                       <div
                         key={detail.id}
                         className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-600"
@@ -240,7 +319,7 @@ export default function KasHistoryPage() {
                           {detail.anggota.nama} ({detail.anggota.nim})
                         </span>
                         <span className="font-semibold text-zinc-800">
-                          Rp {formatRupiah(detail.nominalBayar)}
+                          Rp {formatRupiah(detail.nominal_bayar)}
                         </span>
                       </div>
                     ))}

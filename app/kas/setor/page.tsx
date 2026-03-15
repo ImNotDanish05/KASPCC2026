@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 type Jabatan = {
   id: number;
-  namaJabatan: string;
+  nama_jabatan: string;
   kategori: "DIVISI" | "DEPARTEMEN" | "INTI";
 };
 
@@ -12,8 +12,8 @@ type Anggota = {
   id: number;
   nim: string;
   nama: string;
-  noTelepon: string;
-  jabatanId: number;
+  no_telepon: string;
+  jabatan_id: number;
   jabatan?: Jabatan;
 };
 
@@ -23,8 +23,52 @@ type SetorResponse = {
   };
 };
 
+type SetorItem = {
+  anggota_id: number;
+  nominal_bayar: number;
+};
+
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID").format(value);
+}
+
+function normalizeKategori(value: unknown): Jabatan["kategori"] {
+  if (value === "DIVISI" || value === "DEPARTEMEN" || value === "INTI") {
+    return value;
+  }
+  return "DIVISI";
+}
+
+function toNumber(value: unknown) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function toString(value: unknown) {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+function mapJabatan(raw: unknown): Jabatan {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nama_jabatan: toString(data.nama_jabatan ?? data.namaJabatan),
+    kategori: normalizeKategori(data.kategori),
+  };
+}
+
+function mapAnggota(raw: unknown): Anggota {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nim: toString(data.nim),
+    nama: toString(data.nama),
+    no_telepon: toString(data.no_telepon ?? data.noTelepon),
+    jabatan_id: toNumber(data.jabatan_id ?? data.jabatanId),
+    jabatan: data.jabatan ? mapJabatan(data.jabatan) : undefined,
+  };
 }
 
 export default function SetorKasPage() {
@@ -45,9 +89,12 @@ export default function SetorKasPage() {
     let active = true;
     fetch("/api/jabatans")
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: { data?: unknown[] }) => {
         if (!active) return;
-        setJabatans(data.data ?? []);
+        const list = Array.isArray(data.data)
+          ? data.data.map((item: unknown) => mapJabatan(item))
+          : [];
+        setJabatans(list);
       })
       .catch(() => {
         if (!active) return;
@@ -71,9 +118,12 @@ export default function SetorKasPage() {
     const url = `/api/anggotas${params.toString() ? `?${params}` : ""}`;
     fetch(url)
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: { data?: unknown[] }) => {
         if (!active) return;
-        setAnggotas(data.data ?? []);
+        const list = Array.isArray(data.data)
+          ? data.data.map((item: unknown) => mapAnggota(item))
+          : [];
+        setAnggotas(list);
       })
       .catch(() => {
         if (!active) return;
@@ -90,7 +140,7 @@ export default function SetorKasPage() {
 
   const totalNominal = useMemo(() => {
     let total = 0;
-    selectedIds.forEach((id) => {
+    selectedIds.forEach((id: number) => {
       const raw = nominalById[id];
       const value = raw ? Number(raw) : 0;
       if (Number.isFinite(value) && value > 0) {
@@ -139,11 +189,14 @@ export default function SetorKasPage() {
     setError(null);
 
     const items = Array.from(selectedIds)
-      .map((id) => ({
-        anggotaId: id,
-        nominalBayar: Number(nominalById[id]),
+      .map((id: number) => ({
+        anggota_id: id,
+        nominal_bayar: Number(nominalById[id]),
       }))
-      .filter((item) => Number.isFinite(item.nominalBayar) && item.nominalBayar > 0);
+      .filter(
+        (item: SetorItem) =>
+          Number.isFinite(item.nominal_bayar) && item.nominal_bayar > 0,
+      );
 
     if (!buktiTransfer) {
       setError("Bukti transfer wajib diisi.");
@@ -155,6 +208,13 @@ export default function SetorKasPage() {
       return;
     }
 
+    const itemsPayload = items.map((item: SetorItem) => ({
+      anggota_id: item.anggota_id,
+      nominal_bayar: item.nominal_bayar,
+      anggotaId: item.anggota_id,
+      nominalBayar: item.nominal_bayar,
+    }));
+
     setSubmitting(true);
     try {
       const response = await fetch("/api/kas/setor", {
@@ -163,8 +223,9 @@ export default function SetorKasPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          buktiTransfer,
-          items,
+          bukti_transfer: buktiTransfer,
+          buktiTransfer: buktiTransfer,
+          items: itemsPayload,
         }),
       });
       if (!response.ok) {
@@ -219,9 +280,9 @@ export default function SetorKasPage() {
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
                 >
                   <option value="">Semua jabatan</option>
-                  {jabatans.map((jabatan) => (
+                  {jabatans.map((jabatan: Jabatan) => (
                     <option key={jabatan.id} value={String(jabatan.id)}>
-                      {jabatan.namaJabatan}
+                      {jabatan.nama_jabatan}
                     </option>
                   ))}
                 </select>
@@ -259,7 +320,7 @@ export default function SetorKasPage() {
                       </td>
                     </tr>
                   ) : (
-                    anggotas.map((anggota) => {
+                    anggotas.map((anggota: Anggota) => {
                       const checked = selectedIds.has(anggota.id);
                       return (
                         <tr
@@ -279,7 +340,7 @@ export default function SetorKasPage() {
                           </td>
                           <td className="px-3 py-3">{anggota.nim}</td>
                           <td className="px-3 py-3">
-                            {anggota.jabatan?.namaJabatan ?? "-"}
+                            {anggota.jabatan?.nama_jabatan ?? "-"}
                           </td>
                           <td className="px-3 py-3">
                             <input

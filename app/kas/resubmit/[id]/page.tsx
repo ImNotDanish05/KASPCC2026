@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 type Jabatan = {
   id: number;
-  namaJabatan: string;
+  nama_jabatan: string;
   kategori: "DIVISI" | "DEPARTEMEN" | "INTI";
 };
 
@@ -13,27 +13,94 @@ type Anggota = {
   id: number;
   nim: string;
   nama: string;
-  noTelepon: string;
-  jabatanId: number;
+  no_telepon: string;
+  jabatan_id: number;
   jabatan?: Jabatan;
 };
 
 type Detail = {
   id: number;
-  nominalBayar: number;
+  nominal_bayar: number;
   anggota: Anggota;
 };
 
 type Pemasukan = {
   id: number;
-  buktiTransfer: string;
+  bukti_transfer: string;
   status: "PENDING" | "VERIFIED" | "REJECTED";
-  alasanTolak: string | null;
+  alasan_tolak: string | null;
   details: Detail[];
+};
+
+type ResubmitItem = {
+  anggota_id: number;
+  nominal_bayar: number;
 };
 
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID").format(value);
+}
+
+function normalizeKategori(value: unknown): Jabatan["kategori"] {
+  if (value === "DIVISI" || value === "DEPARTEMEN" || value === "INTI") {
+    return value;
+  }
+  return "DIVISI";
+}
+
+function toNumber(value: unknown) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function toString(value: unknown) {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+function mapJabatan(raw: unknown): Jabatan {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nama_jabatan: toString(data.nama_jabatan ?? data.namaJabatan),
+    kategori: normalizeKategori(data.kategori),
+  };
+}
+
+function mapAnggota(raw: unknown): Anggota {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nim: toString(data.nim),
+    nama: toString(data.nama),
+    no_telepon: toString(data.no_telepon ?? data.noTelepon),
+    jabatan_id: toNumber(data.jabatan_id ?? data.jabatanId),
+    jabatan: data.jabatan ? mapJabatan(data.jabatan) : undefined,
+  };
+}
+
+function mapDetail(raw: unknown): Detail {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nominal_bayar: toNumber(data.nominal_bayar ?? data.nominalBayar),
+    anggota: mapAnggota(data.anggota ?? {}),
+  };
+}
+
+function mapPemasukan(raw: unknown): Pemasukan {
+  const data = raw as Record<string, unknown>;
+  const detailsRaw = Array.isArray(data.details) ? data.details : [];
+  return {
+    id: toNumber(data.id),
+    bukti_transfer: toString(data.bukti_transfer ?? data.buktiTransfer),
+    status: (data.status as Pemasukan["status"]) ?? "PENDING",
+    alasan_tolak: (data.alasan_tolak ?? data.alasanTolak ?? null) as
+      | string
+      | null,
+    details: detailsRaw.map((detail: unknown) => mapDetail(detail)),
+  };
 }
 
 export default function ResubmitKasPage() {
@@ -61,9 +128,12 @@ export default function ResubmitKasPage() {
     let active = true;
     fetch("/api/jabatans")
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: { data?: unknown[] }) => {
         if (!active) return;
-        setJabatans(data.data ?? []);
+        const list = Array.isArray(data.data)
+          ? data.data.map((item: unknown) => mapJabatan(item))
+          : [];
+        setJabatans(list);
       })
       .catch(() => {
         if (!active) return;
@@ -87,9 +157,12 @@ export default function ResubmitKasPage() {
     const url = `/api/anggotas${params.toString() ? `?${params}` : ""}`;
     fetch(url)
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: { data?: unknown[] }) => {
         if (!active) return;
-        setAnggotas(data.data ?? []);
+        const list = Array.isArray(data.data)
+          ? data.data.map((item: unknown) => mapAnggota(item))
+          : [];
+        setAnggotas(list);
       })
       .catch(() => {
         if (!active) return;
@@ -114,20 +187,22 @@ export default function ResubmitKasPage() {
     setLoadingData(true);
     fetch("/api/kas/history?status=REJECTED")
       .then((res) => res.json())
-      .then((payload) => {
+      .then((payload: { data?: unknown[] }) => {
         if (!active) return;
-        const data = payload.data ?? [];
-        const found = data.find((item: Pemasukan) => item.id === pemasukanId);
+        const list = Array.isArray(payload.data)
+          ? payload.data.map((item: unknown) => mapPemasukan(item))
+          : [];
+        const found = list.find((item: Pemasukan) => item.id === pemasukanId);
         if (!found) {
           setError("Data tidak ditemukan.");
         } else {
           setPemasukan(found);
-          setBuktiTransfer(found.buktiTransfer ?? "");
+          setBuktiTransfer(found.bukti_transfer ?? "");
           const nextSelected = new Set<number>();
           const nextNominal: Record<number, string> = {};
-          found.details.forEach((detail) => {
+          found.details.forEach((detail: Detail) => {
             nextSelected.add(detail.anggota.id);
-            nextNominal[detail.anggota.id] = String(detail.nominalBayar);
+            nextNominal[detail.anggota.id] = String(detail.nominal_bayar);
           });
           setSelectedIds(nextSelected);
           setNominalById(nextNominal);
@@ -148,7 +223,7 @@ export default function ResubmitKasPage() {
 
   const totalNominal = useMemo(() => {
     let total = 0;
-    selectedIds.forEach((id) => {
+    selectedIds.forEach((id: number) => {
       const raw = nominalById[id];
       const value = raw ? Number(raw) : 0;
       if (Number.isFinite(value) && value > 0) {
@@ -197,11 +272,14 @@ export default function ResubmitKasPage() {
     setError(null);
 
     const items = Array.from(selectedIds)
-      .map((id) => ({
-        anggotaId: id,
-        nominalBayar: Number(nominalById[id]),
+      .map((id: number) => ({
+        anggota_id: id,
+        nominal_bayar: Number(nominalById[id]),
       }))
-      .filter((item) => Number.isFinite(item.nominalBayar) && item.nominalBayar > 0);
+      .filter(
+        (item: ResubmitItem) =>
+          Number.isFinite(item.nominal_bayar) && item.nominal_bayar > 0,
+      );
 
     if (!buktiTransfer) {
       setError("Bukti transfer wajib diisi.");
@@ -213,6 +291,13 @@ export default function ResubmitKasPage() {
       return;
     }
 
+    const itemsPayload = items.map((item: ResubmitItem) => ({
+      anggota_id: item.anggota_id,
+      nominal_bayar: item.nominal_bayar,
+      anggotaId: item.anggota_id,
+      nominalBayar: item.nominal_bayar,
+    }));
+
     setSubmitting(true);
     try {
       const response = await fetch(`/api/kas/resubmit/${pemasukanId}`, {
@@ -221,8 +306,9 @@ export default function ResubmitKasPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          buktiTransfer,
-          items,
+          bukti_transfer: buktiTransfer,
+          buktiTransfer: buktiTransfer,
+          items: itemsPayload,
         }),
       });
       if (!response.ok) {
@@ -271,9 +357,9 @@ export default function ResubmitKasPage() {
           <p className="mt-2 text-sm text-zinc-500">
             Perbaiki data setoran yang ditolak lalu kirim ulang.
           </p>
-          {pemasukan.alasanTolak ? (
+          {pemasukan.alasan_tolak ? (
             <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              Alasan penolakan: {pemasukan.alasanTolak}
+              Alasan penolakan: {pemasukan.alasan_tolak}
             </div>
           ) : null}
         </div>
@@ -302,9 +388,9 @@ export default function ResubmitKasPage() {
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
                 >
                   <option value="">Semua jabatan</option>
-                  {jabatans.map((jabatan) => (
+                  {jabatans.map((jabatan: Jabatan) => (
                     <option key={jabatan.id} value={String(jabatan.id)}>
-                      {jabatan.namaJabatan}
+                      {jabatan.nama_jabatan}
                     </option>
                   ))}
                 </select>
@@ -342,7 +428,7 @@ export default function ResubmitKasPage() {
                       </td>
                     </tr>
                   ) : (
-                    anggotas.map((anggota) => {
+                    anggotas.map((anggota: Anggota) => {
                       const checked = selectedIds.has(anggota.id);
                       return (
                         <tr
@@ -362,7 +448,7 @@ export default function ResubmitKasPage() {
                           </td>
                           <td className="px-3 py-3">{anggota.nim}</td>
                           <td className="px-3 py-3">
-                            {anggota.jabatan?.namaJabatan ?? "-"}
+                            {anggota.jabatan?.nama_jabatan ?? "-"}
                           </td>
                           <td className="px-3 py-3">
                             <input

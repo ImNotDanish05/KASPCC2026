@@ -6,11 +6,12 @@ type Anggota = {
   id: number;
   nim: string;
   nama: string;
+  no_telepon: string;
 };
 
 type Detail = {
   id: number;
-  nominalBayar: number;
+  nominal_bayar: number;
   anggota: Anggota;
 };
 
@@ -22,10 +23,10 @@ type User = {
 
 type Pemasukan = {
   id: number;
-  nominalTotal: number;
-  buktiTransfer: string;
+  nominal_total: number;
+  bukti_transfer: string;
   status: "PENDING" | "VERIFIED" | "REJECTED";
-  createdAt: string;
+  created_at: string;
   details: Detail[];
   user: User;
 };
@@ -40,6 +41,59 @@ function formatDate(value: string) {
   return date.toLocaleString("id-ID");
 }
 
+function toNumber(value: unknown) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function toString(value: unknown) {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+function mapAnggota(raw: unknown): Anggota {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nim: toString(data.nim),
+    nama: toString(data.nama),
+    no_telepon: toString(data.no_telepon ?? data.noTelepon),
+  };
+}
+
+function mapDetail(raw: unknown): Detail {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    nominal_bayar: toNumber(data.nominal_bayar ?? data.nominalBayar),
+    anggota: mapAnggota(data.anggota ?? {}),
+  };
+}
+
+function mapUser(raw: unknown): User {
+  const data = raw as Record<string, unknown>;
+  return {
+    id: toNumber(data.id),
+    username: toString(data.username),
+    anggota: mapAnggota(data.anggota ?? {}),
+  };
+}
+
+function mapPemasukan(raw: unknown): Pemasukan {
+  const data = raw as Record<string, unknown>;
+  const detailsRaw = Array.isArray(data.details) ? data.details : [];
+  return {
+    id: toNumber(data.id),
+    nominal_total: toNumber(data.nominal_total ?? data.nominalTotal),
+    bukti_transfer: toString(data.bukti_transfer ?? data.buktiTransfer),
+    status: (data.status as Pemasukan["status"]) ?? "PENDING",
+    created_at: toString(data.created_at ?? data.createdAt),
+    details: detailsRaw.map((detail: unknown) => mapDetail(detail)),
+    user: mapUser(data.user ?? {}),
+  };
+}
+
 export default function VerifikasiKasPage() {
   const [data, setData] = useState<Pemasukan[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,8 +105,11 @@ export default function VerifikasiKasPage() {
     setError(null);
     try {
       const res = await fetch("/api/kas/history?status=PENDING");
-      const payload = await res.json();
-      setData(payload.data ?? []);
+      const payload = (await res.json()) as { data?: unknown[] };
+      const list = Array.isArray(payload.data)
+        ? payload.data.map((item: unknown) => mapPemasukan(item))
+        : [];
+      setData(list);
     } catch {
       setError("Gagal memuat data.");
     } finally {
@@ -65,8 +122,8 @@ export default function VerifikasiKasPage() {
   }, []);
 
   async function handleVerify(id: number, status: "VERIFIED" | "REJECTED") {
-    const alasanTolak = commentById[id]?.trim() ?? "";
-    if (status === "REJECTED" && !alasanTolak) {
+    const alasan_tolak = commentById[id]?.trim() ?? "";
+    if (status === "REJECTED" && !alasan_tolak) {
       setError("Alasan penolakan wajib diisi.");
       return;
     }
@@ -77,7 +134,11 @@ export default function VerifikasiKasPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status, alasanTolak }),
+        body: JSON.stringify({
+          status,
+          alasan_tolak,
+          alasanTolak: alasan_tolak,
+        }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -119,7 +180,7 @@ export default function VerifikasiKasPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {data.map((item) => (
+              {data.map((item: Pemasukan) => (
                 <div
                   key={item.id}
                   className="rounded-lg border border-zinc-200 bg-zinc-50 p-4"
@@ -131,16 +192,16 @@ export default function VerifikasiKasPage() {
                       </div>
                       <div className="text-xs text-zinc-500">
                         {item.user?.anggota?.nama ?? item.user?.username} -{" "}
-                        {formatDate(item.createdAt)}
+                        {formatDate(item.created_at)}
                       </div>
                     </div>
                     <div className="text-sm font-semibold text-zinc-800">
-                      Rp {formatRupiah(item.nominalTotal)}
+                      Rp {formatRupiah(item.nominal_total)}
                     </div>
                   </div>
 
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {item.details.map((detail) => (
+                    {item.details.map((detail: Detail) => (
                       <div
                         key={detail.id}
                         className="flex items-center justify-between rounded-md bg-white px-3 py-2 text-xs text-zinc-600"
@@ -149,7 +210,7 @@ export default function VerifikasiKasPage() {
                           {detail.anggota.nama} ({detail.anggota.nim})
                         </span>
                         <span className="font-semibold text-zinc-800">
-                          Rp {formatRupiah(detail.nominalBayar)}
+                          Rp {formatRupiah(detail.nominal_bayar)}
                         </span>
                       </div>
                     ))}
