@@ -16,7 +16,7 @@ Follow these steps to run the project locally.
 
 1. Clone the repository and install dependencies.
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/ImNotDanish05/KASPCC2026.git
 cd kaspcc2026
 npm install
 ```
