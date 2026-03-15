@@ -32,6 +32,12 @@ function decodeJson(segment: string) {
   return JSON.parse(text) as Record<string, unknown>;
 }
 
+function toArrayBuffer(view: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(view.byteLength);
+  new Uint8Array(buffer).set(view);
+  return buffer;
+}
+
 async function verifySignature(
   token: string,
   secret: string,
@@ -45,7 +51,9 @@ async function verifySignature(
     ["verify"],
   );
   const data = new TextEncoder().encode(token);
-  return crypto.subtle.verify("HMAC", key, signature, data);
+  const signatureBuffer = toArrayBuffer(signature);
+  const dataBuffer = toArrayBuffer(data);
+  return crypto.subtle.verify("HMAC", key, signatureBuffer, dataBuffer);
 }
 
 export async function verifyAuthTokenEdge(
