@@ -33,6 +33,7 @@ const MENU: MenuSection[] = [
     title: "KAS Keluar",
     items: [
       { label: "Ajukan Tarik Dana", href: "/tarik-dana", roles: ["Bendahara Eksternal"] },
+      { label: "Riwayat Tarik Dana", href: "/tarik-dana/history", roles: ["Superadmin", "Bendahara Internal", "Bendahara Eksternal"] },
       { label: "Persetujuan Tarik Dana", href: "/tarik-dana/approve", roles: ["Bendahara Internal"] },
     ],
   },
