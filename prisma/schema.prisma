@@ -1,0 +1,118 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum JabatanKategori {
+  DIVISI
+  DEPARTEMEN
+  INTI
+}
+
+enum PemasukanStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum PengeluaranStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Jabatan {
+  id          Int              @id @default(autoincrement())
+  namaJabatan String           @map("nama_jabatan")
+  kategori    JabatanKategori
+  anggotas    Anggota[]
+
+  @@map("jabatans")
+}
+
+model Anggota {
+  id         Int                  @id @default(autoincrement())
+  nim        String               @unique
+  nama       String
+  noTelepon  String               @map("no_telepon")
+  jabatanId  Int                  @map("jabatan_id")
+  jabatan    Jabatan              @relation(fields: [jabatanId], references: [id])
+  user       User?
+  detailKas  DetailPemasukanKas[]
+
+  @@map("anggotas")
+}
+
+model User {
+  id         Int             @id @default(autoincrement())
+  anggotaId  Int             @unique @map("anggota_id")
+  username   String          @unique
+  password   String
+  anggota    Anggota         @relation(fields: [anggotaId], references: [id])
+  roles      ModelHasRole[]
+  pemasukan  PemasukanKas[]
+  pengeluaran PengeluaranKas[]
+
+  @@map("users")
+}
+
+model Role {
+  id    Int            @id @default(autoincrement())
+  name  String         @unique
+  users ModelHasRole[]
+
+  @@map("roles")
+}
+
+model ModelHasRole {
+  userId Int  @map("user_id")
+  roleId Int  @map("role_id")
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("model_has_roles")
+}
+
+model PemasukanKas {
+  id           Int                @id @default(autoincrement())
+  userId       Int                @map("user_id")
+  nominalTotal Int                @map("nominal_total")
+  buktiTransfer String            @map("bukti_transfer")
+  status       PemasukanStatus
+  alasanTolak  String?            @map("alasan_tolak")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  user         User               @relation(fields: [userId], references: [id])
+  details      DetailPemasukanKas[]
+
+  @@map("pemasukan_kas")
+}
+
+model DetailPemasukanKas {
+  id             Int          @id @default(autoincrement())
+  pemasukanKasId Int          @map("pemasukan_kas_id")
+  anggotaId      Int          @map("anggota_id")
+  nominalBayar   Int          @map("nominal_bayar")
+  pemasukanKas   PemasukanKas @relation(fields: [pemasukanKasId], references: [id])
+  anggota        Anggota      @relation(fields: [anggotaId], references: [id])
+
+  @@map("detail_pemasukan_kas")
+}
+
+model PengeluaranKas {
+  id          Int               @id @default(autoincrement())
+  userId      Int               @map("user_id")
+  nominal     Int
+  keterangan  String
+  buktiNota   String            @map("bukti_nota")
+  status      PengeluaranStatus
+  alasanTolak String?           @map("alasan_tolak")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  user        User              @relation(fields: [userId], references: [id])
+
+  @@map("pengeluaran_kas")
+}
