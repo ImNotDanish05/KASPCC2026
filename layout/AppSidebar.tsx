@@ -8,6 +8,7 @@ import {
   ArrowRightIcon,
   BoxCubeIcon,
   ChevronDownIcon,
+  DocsIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -32,6 +33,12 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     path: "/",
     roles: [ROLE_SUPER, ROLE_INTERNAL, ROLE_EXTERNAL],
+  },
+  {
+    icon: <DocsIcon />,
+    name: "Settings",
+    path: "/settings",
+    roles: [ROLE_SUPER, ROLE_INTERNAL],
   },
   {
     name: "KAS Masuk",

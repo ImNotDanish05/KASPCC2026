@@ -71,6 +71,21 @@ async function main() {
     roleName: "Bendahara Internal",
   });
 
+  await prisma.pengaturan.upsert({
+    where: { id: 1 },
+    update: {
+      targetKasPerBulan: 50000,
+      tanggalMulai: new Date("2026-03-01T00:00:00.000Z"),
+      tanggalAkhir: new Date("2027-03-01T00:00:00.000Z"),
+    },
+    create: {
+      id: 1,
+      targetKasPerBulan: 50000,
+      tanggalMulai: new Date("2026-03-01T00:00:00.000Z"),
+      tanggalAkhir: new Date("2027-03-01T00:00:00.000Z"),
+    },
+  });
+
   console.log("Seeded users:");
   console.log("superadmin / superadmin123 (Superadmin)");
   console.log("bendahara / bendahara123 (Bendahara Eksternal)");
