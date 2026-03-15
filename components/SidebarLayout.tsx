@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type MenuItem = {
   label: string;
@@ -64,8 +65,18 @@ function filterMenu(roles: string[]) {
 }
 
 export default function SidebarLayout({ roles, username, children }: SidebarLayoutProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const menu = useMemo(() => filterMenu(roles), [roles]);
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-zinc-100 text-zinc-900">
@@ -94,7 +105,13 @@ export default function SidebarLayout({ roles, username, children }: SidebarLayo
           ))}
         </nav>
         <div className="border-t border-zinc-200 px-6 py-4 text-sm text-zinc-500">
-          {username ? `Signed in as ${username}` : "Not signed in"}
+          <div>{username ? `Signed in as ${username}` : "Not signed in"}</div>
+          <button
+            onClick={handleLogout}
+            className="mt-3 w-full rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50"
+          >
+            Logout
+          </button>
         </div>
       </aside>
 
@@ -152,7 +169,16 @@ export default function SidebarLayout({ roles, username, children }: SidebarLayo
           ))}
         </nav>
         <div className="border-t border-zinc-200 px-6 py-4 text-sm text-zinc-500">
-          {username ? `Signed in as ${username}` : "Not signed in"}
+          <div>{username ? `Signed in as ${username}` : "Not signed in"}</div>
+          <button
+            onClick={() => {
+              setOpen(false);
+              void handleLogout();
+            }}
+            className="mt-3 w-full rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50"
+          >
+            Logout
+          </button>
         </div>
       </aside>
     </div>
