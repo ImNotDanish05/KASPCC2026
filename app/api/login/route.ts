@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
   }
 
-  const roles = user.roles.map((entry) => entry.role.name);
+  const roles = user.roles.map((entry: { role: { name: string } }) => entry.role.name);
   const { token, expiresIn } = await signAuthToken({
     userId: user.id,
     username: user.username,

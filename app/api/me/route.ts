@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const roles = user.roles.map((entry) => entry.role.name);
+  const roles = user.roles.map((entry: { role: { name: string } }) => entry.role.name);
 
   return NextResponse.json({
     user: {
