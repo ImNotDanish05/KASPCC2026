@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0" version="29.6.6">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.1">
   <diagram name="Page-1" id="D8_eOlXYqQPOE3cAlHE3">
-    <mxGraphModel dx="2249" dy="2227" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="815" dy="1252" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -32,7 +32,7 @@
           <mxGeometry height="30" width="220" y="90" as="geometry" />
         </mxCell>
         <mxCell id="tbl_anggotas" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fontStyle=1;align=center;" value="anggotas" vertex="1">
-          <mxGeometry height="180" width="220" x="650" y="-160" as="geometry" />
+          <mxGeometry height="210" width="220" x="650" y="-160" as="geometry" />
         </mxCell>
         <mxCell id="col_a_id" parent="tbl_anggotas" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;" value="PK | id : Int" vertex="1">
           <mxGeometry height="30" width="220" y="30" as="geometry" />
@@ -46,8 +46,11 @@
         <mxCell id="col_a_telp" parent="tbl_anggotas" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;" value="no_telepon : String" vertex="1">
           <mxGeometry height="30" width="220" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="col_a_jabatan" parent="tbl_anggotas" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;" value="FK | jabatan_id : Int" vertex="1">
+        <mxCell id="col_a_jabatan" parent="tbl_anggotas" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;" value="status : Enum (Aktif, Non Aktif)" vertex="1">
           <mxGeometry height="30" width="220" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="5emAf9v9q2UnStMl5A0Y-3" parent="tbl_anggotas" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;" value="FK | jabatan_id : Int" vertex="1">
+          <mxGeometry height="30" width="220" y="180" as="geometry" />
         </mxCell>
         <mxCell id="tbl_users" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fontStyle=1;align=center;" value="users" vertex="1">
           <mxGeometry height="150" width="220" x="950" y="50" as="geometry" />
