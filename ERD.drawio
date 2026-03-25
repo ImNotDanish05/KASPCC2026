@@ -74,7 +74,7 @@
           <mxGeometry height="30" width="220" y="60" as="geometry" />
         </mxCell>
         <mxCell id="tbl_model_has_roles" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fontStyle=1;align=center;" value="model_has_roles" vertex="1">
-          <mxGeometry height="90" width="220" x="1100" y="250" as="geometry" />
+          <mxGeometry height="90" width="220" x="1110" y="270" as="geometry" />
         </mxCell>
         <mxCell id="col_mhr_user" parent="tbl_model_has_roles" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;" value="PK, FK | user_id : Int" vertex="1">
           <mxGeometry height="30" width="220" y="30" as="geometry" />
