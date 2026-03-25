@@ -4,6 +4,7 @@ import { hashPassword } from "../lib/password";
 const prisma = new PrismaClient();
 
 async function main() {
+  // 1. Seed Roles (Hak Akses Aplikasi)
   const roleNames = ["Bendahara Internal", "Bendahara Eksternal", "Superadmin"];
 
   for (const name of roleNames) {
@@ -14,42 +15,58 @@ async function main() {
     });
   }
 
-  const superadminJabatan = await ensureJabatan({
-    namaJabatan: "Superadmin",
-    kategori: "INTI",
-  });
+  // 2. Seed Jabatan (Struktur Organisasi PCC)
+  const daftarJabatan: Array<{ namaJabatan: string; kategori: "INTI" | "DIVISI" | "DEPARTEMEN" }> = [
+    { namaJabatan: "Administrator", kategori: "INTI" },
+    { namaJabatan: "Sekretaris Umum", kategori: "INTI" },
+    { namaJabatan: "Sekretaris", kategori: "INTI" },
+    { namaJabatan: "Litbang", kategori: "INTI" },
+    { namaJabatan: "Bendahara", kategori: "INTI" },
+    { namaJabatan: "Divisi Humas", kategori: "DIVISI" },
+    { namaJabatan: "Divisi HRD", kategori: "DIVISI" },
+    { namaJabatan: "Divisi KRT", kategori: "DIVISI" },
+    { namaJabatan: "Divisi Redaksi", kategori: "DIVISI" },
+    { namaJabatan: "Divisi Workshop", kategori: "DIVISI" },
+    { namaJabatan: "Dept. Danus", kategori: "DEPARTEMEN" },
+    { namaJabatan: "Dept. Maintenance", kategori: "DEPARTEMEN" },
+    { namaJabatan: "Dept. Network", kategori: "DEPARTEMEN" },
+    { namaJabatan: "Dept. Software", kategori: "DEPARTEMEN" },
+    { namaJabatan: "Dept. Multimedia", kategori: "DEPARTEMEN" },
+  ];
 
-  const bendaharaJabatan = await ensureJabatan({
-    namaJabatan: "Bendahara Eksternal",
-    kategori: "DIVISI",
-  });
+  // Simpan ID jabatan yang sudah dibuat untuk dipakai di tabel Anggota
+  const jabatanMap: Record<string, any> = {};
 
-  const bendaharaInternalJabatan = await ensureJabatan({
-    namaJabatan: "Bendahara Internal",
-    kategori: "DIVISI",
-  });
+  for (const jab of daftarJabatan) {
+    jabatanMap[jab.namaJabatan] = await ensureJabatan({
+      namaJabatan: jab.namaJabatan,
+      kategori: jab.kategori,
+    });
+  }
 
+  // 3. Seed Anggota Dummy (Disambungkan ke Jabatan Asli)
   const superadminAnggota = await ensureAnggota({
     nim: "SA-0001",
     nama: "Superadmin",
     noTelepon: "080000000001",
-    jabatanId: superadminJabatan.id,
+    jabatanId: jabatanMap["Administrator"].id, // Diarahkan ke INTI - Administrator
   });
 
   const bendaharaAnggota = await ensureAnggota({
     nim: "BE-0001",
     nama: "Bendahara Eksternal",
     noTelepon: "080000000002",
-    jabatanId: bendaharaJabatan.id,
+    jabatanId: jabatanMap["Bendahara"].id, // Diarahkan ke INTI - Bendahara
   });
 
   const bendaharaInternalAnggota = await ensureAnggota({
     nim: "BI-0001",
     nama: "Bendahara Internal",
     noTelepon: "080000000003",
-    jabatanId: bendaharaInternalJabatan.id,
+    jabatanId: jabatanMap["Bendahara"].id, // Diarahkan ke INTI - Bendahara
   });
 
+  // 4. Seed User dan Assign Role
   await ensureUserWithRole({
     username: "superadmin",
     password: "superadmin123",
@@ -71,6 +88,7 @@ async function main() {
     roleName: "Bendahara Internal",
   });
 
+  // 5. Seed Pengaturan KAS
   await prisma.pengaturan.upsert({
     where: { id: 1 },
     update: {
@@ -86,11 +104,14 @@ async function main() {
     },
   });
 
+  console.log("✅ Seeding Jabatan selesai!");
   console.log("Seeded users:");
-  console.log("superadmin / superadmin123 (Superadmin)");
-  console.log("bendahara / bendahara123 (Bendahara Eksternal)");
-  console.log("bendahara-internal / bendaharaInternal123 (Bendahara Internal)");
+  console.log("- superadmin / superadmin123 (Jabatan: Administrator, Role: Superadmin)");
+  console.log("- bendahara / bendahara123 (Jabatan: Bendahara, Role: Bendahara Eksternal)");
+  console.log("- bendahara-internal / bendaharaInternal123 (Jabatan: Bendahara, Role: Bendahara Internal)");
 }
+
+// === HELPER FUNCTIONS ===
 
 async function ensureJabatan(input: {
   namaJabatan: string;

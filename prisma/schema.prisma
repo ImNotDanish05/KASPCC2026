@@ -41,6 +41,7 @@ model Anggota {
   noTelepon  String               @map("no_telepon")
   jabatanId  Int                  @map("jabatan_id")
   jabatan    Jabatan              @relation(fields: [jabatanId], references: [id])
+  statusAktif Boolean              @default(true) @map("status_aktif")
   user       User?
   detailKas  DetailPemasukanKas[]
 
