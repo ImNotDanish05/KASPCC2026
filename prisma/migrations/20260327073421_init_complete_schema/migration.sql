@@ -23,6 +23,7 @@ CREATE TABLE "anggotas" (
     "nama" TEXT NOT NULL,
     "no_telepon" TEXT NOT NULL,
     "jabatan_id" INTEGER NOT NULL,
+    "status_aktif" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "anggotas_pkey" PRIMARY KEY ("id")
 );
@@ -88,6 +89,16 @@ CREATE TABLE "pengeluaran_kas" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "pengeluaran_kas_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "pengaturan" (
+    "id" INTEGER NOT NULL DEFAULT 1,
+    "target_kas_per_bulan" INTEGER NOT NULL,
+    "tanggal_mulai" TIMESTAMP(3) NOT NULL,
+    "tanggal_akhir" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "pengaturan_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
