@@ -175,18 +175,6 @@ export default function RolesTable() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-            Roles Management
-          </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage user roles and permissions
-          </p>
-        </div>
-      </div>
-
       {/* Error banner */}
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-error-300 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
@@ -199,9 +187,11 @@ export default function RolesTable() {
       <EnhancedDataTable
         columns={roleColumns}
         data={roles}
-        title="Roles"
+        title="Manajemen Roles"
+        description="Kelola role, kredensial, dan role assignments"
         loading={loading}
         onCreateClick={openCreateModal}
+        searchPlaceholder="Cari berdasarkan role name..."
       />
 
       {/* ── CREATE MODAL ── */}

@@ -382,17 +382,6 @@ export default function AnggotaTable() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-            Anggota Management
-          </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage organization members and their positions
-          </p>
-        </div>
-      </div>
 
       {/* Error banner */}
       {error && (
@@ -406,10 +395,12 @@ export default function AnggotaTable() {
       <EnhancedDataTable
         columns={anggotaColumns}
         data={anggotas}
-        title="Anggota"
+        title="Manajemen Anggota"
+        description="Kelola anggota, kredensial, dan anggota assignments"
         loading={loading}
         onCreateClick={openCreateModal}
         exportColumns={anggotaExportColumns}
+        searchPlaceholder="Cari berdasarkan anggota name..."
       />
 
       {/* ── CREATE MODAL ── */}

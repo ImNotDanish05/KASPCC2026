@@ -441,8 +441,8 @@ export default function UsersTable() {
   return (
     <div className="space-y-6">
       <EnhancedDataTable
-        title="Users Management"
-        description="Manage system users, credentials, and role assignments"
+        title="Manajemen Users"
+        description="Kelola user, kredensial, dan role assignments"
         columns={displayColumnsWithActions}
         data={users}
         loading={loading}
@@ -454,7 +454,7 @@ export default function UsersTable() {
         createButtonLabel="Add User"
         showExport={true}
         showImport={true}
-        searchPlaceholder="Search by username or anggota nama..."
+        searchPlaceholder="Cari berdasarkan username atau nama anggota..."
       />
 
       {/* ── CREATE MODAL ── */}
