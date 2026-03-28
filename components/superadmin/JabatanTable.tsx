@@ -13,6 +13,8 @@ import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
+import { SearchBar } from "@/components/ui/search/SearchBar";
+import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
 import {
   getJabatans,
   createJabatan,
@@ -64,6 +66,13 @@ export default function JabatanTable() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedJabatan, setSelectedJabatan] = useState<JabatanRow | null>(null);
 
+  // Search & filter
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // ----- fetch -----
 
   const fetchData = useCallback(async () => {
@@ -81,6 +90,27 @@ export default function JabatanTable() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Filtered list
+  const filteredJabatans = jabatans.filter((j) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      j.namaJabatan.toLowerCase().includes(q) ||
+      j.kategori.toLowerCase().includes(q)
+    );
+  });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredJabatans.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedJabatans = filteredJabatans.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // ----- CREATE -----
 
@@ -198,6 +228,13 @@ export default function JabatanTable() {
         </div>
       )}
 
+      {/* Search Bar */}
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by nama jabatan or kategori..."
+      />
+
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="overflow-x-auto">
@@ -252,23 +289,25 @@ export default function JabatanTable() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : jabatans.length === 0 ? (
+              ) : filteredJabatans.length === 0 ? (
                 <TableRow>
                   <TableCell
                     className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
                     colSpan={5}
                   >
-                    No jabatan found. Click &quot;Add Jabatan&quot; to create one.
+                    {searchQuery
+                      ? "No matching jabatans found."
+                      : 'No jabatans found. Click "Add Jabatan" to create one.'}
                   </TableCell>
                 </TableRow>
               ) : (
-                jabatans.map((jabatan, index) => (
+                paginatedJabatans.map((jabatan, index) => (
                   <TableRow
                     key={jabatan.id}
                     className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
                   >
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {index + 1}
+                      {startIndex + index + 1}
                     </TableCell>
                     <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                       {jabatan.namaJabatan}
@@ -316,6 +355,23 @@ export default function JabatanTable() {
           </Table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && filteredJabatans.length > 0 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalItems={jabatans.length}
+          filteredItems={filteredJabatans.length}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={(rows) => {
+            setRowsPerPage(rows);
+            setCurrentPage(1);
+          }}
+          isSearchActive={searchQuery.trim().length > 0}
+        />
+      )}
 
       {/* ── CREATE MODAL ── */}
       <Modal

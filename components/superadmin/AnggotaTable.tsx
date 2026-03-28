@@ -13,6 +13,8 @@ import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
+import { SearchBar } from "@/components/ui/search/SearchBar";
+import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
 import {
   getAnggotas,
   getJabatanOptions,
@@ -81,6 +83,10 @@ export default function AnggotaTable() {
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // ----- fetch -----
 
   const fetchData = useCallback(async () => {
@@ -126,6 +132,17 @@ export default function AnggotaTable() {
       a.jabatan.namaJabatan.toLowerCase().includes(q)
     );
   });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredAnggotas.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedAnggotas = filteredAnggotas.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // ----- CREATE -----
 
@@ -335,28 +352,11 @@ export default function AnggotaTable() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by NIM, nama, telepon, or jabatan..."
-          className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pl-10 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-        />
-        <svg
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by NIM, nama, telepon, or jabatan..."
+      />
 
       {/* Error banner */}
       {error && (
@@ -426,13 +426,13 @@ export default function AnggotaTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAnggotas.map((anggota, index) => (
+                paginatedAnggotas.map((anggota, index) => (
                   <TableRow
                     key={anggota.id}
                     className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
                   >
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {index + 1}
+                      {startIndex + index + 1}
                     </TableCell>
                     <TableCell className="px-5 py-4 text-sm font-mono text-gray-700 dark:text-white/80">
                       {anggota.nim}
@@ -513,6 +513,23 @@ export default function AnggotaTable() {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && filteredAnggotas.length > 0 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalItems={anggotas.length}
+          filteredItems={filteredAnggotas.length}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={(rows) => {
+            setRowsPerPage(rows);
+            setCurrentPage(1);
+          }}
+          isSearchActive={searchQuery.trim().length > 0}
+        />
+      )}
 
       {/* ── CREATE MODAL ── */}
       <Modal

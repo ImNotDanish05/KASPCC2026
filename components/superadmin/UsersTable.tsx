@@ -33,6 +33,8 @@ import {
   Lock,
   Users,
 } from "lucide-react";
+import { SearchBar } from "@/components/ui/search/SearchBar";
+import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
 
 // ----- types -----
 
@@ -89,6 +91,10 @@ export default function UsersTable() {
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // ----- fetch -----
 
   const fetchData = useCallback(async () => {
@@ -144,6 +150,17 @@ export default function UsersTable() {
       u.anggota.nama.toLowerCase().includes(q)
     );
   });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // ----- CREATE -----
 
@@ -358,28 +375,11 @@ export default function UsersTable() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by username or anggota nama..."
-          className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pl-10 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-        />
-        <svg
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by username or anggota nama..."
+      />
 
       {/* Error banner */}
       {error && (
@@ -455,13 +455,13 @@ export default function UsersTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user, index) => (
+                paginatedUsers.map((user, index) => (
                   <TableRow
                     key={user.id}
                     className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
                   >
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {index + 1}
+                      {startIndex + index + 1}
                     </TableCell>
                     <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                       <div className="flex items-center gap-2">
@@ -522,11 +522,75 @@ export default function UsersTable() {
           </Table>
         </div>
 
-        {/* Footer count */}
-        {!loading && (
+        {/* Footer with Pagination Controls */}
+        {!loading && filteredUsers.length > 0 && (
+          <div className="border-t border-gray-100 px-5 py-4 dark:border-gray-800">
+            <div className="flex flex-col gap-4 sm:items-center sm:justify-between sm:flex-row">
+              {/* Left: Rows per page dropdown */}
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor="rowsPerPage"
+                  className="text-xs font-medium text-gray-600 dark:text-gray-400"
+                >
+                  Rows per page:
+                </label>
+                <select
+                  id="rowsPerPage"
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="h-8 rounded-lg border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-brand-800"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+
+              {/* Center: Info and Page Indicator */}
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Showing {startIndex + 1}–
+                {Math.min(endIndex, filteredUsers.length)} of{" "}
+                {filteredUsers.length} {filteredUsers.length === 1 ? "user" : "users"}
+                {searchQuery && ` (filtered from ${users.length})`}
+              </div>
+
+              {/* Right: Pagination buttons and page indicator */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center justify-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-theme-xs transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  ← Previous
+                </button>
+
+                <div className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                  Page {currentPage} of {Math.max(1, totalPages)}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="flex items-center justify-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-theme-xs transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Footer count (when no pagination needed) */}
+        {!loading && filteredUsers.length > 0 && filteredUsers.length <= rowsPerPage && (
           <div className="border-t border-gray-100 px-5 py-3 dark:border-gray-800">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Showing {filteredUsers.length} of {users.length} users
+              Showing all {filteredUsers.length} of {users.length} users
             </p>
           </div>
         )}

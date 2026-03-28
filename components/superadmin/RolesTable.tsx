@@ -12,6 +12,8 @@ import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import { SearchBar } from "@/components/ui/search/SearchBar";
+import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
 import { getRoles, createRole, updateRole, deleteRole } from "@/lib/actions/role.actions";
 import { Pencil, Trash2, Plus, AlertCircle, Users } from "lucide-react";
 
@@ -41,6 +43,13 @@ export default function RolesTable() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleRow | null>(null);
 
+  // Search & filter
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // ----- fetch -----
 
   const fetchData = useCallback(async () => {
@@ -58,6 +67,24 @@ export default function RolesTable() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Filtered list
+  const filteredRoles = roles.filter((role) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return role.name.toLowerCase().includes(q);
+  });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredRoles.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedRoles = filteredRoles.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // ----- CREATE -----
 
@@ -165,6 +192,13 @@ export default function RolesTable() {
         </div>
       )}
 
+      {/* Search Bar */}
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by role name..."
+      />
+
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="overflow-x-auto">
@@ -213,23 +247,25 @@ export default function RolesTable() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : roles.length === 0 ? (
+              ) : filteredRoles.length === 0 ? (
                 <TableRow>
                   <TableCell
                     className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
                     colSpan={4}
                   >
-                    No roles found. Click &quot;Add Role&quot; to create one.
+                    {searchQuery
+                      ? "No matching roles found."
+                      : 'No roles found. Click "Add Role" to create one.'}
                   </TableCell>
                 </TableRow>
               ) : (
-                roles.map((role, index) => (
+                paginatedRoles.map((role, index) => (
                   <TableRow
                     key={role.id}
                     className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
                   >
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {index + 1}
+                      {startIndex + index + 1}
                     </TableCell>
                     <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                       {role.name}
@@ -275,6 +311,23 @@ export default function RolesTable() {
           </Table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && filteredRoles.length > 0 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalItems={roles.length}
+          filteredItems={filteredRoles.length}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={(rows) => {
+            setRowsPerPage(rows);
+            setCurrentPage(1);
+          }}
+          isSearchActive={searchQuery.trim().length > 0}
+        />
+      )}
 
       {/* ── CREATE MODAL ── */}
       <Modal
