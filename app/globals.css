@@ -750,3 +750,19 @@ span.flatpickr-weekday,
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
 }
+
+/* NextJS TopLoader - Positioned at absolute top */
+#nprogress .bar {
+  background: #3b82f6 !important; /* Brand Blue */
+  position: fixed !important;
+  top: 0 !important; /* STRICTLY AT THE TOP */
+  left: 0 !important;
+  width: 100% !important;
+  height: 4px !important;
+  z-index: 999999 !important; /* ABSOLUTE TOP PRIORITY */
+  box-shadow: 0 0 15px #3b82f6, 0 0 5px #3b82f6 !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 15px #3b82f6, 0 0 5px #3b82f6 !important;
+}

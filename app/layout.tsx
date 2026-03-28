@@ -3,7 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import TopProgressBar from "@/components/common/TopProgressBar";
+import NextTopLoader from "nextjs-toploader";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -22,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        <TopProgressBar />
+        <NextTopLoader
+          color="#3b82f6"
+          showSpinner={false}
+          height={4}
+          zIndex={99999}
+        />
         <ThemeProvider>
           <SidebarProvider>{children}</SidebarProvider>
         </ThemeProvider>
