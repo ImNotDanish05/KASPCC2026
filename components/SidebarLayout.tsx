@@ -39,9 +39,12 @@ const MENU: MenuSection[] = [
     ],
   },
   {
-    title: "Admin",
+    title: "Superadmin",
     items: [
-      { label: "Manajemen User", href: "/admin/users", roles: ["Superadmin"] },
+      { label: "Manajemen Roles", href: "/superadmin/roles", roles: ["Superadmin"] },
+      { label: "Manajemen Jabatan", href: "/superadmin/jabatan", roles: ["Superadmin"] },
+      { label: "Manajemen Anggota", href: "/superadmin/anggota", roles: ["Superadmin"] },
+      { label: "Manajemen Users", href: "/superadmin/users", roles: ["Superadmin"] },
       { label: "Pengaturan Sistem", href: "/admin/settings", roles: ["Superadmin"] },
     ],
   },

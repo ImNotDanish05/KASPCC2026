@@ -14,6 +14,7 @@ import {
   ListIcon,
   UserCircleIcon,
 } from "@/icons";
+import { ShieldCheck } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -81,6 +82,33 @@ const navItems: NavItem[] = [
         name: "Persetujuan Tarik Dana",
         path: "/tarik-dana/approve",
         roles: [ROLE_INTERNAL, ROLE_SUPER],
+      },
+    ],
+  },
+  {
+    name: "Superadmin",
+    icon: <ShieldCheck className="h-6 w-6" />,
+    roles: [ROLE_SUPER],
+    subItems: [
+      {
+        name: "Manajemen Roles",
+        path: "/superadmin/roles",
+        roles: [ROLE_SUPER],
+      },
+      {
+        name: "Manajemen Jabatan",
+        path: "/superadmin/jabatan",
+        roles: [ROLE_SUPER],
+      },
+      {
+        name: "Manajemen Anggota",
+        path: "/superadmin/anggota",
+        roles: [ROLE_SUPER],
+      },
+      {
+        name: "Manajemen Users",
+        path: "/superadmin/users",
+        roles: [ROLE_SUPER],
       },
     ],
   },
