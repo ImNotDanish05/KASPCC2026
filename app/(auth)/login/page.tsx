@@ -109,7 +109,7 @@ export default function LoginPage() {
                   </div>
                 ) : null}
                 <div>
-                  <Button className="w-full" size="sm" disabled={loading}>
+                  <Button className="w-full" size="sm" disabled={loading} type="submit">
                     {loading ? "Memproses..." : "Masuk"}
                   </Button>
                 </div>
