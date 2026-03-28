@@ -387,3 +387,205 @@ export async function deleteUser(userId: number): Promise<ActionResult> {
     };
   }
 }
+
+// ---------- BULK IMPORT ----------
+
+export interface BulkImportUserInput {
+  username: string;
+  password: string;
+  anggota?: string; // NIM string - will be looked up
+  roles?: string; // Comma-separated role names
+}
+
+export interface BulkImportResult {
+  success: boolean;
+  createdCount: number;
+  skippedCount: number;
+  errorCount: number;
+  errors: Array<{
+    rowIndex: number;
+    username?: string;
+    error: string;
+  }>;
+}
+
+export async function bulkCreateUsers(
+  data: BulkImportUserInput[]
+): Promise<ActionResult<BulkImportResult>> {
+  try {
+    await requireSuperadmin();
+
+    let createdCount = 0;
+    let skippedCount = 0;
+    let errorCount = 0;
+    const errors: Array<{ rowIndex: number; username?: string; error: string }> = [];
+
+    for (let index = 0; index < data.length; index++) {
+      const row = data[index];
+      const username = row.username?.trim();
+      const password = row.password?.trim();
+
+      // Validation
+      if (!username || !password) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          username,
+          error: "Missing required fields (username or password)",
+        });
+        continue;
+      }
+
+      if (password.length < 6) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          username,
+          error: "Password must be at least 6 characters",
+        });
+        continue;
+      }
+
+      try {
+        // Check username uniqueness
+        const existingUsername = await prisma.user.findUnique({
+          where: { username },
+        });
+        if (existingUsername) {
+          skippedCount++;
+          errors.push({
+            rowIndex: index + 1,
+            username,
+            error: `Username "${username}" already exists (skipped)`,
+          });
+          continue;
+        }
+
+        // Lookup anggota by NIM
+        let anggotaId: number | null = null;
+        if (row.anggota) {
+          const anggota = await prisma.anggota.findUnique({
+            where: { nim: row.anggota.trim() },
+          });
+          if (anggota) {
+            // Check anggota not already linked to another user
+            const existingUser = await prisma.user.findUnique({
+              where: { anggotaId: anggota.id },
+            });
+            if (existingUser) {
+              errorCount++;
+              errors.push({
+                rowIndex: index + 1,
+                username,
+                error: `Anggota "${row.anggota}" is already linked to another user`,
+              });
+              continue;
+            }
+            anggotaId = anggota.id;
+          } else {
+            // Gracefully skip if anggota not found
+            errorCount++;
+            errors.push({
+              rowIndex: index + 1,
+              username,
+              error: `Anggota NIM "${row.anggota}" not found in database`,
+            });
+            continue;
+          }
+        }
+
+        // Lookup roles by comma-separated names
+        let roleIds: number[] = [];
+        if (row.roles) {
+          const roleNames = row.roles
+            .split(",")
+            .map((r) => r.trim())
+            .filter((r) => r);
+          if (roleNames.length > 0) {
+            const roles = await prisma.role.findMany({
+              where: { name: { in: roleNames } },
+            });
+
+            const foundRoleNames = new Set(roles.map((r) => r.name));
+            const missingRoles = roleNames.filter((name) => !foundRoleNames.has(name));
+
+            if (missingRoles.length > 0) {
+              errorCount++;
+              errors.push({
+                rowIndex: index + 1,
+                username,
+                error: `Roles not found: ${missingRoles.join(", ")}`,
+              });
+              continue;
+            }
+
+            roleIds = roles.map((r) => r.id);
+          }
+        }
+
+        // At least one role is required if anggota is provided
+        if (anggotaId && roleIds.length === 0) {
+          errorCount++;
+          errors.push({
+            rowIndex: index + 1,
+            username,
+            error: "At least one role is required when anggota is provided",
+          });
+          continue;
+        }
+
+        // Hash password
+        const hashedPassword = await bcryptjs.hash(password, 10);
+
+        // Create user with optional anggota and roles
+        const createData: any = {
+          username,
+          password: hashedPassword,
+        };
+
+        if (anggotaId) {
+          createData.anggotaId = anggotaId;
+        }
+
+        if (roleIds.length > 0) {
+          createData.roles = {
+            createMany: {
+              data: roleIds.map((roleId) => ({ roleId })),
+            },
+          };
+        }
+
+        await prisma.user.create({
+          data: createData,
+        });
+
+        createdCount++;
+      } catch (rowErr) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          username,
+          error: rowErr instanceof Error ? rowErr.message : "Unknown error",
+        });
+      }
+    }
+
+    revalidatePath("/superadmin/users");
+
+    return {
+      success: true,
+      data: {
+        success: errorCount === 0,
+        createdCount,
+        skippedCount,
+        errorCount,
+        errors,
+      },
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+}

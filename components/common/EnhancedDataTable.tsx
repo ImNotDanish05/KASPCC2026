@@ -21,7 +21,7 @@ import {
   ArrowDown,
   ArrowUpDown,
 } from "lucide-react";
-import { exportToExcel } from "@/lib/utils/excelExport";
+import { exportToExcel, ExportColumnDef } from "@/lib/utils/excelExport";
 import { parseExcelFile } from "@/lib/utils/excelImport";
 
 // ─────────────────────────────────────────────────────────────────
@@ -45,6 +45,7 @@ export interface EnhancedDataTableProps {
   onImport?: (data: Record<string, any>[]) => Promise<void>;
   importMapping?: Record<string, string>; // Maps import columns to data keys
   exportFilename?: string;
+  exportColumns?: ExportColumnDef[]; // Special export column definitions with relationship types
   createButtonLabel?: string;
   showExport?: boolean;
   showImport?: boolean;
@@ -63,6 +64,7 @@ export default function EnhancedDataTable({
   onImport,
   importMapping = {},
   exportFilename = "export",
+  exportColumns,
   createButtonLabel = "Add",
   showExport = true,
   showImport = true,
@@ -143,7 +145,9 @@ export default function EnhancedDataTable({
 
   // Handle export
   function handleExport() {
-    exportToExcel(exportFilename, sortedData, columns);
+    // Use export-specific columns if provided, otherwise fall back to regular columns
+    const cols = exportColumns || columns;
+    exportToExcel(exportFilename, sortedData, cols);
   }
 
   // Handle import

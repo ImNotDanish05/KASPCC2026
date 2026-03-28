@@ -7,6 +7,7 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
 import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
+import { ExportColumnDef } from "@/lib/utils/excelExport";
 import {
   getAnggotas,
   getJabatanOptions,
@@ -369,6 +370,16 @@ export default function AnggotaTable() {
     },
   ];
 
+  // Define export columns with relationship flattening
+  const anggotaExportColumns: ExportColumnDef[] = [
+    { key: "nim", label: "NIM" },
+    { key: "nama", label: "Nama" },
+    { key: "noTelepon", label: "No. Telepon" },
+    { key: "jabatan", label: "Jabatan", relationshipType: "jabatan" },
+    { key: "statusAktif", label: "Status Aktif" },
+    { key: "user", label: "User Account", relationshipType: "user" },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -398,6 +409,7 @@ export default function AnggotaTable() {
         title="Anggota"
         loading={loading}
         onCreateClick={openCreateModal}
+        exportColumns={anggotaExportColumns}
       />
 
       {/* ── CREATE MODAL ── */}

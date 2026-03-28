@@ -1,18 +1,26 @@
 /**
  * Excel Import Utility
  * Parses XLSX/CSV files and validates data structure
+ * Handles relational data mapping for user-friendly imports
  */
+
+export interface RowError {
+  rowIndex: number;
+  rowData: Record<string, any>;
+  errors: string[];
+}
 
 export interface ImportResult<T = Record<string, any>> {
   success: boolean;
   data?: T[];
   errors: string[];
   warnings: string[];
+  rowErrors?: RowError[];
 }
 
 export async function parseExcelFile(
   file: File,
-  mapping: Record<string, string>
+  mapping: Record<string, string> = {}
 ): Promise<ImportResult> {
   const XLSX = require("xlsx");
 
@@ -67,9 +75,11 @@ export async function parseExcelFile(
     const mappedData: Record<string, any>[] = [];
     const errors: string[] = [];
     const warnings: string[] = [];
+    const rowErrors: RowError[] = [];
 
     rawData.forEach((row, index) => {
       const mappedRow: Record<string, any> = {};
+      const rowRowErrors: string[] = [];
       let hasData = false;
 
       Object.entries(mapping).forEach(([sourceCol, targetKey]) => {
@@ -82,15 +92,20 @@ export async function parseExcelFile(
 
       if (hasData) {
         mappedData.push(mappedRow);
+      } else if (Object.keys(mapping).length > 0) {
+        warnings.push(
+          `Row ${index + 1}: No data found matching the mapped columns`
+        );
       } else {
-        warnings.push(`Row ${index + 2}: Skipped (no data)`);
+        // If no mapping provided, use raw data
+        mappedData.push(row);
       }
     });
 
     if (mappedData.length === 0) {
       return {
         success: false,
-        errors: ["No valid data rows found after mapping"],
+        errors: ["No valid data found in file after mapping"],
         warnings,
       };
     }
@@ -100,13 +115,12 @@ export async function parseExcelFile(
       data: mappedData,
       errors,
       warnings,
+      rowErrors: rowErrors.length > 0 ? rowErrors : undefined,
     };
-  } catch (err) {
+  } catch (error) {
     return {
       success: false,
-      errors: [
-        `Failed to parse file: ${err instanceof Error ? err.message : "Unknown error"}`,
-      ],
+      errors: [error instanceof Error ? error.message : "Unknown error parsing file"],
       warnings: [],
     };
   }
