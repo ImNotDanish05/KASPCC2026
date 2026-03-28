@@ -1,31 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
-import { SearchBar } from "@/components/ui/search/SearchBar";
-import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
+import Button from "@/components/ui/button/Button";
+import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
 import { getRoles, createRole, updateRole, deleteRole } from "@/lib/actions/role.actions";
-import { Pencil, Trash2, Plus, AlertCircle, Users } from "lucide-react";
-
-// ----- types -----
+import { Pencil, Trash2, AlertCircle, Plus } from "lucide-react";
 
 type RoleRow = {
   id: number;
   name: string;
   users: { user: { id: number; username: string } }[];
 };
-
-// ----- component -----
 
 export default function RolesTable() {
   const [roles, setRoles] = useState<RoleRow[]>([]);
@@ -43,14 +31,7 @@ export default function RolesTable() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleRow | null>(null);
 
-  // Search & filter
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  // ----- fetch -----
+  // ----- Fetch -----
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -68,25 +49,7 @@ export default function RolesTable() {
     fetchData();
   }, [fetchData]);
 
-  // Filtered list
-  const filteredRoles = roles.filter((role) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return role.name.toLowerCase().includes(q);
-  });
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredRoles.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedRoles = filteredRoles.slice(startIndex, endIndex);
-
-  // Reset to page 1 when search query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
-  // ----- CREATE -----
+  // ----- Create -----
 
   function openCreateModal() {
     setFormName("");
@@ -162,6 +125,54 @@ export default function RolesTable() {
 
   // ----- RENDER -----
 
+  // Define columns for EnhancedDataTable
+  const roleColumns: ColumnDef[] = [
+    { key: "name", label: "Role Name", sortable: true },
+    {
+      key: "users",
+      label: "Assigned Users",
+      sortable: false,
+      render: (value: any, role: RoleRow) =>
+        role.users.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {role.users.map((u) => (
+              <span
+                key={u.user.id}
+                className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400"
+              >
+                {u.user.username}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400 dark:text-gray-500">—</span>
+        ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      sortable: false,
+      render: (value: any, role: RoleRow) => (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => openEditModal(role)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-brand-400"
+            title="Edit"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => openDeleteModal(role)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-error-50 hover:text-error-500 dark:text-gray-400 dark:hover:bg-error-500/10 dark:hover:text-error-400"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -174,14 +185,6 @@ export default function RolesTable() {
             Manage user roles and permissions
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          startIcon={<Plus className="h-4 w-4" />}
-          onClick={openCreateModal}
-        >
-          Add Role
-        </Button>
       </div>
 
       {/* Error banner */}
@@ -192,142 +195,14 @@ export default function RolesTable() {
         </div>
       )}
 
-      {/* Search Bar */}
-      <SearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search by role name..."
+      {/* Enhanced Data Table */}
+      <EnhancedDataTable
+        columns={roleColumns}
+        data={roles}
+        title="Roles"
+        loading={loading}
+        onCreateClick={openCreateModal}
       />
-
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-gray-100 dark:border-gray-800">
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  No
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  Role Name
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
-                    Assigned Users
-                  </span>
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell
-                    className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
-                    colSpan={4}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-                      Loading roles...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : filteredRoles.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
-                    colSpan={4}
-                  >
-                    {searchQuery
-                      ? "No matching roles found."
-                      : 'No roles found. Click "Add Role" to create one.'}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedRoles.map((role, index) => (
-                  <TableRow
-                    key={role.id}
-                    className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
-                  >
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {startIndex + index + 1}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
-                      {role.name}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {role.users.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {role.users.map((u) => (
-                            <span
-                              key={u.user.id}
-                              className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400"
-                            >
-                              {u.user.username}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-500">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(role)}
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-brand-400"
-                          title="Edit"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(role)}
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-error-50 hover:text-error-500 dark:text-gray-400 dark:hover:bg-error-500/10 dark:hover:text-error-400"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-
-      {/* Pagination Controls */}
-      {!loading && filteredRoles.length > 0 && (
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          rowsPerPage={rowsPerPage}
-          totalItems={roles.length}
-          filteredItems={filteredRoles.length}
-          onPageChange={setCurrentPage}
-          onRowsPerPageChange={(rows) => {
-            setRowsPerPage(rows);
-            setCurrentPage(1);
-          }}
-          isSearchActive={searchQuery.trim().length > 0}
-        />
-      )}
 
       {/* ── CREATE MODAL ── */}
       <Modal

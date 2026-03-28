@@ -1,20 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
-import { SearchBar } from "@/components/ui/search/SearchBar";
-import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
+import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
 import {
   getAnggotas,
   getJabatanOptions,
@@ -29,7 +21,6 @@ import {
   AlertCircle,
   UserCheck,
   UserX,
-  Phone,
 } from "lucide-react";
 
 // ----- types -----
@@ -80,13 +71,6 @@ export default function AnggotaTable() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedAnggota, setSelectedAnggota] = useState<AnggotaRow | null>(null);
 
-  // Search & filter
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
   // ----- fetch -----
 
   const fetchData = useCallback(async () => {
@@ -120,29 +104,6 @@ export default function AnggotaTable() {
     value: String(j.id),
     label: `${j.namaJabatan} (${j.kategori})`,
   }));
-
-  // Filtered list
-  const filteredAnggotas = anggotas.filter((a) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      a.nim.toLowerCase().includes(q) ||
-      a.nama.toLowerCase().includes(q) ||
-      a.noTelepon.toLowerCase().includes(q) ||
-      a.jabatan.namaJabatan.toLowerCase().includes(q)
-    );
-  });
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredAnggotas.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedAnggotas = filteredAnggotas.slice(startIndex, endIndex);
-
-  // Reset to page 1 when search query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   // ----- CREATE -----
 
@@ -329,6 +290,85 @@ export default function AnggotaTable() {
 
   // ----- RENDER -----
 
+  // Define columns for EnhancedDataTable
+  const anggotaColumns: ColumnDef[] = [
+    { key: "nim", label: "NIM", sortable: true },
+    { key: "nama", label: "Nama", sortable: true },
+    { key: "noTelepon", label: "No. Telepon", sortable: true },
+    {
+      key: "jabatan",
+      label: "Jabatan",
+      sortable: false,
+      render: (value: any, anggota: AnggotaRow) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium text-gray-700 dark:text-white/80">
+            {anggota.jabatan.namaJabatan}
+          </span>
+          <span
+            className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+              KATEGORI_BADGE[anggota.jabatan.kategori] ?? ""
+            }`}
+          >
+            {anggota.jabatan.kategori}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "statusAktif",
+      label: "Status",
+      sortable: true,
+      render: (value: any, anggota: AnggotaRow) =>
+        anggota.statusAktif ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium text-success-700 dark:bg-success-500/10 dark:text-success-400">
+            <UserCheck className="h-3 w-3" />
+            Aktif
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+            <UserX className="h-3 w-3" />
+            Tidak Aktif
+          </span>
+        ),
+    },
+    {
+      key: "user",
+      label: "User",
+      sortable: false,
+      render: (value: any, anggota: AnggotaRow) =>
+        anggota.user ? (
+          <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
+            {anggota.user.username}
+          </span>
+        ) : (
+          <span className="text-gray-400 dark:text-gray-500">—</span>
+        ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      sortable: false,
+      render: (value: any, anggota: AnggotaRow) => (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => openEditModal(anggota)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-brand-400"
+            title="Edit"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => openDeleteModal(anggota)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-error-50 hover:text-error-500 dark:text-gray-400 dark:hover:bg-error-500/10 dark:hover:text-error-400"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -341,22 +381,7 @@ export default function AnggotaTable() {
             Manage organization members and their positions
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          startIcon={<Plus className="h-4 w-4" />}
-          onClick={openCreateModal}
-        >
-          Add Anggota
-        </Button>
       </div>
-
-      {/* Search Bar */}
-      <SearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search by NIM, nama, telepon, or jabatan..."
-      />
 
       {/* Error banner */}
       {error && (
@@ -366,170 +391,14 @@ export default function AnggotaTable() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-gray-100 dark:border-gray-800">
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  No
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  NIM
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Nama
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1.5">
-                    <Phone className="h-3.5 w-3.5" />
-                    No. Telepon
-                  </span>
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Jabatan
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Status
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  User
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell
-                    className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
-                    colSpan={8}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-                      Loading anggota...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : filteredAnggotas.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
-                    colSpan={8}
-                  >
-                    {searchQuery
-                      ? "No matching anggota found."
-                      : 'No anggota found. Click "Add Anggota" to create one.'}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedAnggotas.map((anggota, index) => (
-                  <TableRow
-                    key={anggota.id}
-                    className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
-                  >
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {startIndex + index + 1}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm font-mono text-gray-700 dark:text-white/80">
-                      {anggota.nim}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
-                      {anggota.nama}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {anggota.noTelepon}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-medium text-gray-700 dark:text-white/80">
-                          {anggota.jabatan.namaJabatan}
-                        </span>
-                        <span
-                          className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                            KATEGORI_BADGE[anggota.jabatan.kategori] ?? ""
-                          }`}
-                        >
-                          {anggota.jabatan.kategori}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm">
-                      {anggota.statusAktif ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium text-success-700 dark:bg-success-500/10 dark:text-success-400">
-                          <UserCheck className="h-3 w-3" />
-                          Aktif
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                          <UserX className="h-3 w-3" />
-                          Tidak Aktif
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {anggota.user ? (
-                        <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
-                          {anggota.user.username}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-500">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(anggota)}
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-brand-400"
-                          title="Edit"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(anggota)}
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-error-50 hover:text-error-500 dark:text-gray-400 dark:hover:bg-error-500/10 dark:hover:text-error-400"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Footer count */}
-        {!loading && (
-          <div className="border-t border-gray-100 px-5 py-3 dark:border-gray-800">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Showing {filteredAnggotas.length} of {anggotas.length} anggota
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Pagination Controls */}
-      {!loading && filteredAnggotas.length > 0 && (
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          rowsPerPage={rowsPerPage}
-          totalItems={anggotas.length}
-          filteredItems={filteredAnggotas.length}
-          onPageChange={setCurrentPage}
-          onRowsPerPageChange={(rows) => {
-            setRowsPerPage(rows);
-            setCurrentPage(1);
-          }}
-          isSearchActive={searchQuery.trim().length > 0}
-        />
-      )}
+      {/* Enhanced Data Table */}
+      <EnhancedDataTable
+        columns={anggotaColumns}
+        data={anggotas}
+        title="Anggota"
+        loading={loading}
+        onCreateClick={openCreateModal}
+      />
 
       {/* ── CREATE MODAL ── */}
       <Modal

@@ -1,27 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
-import { SearchBar } from "@/components/ui/search/SearchBar";
-import { PaginationControls } from "@/components/ui/pagination/PaginationControls";
+import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
 import {
   getJabatans,
   createJabatan,
   updateJabatan,
   deleteJabatan,
 } from "@/lib/actions/jabatan.actions";
-import { Pencil, Trash2, Plus, AlertCircle, Users } from "lucide-react";
+import { Pencil, Trash2, Plus, AlertCircle } from "lucide-react";
 
 // ----- types -----
 
@@ -66,13 +58,6 @@ export default function JabatanTable() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedJabatan, setSelectedJabatan] = useState<JabatanRow | null>(null);
 
-  // Search & filter
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
   // ----- fetch -----
 
   const fetchData = useCallback(async () => {
@@ -90,27 +75,6 @@ export default function JabatanTable() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  // Filtered list
-  const filteredJabatans = jabatans.filter((j) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      j.namaJabatan.toLowerCase().includes(q) ||
-      j.kategori.toLowerCase().includes(q)
-    );
-  });
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredJabatans.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedJabatans = filteredJabatans.slice(startIndex, endIndex);
-
-  // Reset to page 1 when search query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   // ----- CREATE -----
 
@@ -198,6 +162,61 @@ export default function JabatanTable() {
 
   // ----- RENDER -----
 
+  // Define columns for EnhancedDataTable
+  const jabatanColumns: ColumnDef[] = [
+    { key: "namaJabatan", label: "Nama Jabatan", sortable: true },
+    {
+      key: "kategori",
+      label: "Kategori",
+      sortable: true,
+      render: (value: any, jabatan: JabatanRow) => (
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+            KATEGORI_BADGE[jabatan.kategori] ?? ""
+          }`}
+        >
+          {jabatan.kategori}
+        </span>
+      ),
+    },
+    {
+      key: "anggotas",
+      label: "Anggota",
+      sortable: false,
+      render: (value: any, jabatan: JabatanRow) =>
+        jabatan.anggotas.length > 0 ? (
+          <span className="font-medium text-gray-700 dark:text-white/80">
+            {jabatan.anggotas.length} anggota
+          </span>
+        ) : (
+          <span className="text-gray-400 dark:text-gray-500">—</span>
+        ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      sortable: false,
+      render: (value: any, jabatan: JabatanRow) => (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => openEditModal(jabatan)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-brand-400"
+            title="Edit"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => openDeleteModal(jabatan)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-error-50 hover:text-error-500 dark:text-gray-400 dark:hover:bg-error-500/10 dark:hover:text-error-400"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -210,14 +229,6 @@ export default function JabatanTable() {
             Manage organizational positions and divisions
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          startIcon={<Plus className="h-4 w-4" />}
-          onClick={openCreateModal}
-        >
-          Add Jabatan
-        </Button>
       </div>
 
       {/* Error banner */}
@@ -228,150 +239,14 @@ export default function JabatanTable() {
         </div>
       )}
 
-      {/* Search Bar */}
-      <SearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search by nama jabatan or kategori..."
+      {/* Enhanced Data Table */}
+      <EnhancedDataTable
+        columns={jabatanColumns}
+        data={jabatans}
+        title="Jabatan"
+        loading={loading}
+        onCreateClick={openCreateModal}
       />
-
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-gray-100 dark:border-gray-800">
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  No
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  Nama Jabatan
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  Kategori
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
-                    Anggota
-                  </span>
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400"
-                >
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell
-                    className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
-                    colSpan={5}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-                      Loading jabatan...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : filteredJabatans.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500"
-                    colSpan={5}
-                  >
-                    {searchQuery
-                      ? "No matching jabatans found."
-                      : 'No jabatans found. Click "Add Jabatan" to create one.'}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedJabatans.map((jabatan, index) => (
-                  <TableRow
-                    key={jabatan.id}
-                    className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
-                  >
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {startIndex + index + 1}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
-                      {jabatan.namaJabatan}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          KATEGORI_BADGE[jabatan.kategori] ?? ""
-                        }`}
-                      >
-                        {jabatan.kategori}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {jabatan.anggotas.length > 0 ? (
-                        <span className="font-medium text-gray-700 dark:text-white/80">
-                          {jabatan.anggotas.length} anggota
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-500">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(jabatan)}
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-brand-400"
-                          title="Edit"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(jabatan)}
-                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors hover:bg-error-50 hover:text-error-500 dark:text-gray-400 dark:hover:bg-error-500/10 dark:hover:text-error-400"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-
-      {/* Pagination Controls */}
-      {!loading && filteredJabatans.length > 0 && (
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          rowsPerPage={rowsPerPage}
-          totalItems={jabatans.length}
-          filteredItems={filteredJabatans.length}
-          onPageChange={setCurrentPage}
-          onRowsPerPageChange={(rows) => {
-            setRowsPerPage(rows);
-            setCurrentPage(1);
-          }}
-          isSearchActive={searchQuery.trim().length > 0}
-        />
-      )}
 
       {/* ── CREATE MODAL ── */}
       <Modal
