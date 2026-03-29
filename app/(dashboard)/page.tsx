@@ -310,7 +310,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
               <span>Total</span>
               <span className="font-semibold text-gray-800 dark:text-white/90">
-                {loading || !stats ? "-" : stats.nunggak_total}
+                {loading || !stats ? "-" : nunggak.length}
               </span>
             </div>
             <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
