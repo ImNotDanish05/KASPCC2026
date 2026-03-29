@@ -21,6 +21,8 @@ CREATE TABLE "anggotas" (
     "id" SERIAL NOT NULL,
     "nim" TEXT NOT NULL,
     "nama" TEXT NOT NULL,
+    "tabungan" INTEGER NOT NULL DEFAULT 0,
+    "lunas_sampai" TIMESTAMP(3),
     "no_telepon" TEXT NOT NULL,
     "jabatan_id" INTEGER NOT NULL,
     "status_aktif" BOOLEAN NOT NULL DEFAULT true,
@@ -58,6 +60,7 @@ CREATE TABLE "model_has_roles" (
 CREATE TABLE "pemasukan_kas" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
+    "jabatan_id" INTEGER NOT NULL,
     "nominal_total" INTEGER NOT NULL,
     "bukti_transfer" TEXT NOT NULL,
     "status" "PemasukanStatus" NOT NULL,
@@ -73,6 +76,7 @@ CREATE TABLE "detail_pemasukan_kas" (
     "pemasukan_kas_id" INTEGER NOT NULL,
     "anggota_id" INTEGER NOT NULL,
     "nominal_bayar" INTEGER NOT NULL,
+    "link_bukti" TEXT,
 
     CONSTRAINT "detail_pemasukan_kas_pkey" PRIMARY KEY ("id")
 );
@@ -127,6 +131,9 @@ ALTER TABLE "model_has_roles" ADD CONSTRAINT "model_has_roles_role_id_fkey" FORE
 
 -- AddForeignKey
 ALTER TABLE "pemasukan_kas" ADD CONSTRAINT "pemasukan_kas_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "pemasukan_kas" ADD CONSTRAINT "pemasukan_kas_jabatan_id_fkey" FOREIGN KEY ("jabatan_id") REFERENCES "jabatans"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "detail_pemasukan_kas" ADD CONSTRAINT "detail_pemasukan_kas_pemasukan_kas_id_fkey" FOREIGN KEY ("pemasukan_kas_id") REFERENCES "pemasukan_kas"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

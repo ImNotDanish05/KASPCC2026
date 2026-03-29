@@ -31,6 +31,7 @@ model Jabatan {
   namaJabatan String           @map("nama_jabatan")
   kategori    JabatanKategori
   anggotas    Anggota[]
+  pemasukan    PemasukanKas[]
 
   @@map("jabatans")
 }
@@ -39,6 +40,8 @@ model Anggota {
   id         Int                  @id @default(autoincrement())
   nim        String               @unique
   nama       String
+  tabungan   Int                  @default(0)
+  lunasSampai DateTime?            @map("lunas_sampai")
   noTelepon  String               @map("no_telepon")
   jabatanId  Int                  @map("jabatan_id")
   jabatan    Jabatan              @relation(fields: [jabatanId], references: [id])
@@ -81,15 +84,18 @@ model ModelHasRole {
 }
 
 model PemasukanKas {
-  id           Int                @id @default(autoincrement())
-  userId       Int                @map("user_id")
-  nominalTotal Int                @map("nominal_total")
-  buktiTransfer String            @map("bukti_transfer")
-  status       PemasukanStatus
-  alasanTolak  String?            @map("alasan_tolak")
-  createdAt    DateTime           @default(now()) @map("created_at")
-  user         User               @relation(fields: [userId], references: [id])
-  details      DetailPemasukanKas[]
+  id            Int                @id @default(autoincrement())
+  userId        Int                @map("user_id")
+  jabatanId     Int                @map("jabatan_id")
+  nominalTotal  Int                @map("nominal_total")
+  buktiTransfer String             @map("bukti_transfer")
+  status        PemasukanStatus
+  alasanTolak   String?            @map("alasan_tolak")
+  createdAt     DateTime           @default(now()) @map("created_at")
+
+  user          User                  @relation(fields: [userId], references: [id])
+  jabatan       Jabatan               @relation(fields: [jabatanId], references: [id])
+  details       DetailPemasukanKas[]
 
   @@map("pemasukan_kas")
 }
@@ -99,6 +105,8 @@ model DetailPemasukanKas {
   pemasukanKasId Int          @map("pemasukan_kas_id")
   anggotaId      Int          @map("anggota_id")
   nominalBayar   Int          @map("nominal_bayar")
+  linkBukti      String?      @map("link_bukti")
+
   pemasukanKas   PemasukanKas @relation(fields: [pemasukanKasId], references: [id])
   anggota        Anggota      @relation(fields: [anggotaId], references: [id])
 

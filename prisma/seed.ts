@@ -14,8 +14,11 @@ async function main() {
     password = process.env.PASSWORD_LOCAL || "password2";
   }
 
-  // 1. Seed Roles (Hak Akses Aplikasi)
+  // 1. Konfigurasi Awal
+  // Seed Roles (Hak Akses Aplikasi)
   const roleNames = ["Bendahara Internal", "Bendahara Eksternal", "Superadmin"];
+  // Deklarasi Tanggal Awal
+  const defaultTanggalMulai = new Date("2026-03-01T00:00:00.000Z");
 
   for (const name of roleNames) {
     await prisma.role.upsert({
@@ -55,76 +58,76 @@ async function main() {
 
   // 4. Seed Anggota Asli dari Data PCC 2025/2026
   const dataAnggotaPCC = [
-    { nama: "Abimanyu Gilar Waluyo", noTelepon: "085642324087", jabatan: "Dept. Software", nim: "4.33.24.0.01" },
-    { nama: "Agies Mauranzah", noTelepon: "085326777681", jabatan: "Sekretaris", nim: "4.41.24.2.02" },
-    { nama: "Agung Hadi Astanto", noTelepon: "08973081307", jabatan: "Litbang", nim: "4.33.23.0.02" },
-    { nama: "Aisy Tsabita Amru", noTelepon: "081282078525", jabatan: "Divisi HRD", nim: "4.33.24.0.03" },
-    { nama: "Akbar Hakim Muzaky", noTelepon: "085117065501", jabatan: "Divisi HRD", nim: "4.33.24.0.04" },
-    { nama: "Alfin Rozzaq Nirwana", noTelepon: "085728141488", jabatan: "Dept. Software", nim: "4.33.24.0.05" },
-    { nama: "Aliyya Nufaisah Budiyanto", noTelepon: "089653546282", jabatan: "Dept. Danus", nim: "3.33.24.3.04" },
-    { nama: "Annisa Naelil Izati", noTelepon: "088227513683", jabatan: "Divisi Redaksi", nim: "4.33.24.2.03" },
-    { nama: "Atha Renata", noTelepon: "085811187679", jabatan: "Dept. Software", nim: "3.34.24.3.03" },
-    { nama: "Atsiila Arya Nabiih", noTelepon: "085876221718", jabatan: "Divisi Workshop", nim: "4.33.23.1.04" },
-    { nama: "Azzaki Nauval Putra", noTelepon: "081382186653", jabatan: "Dept. Network", nim: "4.31.24.4.05" },
-    { nama: "Bagus Sadewa", noTelepon: "085875043431", jabatan: "Divisi KRT", nim: "4.33.23.2.08" },
-    { nama: "Benayya Nohan Admiraldo", noTelepon: "089626046100", jabatan: "Dept. Maintenance", nim: "4.33.24.0.08" },
-    { nama: "Cantika Alifia Maharani", noTelepon: "0895632188171", jabatan: "Divisi HRD", nim: "4.33.24.1.06" },
-    { nama: "Danicha Husna", noTelepon: "083839338825", jabatan: "Divisi HRD", nim: "4.41.24.3.12" },
-    { nama: "Danish Mahdi", noTelepon: "087794177076", jabatan: "Divisi Workshop", nim: "4.33.24.0.09" },
-    { nama: "Danu Alamsyah Putra", noTelepon: "0895412719404", jabatan: "Divisi Workshop", nim: "4.33.23.1.06" },
-    { nama: "Davin Alifianda Adytia", noTelepon: "081327029089", jabatan: "Bendahara", nim: "4.33.23.0.08" },
-    { nama: "Diah Dwi Astuti", noTelepon: "0895412575712", jabatan: "Dept. Multimedia", nim: "4.33.24.2.07" },
-    { nama: "Dwy Noor Fatimah", noTelepon: "083117373703", jabatan: "Dept. Danus", nim: "4.41.24.1.09" },
-    { nama: "Elvira Eka Nurhayati", noTelepon: "0895361318121", jabatan: "Divisi KRT", nim: "4.43.24.2.08" },
-    { nama: "Farrel Sheva Basudewa", noTelepon: "087834644104", jabatan: "Divisi Redaksi", nim: "3.34.24.2.09" },
-    { nama: "Feby Yuanggi Putri", noTelepon: "0881027538285", jabatan: "Divisi Redaksi", nim: "4.33.24.0.11" },
-    { nama: "Frea Aline Aurellia", noTelepon: "087733839075", jabatan: "Sekretaris Umum", nim: "4.31.23.3.09" },
-    { nama: "Ghufron Ainun Najib", noTelepon: "089607593219", jabatan: "Dept. Maintenance", nim: "4.33.24.2.10" },
-    { nama: "Gilang Maulanata Pramudya", noTelepon: "087863039707", jabatan: "Litbang", nim: "4.33.23.0.11" },
-    { nama: "Hafizh Iman Wicaksono", noTelepon: "082138543745", jabatan: "Dept. Danus", nim: "4.33.24.1.10" },
-    { nama: "Haikal Utomo Putra", noTelepon: "089696251005", jabatan: "Dept. Danus", nim: "3.34.24.3.10" },
-    { nama: "Hany Diah Ramadhani", noTelepon: "0895414886059", jabatan: "Litbang", nim: "4.41.23.1.10" },
-    { nama: "Ika Fuji Astuti", noTelepon: "081575162004", jabatan: "Divisi Workshop", nim: "4.41.24.0.17" },
-    { nama: "Ilham Vallian Wardoyo Putra", noTelepon: "089669588760", jabatan: "Litbang", nim: "3.34.23.1.13" },
-    { nama: "Inas Salsabila Firdaus", noTelepon: "082223961300", jabatan: "Sekretaris", nim: "4.41.23.2.11" },
-    { nama: "Irine Luthfia Dani", noTelepon: "0882006978977", jabatan: "Dept. Multimedia", nim: "3.34.24.3.11" },
-    { nama: "Johar Awal Khoiroti Widyadarma", noTelepon: "081329156330", jabatan: "Dept. Network", nim: "4.31.24.4.10" },
-    { nama: "Jonathan Ordrick Edra Wijaya", noTelepon: "082220047070", jabatan: "Divisi Humas", nim: "4.33.23.1.13" },
-    { nama: "Khilda Salsabila Azka", noTelepon: "085804747471", jabatan: "Litbang", nim: "4.33.23.0.15" },
-    { nama: "Lucky Laurenshia S.", noTelepon: "081538712485", jabatan: "Dept. Maintenance", nim: "4.44.23.1.14" },
-    { nama: "Miftachussurur", noTelepon: "081933521396", jabatan: "Litbang", nim: "4.33.23.1.15" },
-    { nama: "Muhamad Haydar Aydin Alhamdani", noTelepon: "081225562697", jabatan: "Administrator", nim: "4.33.23.0.19" },
-    { nama: "Muhamad Irfan Ramadhan", noTelepon: "081289212382", jabatan: "Dept. Multimedia", nim: "3.34.24.0.14" },
-    { nama: "Muhammad Ihsan Naufal", noTelepon: "085740893435", jabatan: "Dept. Maintenance", nim: "3.11.24.3.18" },
-    { nama: "Muhammad Ilham Rijal Thaariq", noTelepon: "085291905080", jabatan: "Divisi KRT", nim: "4.33.24.1.16" },
-    { nama: "Muhammad Januar Rifqi Nanda", noTelepon: "08893547439", jabatan: "Dept. Maintenance", nim: "4.33.23.2.21" },
-    { nama: "Nabila Az Zahra Munir", noTelepon: "081391193646", jabatan: "Divisi Humas", nim: "4.33.24.2.16" },
-    { nama: "Nabila Proletariati Azzura", noTelepon: "082385108728", jabatan: "Bendahara", nim: "4.44.24.2.20" },
-    { nama: "Naila Dwista Rastiwi", noTelepon: "089648951799", jabatan: "Divisi Redaksi", nim: "4.41.23.2.17" },
-    { nama: "Nisrina Izdihar", noTelepon: "083867409471", jabatan: "Litbang", nim: "4.31.23.3.17" },
-    { nama: "Paulus Ale Kristiawan", noTelepon: "088801982508", jabatan: "Divisi KRT", nim: "4.33.24.2.17" },
-    { nama: "Putri Levina Agatha", noTelepon: "089508779306", jabatan: "Dept. Multimedia", nim: "4.33.24.1.20" },
-    { nama: "Rafif Ali Fahrezi", noTelepon: "085842487757", jabatan: "Divisi HRD", nim: "4.33.24.0.22" },
-    { nama: "Rahmalyana Ayuningtyas", noTelepon: "082325516043", jabatan: "Divisi Workshop", nim: "4.33.23.1.20" },
-    { nama: "Rahmatul Laila Nuur Arifah", noTelepon: "089605942880", jabatan: "Dept. Multimedia", nim: "4.41.24.1.27" },
-    { nama: "Rajaba Hamim Maududi", noTelepon: "085727494511", jabatan: "Divisi Humas", nim: "4.33.24.2.18" },
-    { nama: "Rameyza Proletariati", noTelepon: "082385108735", jabatan: "Bendahara", nim: "4.42.24.2.24" },
-    { nama: "Ravinka Risdiani Putri", noTelepon: "088902984546", jabatan: "Divisi HRD", nim: "4.41.23.2.24" },
-    { nama: "Renaldi Sahril Hidayat", noTelepon: "085714539546", jabatan: "Divisi HRD", nim: "4.31.24.4.17" },
-    { nama: "Reza Maulana Fatih", noTelepon: "085771900840", jabatan: "Divisi Redaksi", nim: "4.41.23.2.25" },
-    { nama: "Risma Nur Aini", noTelepon: "0895397277061", jabatan: "Sekretaris", nim: "4.43.24.2.22" },
-    { nama: "Riztika Merista Indriani", noTelepon: "081227770587", jabatan: "Divisi KRT", nim: "4.33.24.2.19" },
-    { nama: "Sabila Anastasia", noTelepon: "0895414918411", jabatan: "Dept. Danus", nim: "4.43.24.2.23" },
-    { nama: "Salsabila Rizqi Nurbarokah", noTelepon: "085724187946", jabatan: "Divisi Humas", nim: "3.33.24.1.23" },
-    { nama: "Sausan Fadiya Rizqiya", noTelepon: "081284022090", jabatan: "Dept. Software", nim: "3.41.23.2.26" },
-    { nama: "Shintia Ratna Dewi", noTelepon: "082324391346", jabatan: "Divisi Humas", nim: "4.41.24.2.24" },
-    { nama: "Siti Miftahus Sa'diyah", noTelepon: "0889-8049-7024", jabatan: "Dept. Network", nim: "4.33.24.2.21" },
-    { nama: "Suci Wulandari", noTelepon: "085649676108", jabatan: "Divisi Redaksi", nim: "4.31.24.2.23" },
-    { nama: "Ummi Imaroh", noTelepon: "083149492496", jabatan: "Dept. Network", nim: "3.34.24.0.24" },
-    { nama: "Wahyu Prasetyo Wibowo", noTelepon: "081882870773", jabatan: "Dept. Software", nim: "3.34.24.1.23" },
-    { nama: "Warseno Bambang Setyono", noTelepon: "089692174818", jabatan: "Divisi Workshop", nim: "4.33.23.1.25" },
-    { nama: "Wisdom Wahyu Aji", noTelepon: "089682303872", jabatan: "Dept. Network", nim: "3.34.24.0.25" },
-    { nama: "Zalfa Az Zahra", noTelepon: "085893705985", jabatan: "Dept. Danus", nim: "4.33.24.2.24" }
+    { nama: "Abimanyu Gilar Waluyo", noTelepon: "080000000001", jabatan: "Dept. Software", nim: "0.00.00.0.01" },
+    { nama: "Agies Mauranzah", noTelepon: "080000000002", jabatan: "Sekretaris", nim: "0.00.00.0.02" },
+    { nama: "Agung Hadi Astanto", noTelepon: "080000000003", jabatan: "Litbang", nim: "0.00.00.0.03" },
+    { nama: "Aisy Tsabita Amru", noTelepon: "080000000004", jabatan: "Divisi HRD", nim: "0.00.00.0.04" },
+    { nama: "Akbar Hakim Muzaky", noTelepon: "080000000005", jabatan: "Divisi HRD", nim: "0.00.00.0.05" },
+    { nama: "Alfin Rozzaq Nirwana", noTelepon: "080000000006", jabatan: "Dept. Software", nim: "0.00.00.0.06" },
+    { nama: "Aliyya Nufaisah Budiyanto", noTelepon: "080000000007", jabatan: "Dept. Danus", nim: "0.00.00.0.07" },
+    { nama: "Annisa Naelil Izati", noTelepon: "080000000008", jabatan: "Divisi Redaksi", nim: "0.00.00.0.08" },
+    { nama: "Atha Renata", noTelepon: "080000000009", jabatan: "Dept. Software", nim: "0.00.00.0.09" },
+    { nama: "Atsiila Arya Nabiih", noTelepon: "080000000010", jabatan: "Divisi Workshop", nim: "0.00.00.0.10" },
+    { nama: "Azzaki Nauval Putra", noTelepon: "080000000011", jabatan: "Dept. Network", nim: "0.00.00.0.11" },
+    { nama: "Bagus Sadewa", noTelepon: "080000000012", jabatan: "Divisi KRT", nim: "0.00.00.0.12" },
+    { nama: "Benayya Nohan Admiraldo", noTelepon: "080000000013", jabatan: "Dept. Maintenance", nim: "0.00.00.0.13" },
+    { nama: "Cantika Alifia Maharani", noTelepon: "080000000014", jabatan: "Divisi HRD", nim: "0.00.00.0.14" },
+    { nama: "Danicha Husna", noTelepon: "080000000015", jabatan: "Divisi HRD", nim: "0.00.00.0.15" },
+    { nama: "Danish Mahdi", noTelepon: "080000000016", jabatan: "Divisi Workshop", nim: "0.00.00.0.16" },
+    { nama: "Danu Alamsyah Putra", noTelepon: "080000000017", jabatan: "Divisi Workshop", nim: "0.00.00.0.17" },
+    { nama: "Davin Alifianda Adytia", noTelepon: "080000000018", jabatan: "Bendahara", nim: "0.00.00.0.18" },
+    { nama: "Diah Dwi Astuti", noTelepon: "080000000019", jabatan: "Dept. Multimedia", nim: "0.00.00.0.19" },
+    { nama: "Dwy Noor Fatimah", noTelepon: "080000000020", jabatan: "Dept. Danus", nim: "0.00.00.0.20" },
+    { nama: "Elvira Eka Nurhayati", noTelepon: "080000000021", jabatan: "Divisi KRT", nim: "0.00.00.0.21" },
+    { nama: "Farrel Sheva Basudewa", noTelepon: "080000000022", jabatan: "Divisi Redaksi", nim: "0.00.00.0.22" },
+    { nama: "Feby Yuanggi Putri", noTelepon: "080000000023", jabatan: "Divisi Redaksi", nim: "0.00.00.0.23" },
+    { nama: "Frea Aline Aurellia", noTelepon: "080000000024", jabatan: "Sekretaris Umum", nim: "0.00.00.0.24" },
+    { nama: "Ghufron Ainun Najib", noTelepon: "080000000025", jabatan: "Dept. Maintenance", nim: "0.00.00.0.25" },
+    { nama: "Gilang Maulanata Pramudya", noTelepon: "080000000026", jabatan: "Litbang", nim: "0.00.00.0.26" },
+    { nama: "Hafizh Iman Wicaksono", noTelepon: "080000000027", jabatan: "Dept. Danus", nim: "0.00.00.0.27" },
+    { nama: "Haikal Utomo Putra", noTelepon: "080000000028", jabatan: "Dept. Danus", nim: "0.00.00.0.28" },
+    { nama: "Hany Diah Ramadhani", noTelepon: "080000000029", jabatan: "Litbang", nim: "0.00.00.0.29" },
+    { nama: "Ika Fuji Astuti", noTelepon: "080000000030", jabatan: "Divisi Workshop", nim: "0.00.00.0.30" },
+    { nama: "Ilham Vallian Wardoyo Putra", noTelepon: "080000000031", jabatan: "Litbang", nim: "0.00.00.0.31" },
+    { nama: "Inas Salsabila Firdaus", noTelepon: "080000000032", jabatan: "Sekretaris", nim: "0.00.00.0.32" },
+    { nama: "Irine Luthfia Dani", noTelepon: "080000000033", jabatan: "Dept. Multimedia", nim: "0.00.00.0.33" },
+    { nama: "Johar Awal Khoiroti Widyadarma", noTelepon: "080000000034", jabatan: "Dept. Network", nim: "0.00.00.0.34" },
+    { nama: "Jonathan Ordrick Edra Wijaya", noTelepon: "080000000035", jabatan: "Divisi Humas", nim: "0.00.00.0.35" },
+    { nama: "Khilda Salsabila Azka", noTelepon: "080000000036", jabatan: "Litbang", nim: "0.00.00.0.36" },
+    { nama: "Lucky Laurenshia S.", noTelepon: "080000000037", jabatan: "Dept. Maintenance", nim: "0.00.00.0.37" },
+    { nama: "Miftachussurur", noTelepon: "080000000038", jabatan: "Litbang", nim: "0.00.00.0.38" },
+    { nama: "Muhamad Haydar Aydin Alhamdani", noTelepon: "080000000039", jabatan: "Administrator", nim: "0.00.00.0.39" },
+    { nama: "Muhamad Irfan Ramadhan", noTelepon: "080000000040", jabatan: "Dept. Multimedia", nim: "0.00.00.0.40" },
+    { nama: "Muhammad Ihsan Naufal", noTelepon: "080000000041", jabatan: "Dept. Maintenance", nim: "0.00.00.0.41" },
+    { nama: "Muhammad Ilham Rijal Thaariq", noTelepon: "080000000042", jabatan: "Divisi KRT", nim: "0.00.00.0.42" },
+    { nama: "Muhammad Januar Rifqi Nanda", noTelepon: "080000000043", jabatan: "Dept. Maintenance", nim: "0.00.00.0.43" },
+    { nama: "Nabila Az Zahra Munir", noTelepon: "080000000044", jabatan: "Divisi Humas", nim: "0.00.00.0.44" },
+    { nama: "Nabila Proletariati Azzura", noTelepon: "080000000045", jabatan: "Bendahara", nim: "0.00.00.0.45" },
+    { nama: "Naila Dwista Rastiwi", noTelepon: "080000000046", jabatan: "Divisi Redaksi", nim: "0.00.00.0.46" },
+    { nama: "Nisrina Izdihar", noTelepon: "080000000047", jabatan: "Litbang", nim: "0.00.00.0.47" },
+    { nama: "Paulus Ale Kristiawan", noTelepon: "080000000048", jabatan: "Divisi KRT", nim: "0.00.00.0.48" },
+    { nama: "Putri Levina Agatha", noTelepon: "080000000049", jabatan: "Dept. Multimedia", nim: "0.00.00.0.49" },
+    { nama: "Rafif Ali Fahrezi", noTelepon: "080000000050", jabatan: "Divisi HRD", nim: "0.00.00.0.50" },
+    { nama: "Rahmalyana Ayuningtyas", noTelepon: "080000000051", jabatan: "Divisi Workshop", nim: "0.00.00.0.51" },
+    { nama: "Rahmatul Laila Nuur Arifah", noTelepon: "080000000052", jabatan: "Dept. Multimedia", nim: "0.00.00.0.52" },
+    { nama: "Rajaba Hamim Maududi", noTelepon: "080000000053", jabatan: "Divisi Humas", nim: "0.00.00.0.53" },
+    { nama: "Rameyza Proletariati", noTelepon: "080000000054", jabatan: "Bendahara", nim: "0.00.00.0.54" },
+    { nama: "Ravinka Risdiani Putri", noTelepon: "080000000055", jabatan: "Divisi HRD", nim: "0.00.00.0.55" },
+    { nama: "Renaldi Sahril Hidayat", noTelepon: "080000000056", jabatan: "Divisi HRD", nim: "0.00.00.0.56" },
+    { nama: "Reza Maulana Fatih", noTelepon: "080000000057", jabatan: "Divisi Redaksi", nim: "0.00.00.0.57" },
+    { nama: "Risma Nur Aini", noTelepon: "080000000058", jabatan: "Sekretaris", nim: "0.00.00.0.58" },
+    { nama: "Riztika Merista Indriani", noTelepon: "080000000059", jabatan: "Divisi KRT", nim: "0.00.00.0.59" },
+    { nama: "Sabila Anastasia", noTelepon: "080000000060", jabatan: "Dept. Danus", nim: "0.00.00.0.60" },
+    { nama: "Salsabila Rizqi Nurbarokah", noTelepon: "080000000061", jabatan: "Divisi Humas", nim: "0.00.00.0.61" },
+    { nama: "Sausan Fadiya Rizqiya", noTelepon: "080000000062", jabatan: "Dept. Software", nim: "0.00.00.0.62" },
+    { nama: "Shintia Ratna Dewi", noTelepon: "080000000063", jabatan: "Divisi Humas", nim: "0.00.00.0.63" },
+    { nama: "Siti Miftahus Sa'diyah", noTelepon: "080000000064", jabatan: "Dept. Network", nim: "0.00.00.0.64" },
+    { nama: "Suci Wulandari", noTelepon: "080000000065", jabatan: "Divisi Redaksi", nim: "0.00.00.0.65" },
+    { nama: "Ummi Imaroh", noTelepon: "080000000066", jabatan: "Dept. Network", nim: "0.00.00.0.66" },
+    { nama: "Wahyu Prasetyo Wibowo", noTelepon: "080000000067", jabatan: "Dept. Software", nim: "0.00.00.0.67" },
+    { nama: "Warseno Bambang Setyono", noTelepon: "080000000068", jabatan: "Divisi Workshop", nim: "0.00.00.0.68" },
+    { nama: "Wisdom Wahyu Aji", noTelepon: "080000000069", jabatan: "Dept. Network", nim: "0.00.00.0.69" },
+    { nama: "Zalfa Az Zahra", noTelepon: "080000000070", jabatan: "Dept. Danus", nim: "0.00.00.0.70" }
   ];
 
   for (const anggota of dataAnggotaPCC) {
@@ -135,6 +138,7 @@ async function main() {
         nama: anggota.nama,
         noTelepon: anggota.noTelepon,
         jabatanId: jabatanTerkait.id,
+        lunasSampai: defaultTanggalMulai,
       });
     } else {
       console.warn(`⚠️ Jabatan "${anggota.jabatan}" tidak ditemukan untuk ${anggota.nama}!`);
@@ -145,26 +149,26 @@ async function main() {
   // LOOPING UNTUK CREATE USER BERDASARKAN KONFIGURASI
   const userConfigs = [
     // === INTI / SUPERADMIN ===
-    { username: "superadmin", nim: "4.33.24.0.09", role: "Superadmin" },
+    { username: "superadmin", nim: "0.00.00.0.16", role: "Superadmin" }, // Danish Mahdi
 
     // === BENDAHARA INTERNAL ===
-    { username: "davin.alifianda", nim: "4.33.23.0.08", role: "Bendahara Internal" },
-    { username: "nabila.proletariati", nim: "4.44.24.2.20", role: "Bendahara Internal" },
-    { username: "rameyza.proletariati", nim: "4.42.24.2.24", role: "Bendahara Internal" },
+    { username: "davin.alifianda", nim: "0.00.00.0.18", role: "Bendahara Internal" },
+    { username: "nabila.proletariati", nim: "0.00.00.0.45", role: "Bendahara Internal" },
+    { username: "rameyza.proletariati", nim: "0.00.00.0.54", role: "Bendahara Internal" },
 
     // === BENDAHARA EKSTERNAL (Per Jabatan) ===
-    { username: "agung.hadi", nim: "4.33.23.0.02", role: "Bendahara Eksternal" }, // Litbang
-    { username: "inas.salsabila", nim: "4.41.23.2.11", role: "Bendahara Eksternal" }, // Sekretaris
-    { username: "nabila.munir", nim: "4.33.24.2.16", role: "Bendahara Eksternal" }, // Humas
-    { username: "danicha.husna", nim: "4.41.24.3.12", role: "Bendahara Eksternal" }, // HRD
-    { username: "ilham.rijal", nim: "4.33.24.1.16", role: "Bendahara Eksternal" }, // KRT
-    { username: "hafizh.iman", nim: "4.33.24.1.10", role: "Bendahara Eksternal" }, // Danus
-    { username: "ihsan.naufal", nim: "3.11.24.3.18", role: "Bendahara Eksternal" }, // Maintenance
-    { username: "feby.yuanggi", nim: "4.33.24.0.11", role: "Bendahara Eksternal" }, // Redaksi
-    { username: "warseno.bambang", nim: "4.33.23.1.25", role: "Bendahara Eksternal" }, // Workshop
-    { username: "ummi.imaroh", nim: "3.34.24.0.24", role: "Bendahara Eksternal" }, // Network
-    { username: "abimanyu.gilar", nim: "4.33.24.0.01", role: "Bendahara Eksternal" }, // Software
-    { username: "irine.luthfia", nim: "3.34.24.3.11", role: "Bendahara Eksternal" }, // Multimedia
+    { username: "agung.hadi", nim: "0.00.00.0.03", role: "Bendahara Eksternal" }, // Litbang
+    { username: "inas.salsabila", nim: "0.00.00.0.32", role: "Bendahara Eksternal" }, // Sekretaris
+    { username: "nabila.munir", nim: "0.00.00.0.44", role: "Bendahara Eksternal" }, // Humas
+    { username: "danicha.husna", nim: "0.00.00.0.15", role: "Bendahara Eksternal" }, // HRD
+    { username: "ilham.rijal", nim: "0.00.00.0.42", role: "Bendahara Eksternal" }, // KRT
+    { username: "hafizh.iman", nim: "0.00.00.0.27", role: "Bendahara Eksternal" }, // Danus
+    { username: "ihsan.naufal", nim: "0.00.00.0.41", role: "Bendahara Eksternal" }, // Maintenance
+    { username: "feby.yuanggi", nim: "0.00.00.0.23", role: "Bendahara Eksternal" }, // Redaksi
+    { username: "warseno.bambang", nim: "0.00.00.0.68", role: "Bendahara Eksternal" }, // Workshop
+    { username: "ummi.imaroh", nim: "0.00.00.0.66", role: "Bendahara Eksternal" }, // Network
+    { username: "abimanyu.gilar", nim: "0.00.00.0.01", role: "Bendahara Eksternal" }, // Software
+    { username: "irine.luthfia", nim: "0.00.00.0.33", role: "Bendahara Eksternal" }, // Multimedia
   ];
 
   for (const config of userConfigs) {
@@ -193,16 +197,31 @@ async function main() {
     where: { id: 1 },
     update: {
       targetKasPerBulan: 50000,
-      tanggalMulai: new Date("2026-03-01T00:00:00.000Z"),
+      tanggalMulai: defaultTanggalMulai,
       tanggalAkhir: new Date("2027-03-01T00:00:00.000Z"),
     },
     create: {
       id: 1,
       targetKasPerBulan: 50000,
-      tanggalMulai: new Date("2026-03-01T00:00:00.000Z"),
+      tanggalMulai: defaultTanggalMulai,
       tanggalAkhir: new Date("2027-03-01T00:00:00.000Z"),
     },
   });
+
+  // --- 🌟 TAMBAHAN: AUTO-CREATE SUPABASE BUCKETS (Tanpa Manual Club) ---
+  console.log("📦 Mencoba membuat Storage Buckets di Supabase...");
+  try {
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO storage.buckets (id, name, public)
+      VALUES 
+        ('bukti_pemasukan_kas', 'bukti_pemasukan_kas', true),
+        ('bukti_pengeluaran_kas', 'bukti_pengeluaran_kas', true)
+      ON CONFLICT (id) DO NOTHING;
+    `);
+    console.log("✅ Storage Buckets 'bukti_pemasukan_kas' & 'bukti_pengeluaran_kas' siap!");
+  } catch (err) {
+    console.warn("⚠️ Gagal membuat bucket via Prisma. (Biasanya karena limitasi user akses di Supabase).", err);
+  }
 
   console.log("✅ Seeding Jabatan & Anggota selesai!");
   console.log("Seeded users:");
@@ -237,6 +256,7 @@ async function ensureAnggota(input: {
   nama: string;
   noTelepon: string;
   jabatanId: number;
+  lunasSampai: Date;
 }) {
   return prisma.anggota.upsert({
     where: { nim: input.nim },
@@ -244,6 +264,7 @@ async function ensureAnggota(input: {
       nama: input.nama,
       noTelepon: input.noTelepon,
       jabatanId: input.jabatanId,
+      lunasSampai: input.lunasSampai,
     },
     create: input,
   });
