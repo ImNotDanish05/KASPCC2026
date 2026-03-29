@@ -93,6 +93,30 @@ export default function SetorKasPage() {
 
   useEffect(() => {
     let active = true;
+    fetch("/api/me")
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal fetch user");
+        return res.json();
+      })
+      .then((res) => {
+        if (!active) return;
+        const userJabatanId = res.user?.anggota?.jabatanId; 
+        
+        if (userJabatanId) {
+          setSelectedJabatanId(String(userJabatanId));
+        }
+      })
+      .catch((err) => {
+        console.error("Gagal mendapatkan data user aktif:", err);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
     fetch("/api/jabatans")
       .then((res) => res.json())
       .then((data: { data?: unknown[] }) => {
