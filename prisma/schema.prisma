@@ -32,6 +32,7 @@ model Jabatan {
   kategori    JabatanKategori
   anggotas    Anggota[]
   pemasukan    PemasukanKas[]
+  pengeluaranKas  PengeluaranKas[]
 
   @@map("jabatans")
 }
