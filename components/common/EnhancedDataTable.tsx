@@ -26,6 +26,12 @@ import { parseExcelFile } from "@/lib/utils/excelImport";
 
 // ─────────────────────────────────────────────────────────────────
 
+export interface FilterConfig {
+  key: string;      // Kolom yang akan difilter (misal: 'jabatan.kategori')
+  label: string;    // Label di samping dropdown
+  options: { label: string; value: string }[];
+}
+
 export interface ColumnDef {
   key: string;
   label: string;
@@ -35,6 +41,7 @@ export interface ColumnDef {
 }
 
 export interface EnhancedDataTableProps {
+  filterConfig?: FilterConfig;
   title: string;
   description?: string;
   columns: ColumnDef[];
@@ -53,7 +60,12 @@ export interface EnhancedDataTableProps {
   emptyMessage?: string;
 }
 
+const getNestedValue = (obj: any, path: string) => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
+
 export default function EnhancedDataTable({
+  filterConfig,
   title,
   description,
   columns,
@@ -80,22 +92,65 @@ export default function EnhancedDataTable({
   const [showImportModal, setShowImportModal] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importError, setImportError] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("ALL");
 
-  // Filter data by search
+  // --- LOGIKA OTOMATIS DI SINI ---
+  const dynamicOptions = useMemo(() => {
+    if (!filterConfig || !data.length) return [];
+
+    // 1. Ambil semua nilai dari key yang ditentukan (misal: jabatan.namaJabatan)
+    const allValues = data.map((item) => getNestedValue(item, filterConfig.key));
+
+    // 2. Buat jadi unik (biar gak double) & bersihkan nilai null/undefined
+    const uniqueValues = Array.from(new Set(allValues)).filter(Boolean);
+
+    // 3. Ubah jadi format { label, value } dan urutkan abjad
+    return uniqueValues
+      .map((val) => ({
+        label: String(val),
+        value: String(val),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [data, filterConfig]);
+
+  // Logika filtering data
   const filteredData = useMemo(() => {
-    if (!searchQuery.trim()) return data;
+    let result = data;
+    if (filterConfig && selectedFilter !== "ALL") {
+      result = result.filter((row) => {
+        const value = getNestedValue(row, filterConfig.key);
+        return String(value) === selectedFilter;
+      });
+    }
 
+    // 2. Logika Search (Tetap sama)
+    if (!searchQuery.trim()) return result;
     const query = searchQuery.toLowerCase();
-    return data.filter((row) =>
+    return result.filter((row) =>
       columns.some((col) => {
-        const value = row[col.key];
-        return (
-          value &&
-          String(value).toLowerCase().includes(query)
-        );
+        const value = getNestedValue(row, col.key);
+        return value && String(value).toLowerCase().includes(query);
       })
     );
-  }, [data, searchQuery, columns]);
+  }, [data, searchQuery, columns, filterConfig, selectedFilter]);
+
+  const filterDropdown = filterConfig && (
+    <div className="flex items-center gap-2 shrink-0">
+      <label className="hidden text-sm font-medium text-gray-500 sm:inline-block">
+        {filterConfig.label}:
+      </label>
+      <select
+        value={selectedFilter}
+        onChange={(e) => setSelectedFilter(e.target.value)}
+        className="h-11 rounded-lg border border-gray-300 bg-transparent px-3 py-1 text-sm focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+      >
+        <option value="ALL">Semua {filterConfig.label}</option>
+        {dynamicOptions.map((opt) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  );
 
   // Sort data
   const sortedData = useMemo(() => {
@@ -250,13 +305,16 @@ export default function EnhancedDataTable({
         </div>
       </div>
 
-      {/* Search Bar */}
-      <SearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={searchPlaceholder}
-        disabled={loading}
-      />
+      {/* Filtering */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={searchPlaceholder}
+          disabled={loading}
+        />
+        {filterDropdown}
+      </div>
 
       {/* Error Banner */}
       {error && (

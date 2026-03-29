@@ -161,6 +161,7 @@ export default function KasHistoryPage() {
       params.set("status", status);
     }
     const url = `/api/kas/history${params.toString() ? `?${params}` : ""}`;
+    console.log(url)
     fetch(url)
       .then((res) => res.json())
       .then((payload: { data?: unknown[] }) => {

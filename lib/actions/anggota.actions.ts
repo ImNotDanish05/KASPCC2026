@@ -27,7 +27,7 @@ type ActionResult<T = unknown> =
 
 export async function getAnggotas(): Promise<ActionResult> {
   try {
-    await requireSuperadmin();
+    // await requireSuperadmin();
 
     const anggotas = await prisma.anggota.findMany({
       orderBy: { id: "asc" },

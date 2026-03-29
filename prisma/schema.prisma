@@ -1,11 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model Jabatan {
+  id          Int             @id @default(autoincrement())
+  namaJabatan String          @map("nama_jabatan")
+  kategori    JabatanKategori
+  anggotas    Anggota[]
+  pemasukan   PemasukanKas[]
+
+  @@map("jabatans")
+}
+
+model Anggota {
+  id          Int                  @id @default(autoincrement())
+  nim         String               @unique
+  nama        String
+  tabungan    Int                  @default(0)
+  lunasSampai DateTime?            @map("lunas_sampai")
+  noTelepon   String               @map("no_telepon")
+  jabatanId   Int                  @map("jabatan_id")
+  statusAktif Boolean              @default(true) @map("status_aktif")
+  jabatan     Jabatan              @relation(fields: [jabatanId], references: [id])
+  detailKas   DetailPemasukanKas[]
+  user        User?
+
+  @@map("anggotas")
+}
+
+model User {
+  id          Int              @id @default(autoincrement())
+  anggotaId   Int              @unique @map("anggota_id")
+  username    String           @unique
+  password    String
+  roles       ModelHasRole[]
+  pemasukan   PemasukanKas[]
+  pengeluaran PengeluaranKas[]
+  anggota     Anggota          @relation(fields: [anggotaId], references: [id])
+
+  @@map("users")
+}
+
+model Role {
+  id    Int            @id @default(autoincrement())
+  name  String         @unique
+  users ModelHasRole[]
+
+  @@map("roles")
+}
+
+model ModelHasRole {
+  userId Int  @map("user_id")
+  roleId Int  @map("role_id")
+  role   Role @relation(fields: [roleId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("model_has_roles")
+}
+
+model PemasukanKas {
+  id            Int                  @id @default(autoincrement())
+  userId        Int                  @map("user_id")
+  jabatanId     Int                  @map("jabatan_id")
+  nominalTotal  Int                  @map("nominal_total")
+  buktiTransfer String               @map("bukti_transfer")
+  status        PemasukanStatus
+  alasanTolak   String?              @map("alasan_tolak")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  details       DetailPemasukanKas[]
+  jabatan       Jabatan              @relation(fields: [jabatanId], references: [id])
+  user          User                 @relation(fields: [userId], references: [id])
+
+  @@map("pemasukan_kas")
+}
+
+model DetailPemasukanKas {
+  id             Int          @id @default(autoincrement())
+  pemasukanKasId Int          @map("pemasukan_kas_id")
+  anggotaId      Int          @map("anggota_id")
+  nominalBayar   Int          @map("nominal_bayar")
+  linkBukti      String?      @map("link_bukti")
+  anggota        Anggota      @relation(fields: [anggotaId], references: [id])
+  pemasukanKas   PemasukanKas @relation(fields: [pemasukanKasId], references: [id])
+
+  @@map("detail_pemasukan_kas")
+}
+
+model PengeluaranKas {
+  id          Int               @id @default(autoincrement())
+  userId      Int               @map("user_id")
+  nominal     Int
+  keterangan  String
+  buktiNota   String            @map("bukti_nota")
+  status      PengeluaranStatus
+  alasanTolak String?           @map("alasan_tolak")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  user        User              @relation(fields: [userId], references: [id])
+
+  @@map("pengeluaran_kas")
+}
+
+model Pengaturan {
+  id                Int      @id @default(1)
+  targetKasPerBulan Int      @map("target_kas_per_bulan")
+  tanggalMulai      DateTime @map("tanggal_mulai")
+  tanggalAkhir      DateTime @map("tanggal_akhir")
+
+  @@map("pengaturan")
 }
 
 enum JabatanKategori {
@@ -24,117 +132,4 @@ enum PengeluaranStatus {
   PENDING
   APPROVED
   REJECTED
-}
-
-model Jabatan {
-  id          Int              @id @default(autoincrement())
-  namaJabatan String           @map("nama_jabatan")
-  kategori    JabatanKategori
-  anggotas    Anggota[]
-  pemasukan    PemasukanKas[]
-  pengeluaranKas  PengeluaranKas[]
-
-  @@map("jabatans")
-}
-
-model Anggota {
-  id         Int                  @id @default(autoincrement())
-  nim        String               @unique
-  nama       String
-  tabungan   Int                  @default(0)
-  lunasSampai DateTime?            @map("lunas_sampai")
-  noTelepon  String               @map("no_telepon")
-  jabatanId  Int                  @map("jabatan_id")
-  jabatan    Jabatan              @relation(fields: [jabatanId], references: [id])
-  statusAktif Boolean              @default(true) @map("status_aktif")
-  user       User?
-  detailKas  DetailPemasukanKas[]
-
-  @@map("anggotas")
-}
-
-model User {
-  id         Int             @id @default(autoincrement())
-  anggotaId  Int             @unique @map("anggota_id")
-  username   String          @unique
-  password   String
-  anggota    Anggota         @relation(fields: [anggotaId], references: [id])
-  roles      ModelHasRole[]
-  pemasukan  PemasukanKas[]
-  pengeluaran PengeluaranKas[]
-
-  @@map("users")
-}
-
-model Role {
-  id    Int            @id @default(autoincrement())
-  name  String         @unique
-  users ModelHasRole[]
-
-  @@map("roles")
-}
-
-model ModelHasRole {
-  userId Int  @map("user_id")
-  roleId Int  @map("role_id")
-  user   User @relation(fields: [userId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
-
-  @@id([userId, roleId])
-  @@map("model_has_roles")
-}
-
-model PemasukanKas {
-  id            Int                @id @default(autoincrement())
-  userId        Int                @map("user_id")
-  jabatanId     Int                @map("jabatan_id")
-  nominalTotal  Int                @map("nominal_total")
-  buktiTransfer String             @map("bukti_transfer")
-  status        PemasukanStatus
-  alasanTolak   String?            @map("alasan_tolak")
-  createdAt     DateTime           @default(now()) @map("created_at")
-
-  user          User                  @relation(fields: [userId], references: [id])
-  jabatan       Jabatan               @relation(fields: [jabatanId], references: [id])
-  details       DetailPemasukanKas[]
-
-  @@map("pemasukan_kas")
-}
-
-model DetailPemasukanKas {
-  id             Int          @id @default(autoincrement())
-  pemasukanKasId Int          @map("pemasukan_kas_id")
-  anggotaId      Int          @map("anggota_id")
-  nominalBayar   Int          @map("nominal_bayar")
-  linkBukti      String?      @map("link_bukti")
-
-  pemasukanKas   PemasukanKas @relation(fields: [pemasukanKasId], references: [id])
-  anggota        Anggota      @relation(fields: [anggotaId], references: [id])
-
-  @@map("detail_pemasukan_kas")
-}
-
-model PengeluaranKas {
-  id          Int               @id @default(autoincrement())
-  userId      Int               @map("user_id")
-  jabatanId   Int               @map("jabatan_id")
-  nominal     Int
-  keterangan  String
-  buktiNota   String            @map("bukti_nota")
-  status      PengeluaranStatus
-  alasanTolak String?           @map("alasan_tolak")
-  createdAt   DateTime          @default(now()) @map("created_at")
-  user        User              @relation(fields: [userId], references: [id])
-  jabatan     Jabatan           @relation(fields: [jabatanId], references: [id])
-
-  @@map("pengeluaran_kas")
-}
-
-model Pengaturan {
-  id                 Int      @id @default(1)
-  targetKasPerBulan  Int      @map("target_kas_per_bulan")
-  tanggalMulai       DateTime @map("tanggal_mulai")
-  tanggalAkhir       DateTime @map("tanggal_akhir")
-
-  @@map("pengaturan")
 }

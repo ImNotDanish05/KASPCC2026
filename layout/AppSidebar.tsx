@@ -47,6 +47,11 @@ const navItems: NavItem[] = [
     roles: [ROLE_SUPER, ROLE_INTERNAL, ROLE_EXTERNAL],
     subItems: [
       {
+        name: "Rekapitulasi",
+        path: "/kas/rekapitulasi",
+        roles: [ROLE_INTERNAL, ROLE_SUPER],
+      },
+      {
         name: "Setor KAS",
         path: "/kas/setor",
         roles: [ROLE_EXTERNAL, ROLE_SUPER],
