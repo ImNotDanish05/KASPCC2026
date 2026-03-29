@@ -155,8 +155,9 @@ export default function Rekapitulasi() {
   }, [fetchData]);
 
   const targetNominal = Number(targetKas) || 0;
-  const totalKewajiban = totalBulan * targetNominal;
+  // const totalKewajiban = totalBulan * targetNominal;
   const currentMonthIdx = getCurrentMonthIndex(tanggalMulai);
+  const kewajibanHinggaSaatIni = (currentMonthIdx) * targetNominal;
 
   const anggotaColumns: ColumnDef[] = [
     { key: "nama", label: "Nama", sortable: true },
@@ -196,22 +197,32 @@ export default function Rekapitulasi() {
       label: "Rekap Saldo",
       render: (_, anggota: AnggotaRow) => {
         const totalBayar = pembayaranMap[anggota.id] || 0;
-        const sisa = totalKewajiban - totalBayar;
-        const isLunasSemua = sisa <= 0;
+        
+        // Hitung sisa hanya sampai bulan ini
+        const sisaHinggaSaatIni = kewajibanHinggaSaatIni - totalBayar;
+        
+        // Status lunas jika bayarannya >= kewajiban bulan ini
+        const isLunasHinggaSaatIni = sisaHinggaSaatIni <= 0;
 
         return (
           <div className="flex flex-col gap-1">
             <div className="text-sm font-bold text-gray-800 dark:text-white">
               Rp {new Intl.NumberFormat("id-ID").format(totalBayar)}
             </div>
-            {isLunasSemua ? (
+            
+            {isLunasHinggaSaatIni ? (
               <span className="text-[10px] font-medium text-success-600 dark:text-success-400">
-                Lunas Seluruh Periode
+                Lunas (s.d Bulan {currentMonthIdx + 1})
               </span>
             ) : (
-              <span className="text-[10px] font-medium text-error-500">
-                Kurang: Rp {new Intl.NumberFormat("id-ID").format(sisa)}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-medium text-error-500">
+                  Kurang: Rp {new Intl.NumberFormat("id-ID").format(sisaHinggaSaatIni)}
+                </span>
+                <span className="text-[8px] text-gray-400">
+                  Tunggakan s.d saat ini
+                </span>
+              </div>
             )}
           </div>
         );
