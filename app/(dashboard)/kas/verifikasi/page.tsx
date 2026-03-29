@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
@@ -134,6 +135,13 @@ interface ImageViewerModalProps {
 
 function ImageViewerModal({ url, anggotaNama, onClose }: ImageViewerModalProps) {
   const backdropRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle mounting for SSR safety
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   // Close on Escape key
   useEffect(() => {
@@ -150,11 +158,14 @@ function ImageViewerModal({ url, anggotaNama, onClose }: ImageViewerModalProps) 
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  return (
+  // Don't render until mounted (avoid SSR hydration errors)
+  if (!mounted) return null;
+
+  const modalContent = (
     <div
       ref={backdropRef}
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm"
+      className="fixed inset-0 z-[999999] h-screen w-screen flex items-center justify-center bg-black/80 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Lihat Bukti Transfer"
@@ -262,6 +273,9 @@ function ImageViewerModal({ url, anggotaNama, onClose }: ImageViewerModalProps) 
       </div>
     </div>
   );
+
+  // Render the modal into document.body using Portal
+  return createPortal(modalContent, document.body);
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
