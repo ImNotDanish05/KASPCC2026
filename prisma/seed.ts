@@ -9,9 +9,9 @@ async function main() {
   // TO DO: Buat password untuk local dan production berdasarkan variable di env pakai if else
   let password = "";
   if (process.env.NODE_ENV === "production") {
-    password = process.env.PASSWORD_PRODUCTION || "ChangePASSWORD_PRODUCTIONpls";
+    password = process.env.PASSWORD_PRODUCTION || "Ba:F)Q1|]b+8W6£$";
   } else {
-    password = process.env.PASSWORD_LOCAL || "password2";
+    password = process.env.PASSWORD_LOCAL || "password";
   }
 
   // 1. Konfigurasi Awal
