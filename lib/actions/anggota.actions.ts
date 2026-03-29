@@ -264,7 +264,7 @@ export async function bulkCreateAnggota(
           continue;
         }
 
-        // Lookup jabatan by name
+        // Lookup jabatan by name (required field)
         let jabatanId: number | null = null;
         if (row.jabatan) {
           const jabatan = await prisma.jabatan.findFirst({
@@ -273,24 +273,33 @@ export async function bulkCreateAnggota(
           if (jabatan) {
             jabatanId = jabatan.id;
           } else {
-            // Gracefully set to null if jabatan not found
+            // Skip row — jabatanId is required, cannot create without it
             skippedCount++;
             errors.push({
               rowIndex: index + 1,
               nim,
-              error: `Jabatan "${row.jabatan}" not found (setting to null)`,
+              error: `Jabatan "${row.jabatan}" not found — row skipped`,
             });
-            jabatanId = null;
+            continue;
           }
+        } else {
+          // No jabatan provided at all — skip
+          errorCount++;
+          errors.push({
+            rowIndex: index + 1,
+            nim,
+            error: "Jabatan is required but was not provided",
+          });
+          continue;
         }
 
-        // Create anggota
+        // Create anggota (jabatanId is guaranteed to be a number here)
         await prisma.anggota.create({
           data: {
             nim,
             nama,
             noTelepon,
-            jabatanId: jabatanId || undefined,
+            jabatanId,
             statusAktif,
           },
         });

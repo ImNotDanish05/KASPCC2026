@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ImageIcon, X, ExternalLink } from "lucide-react";
+
+// ── Types ────────────────────────────────────────────────────────────────────
 
 type Jabatan = {
   id: number;
@@ -27,87 +36,94 @@ type Anggota = {
 type Detail = {
   id: number;
   nominal_bayar: number;
+  link_bukti: string;
   anggota: Anggota;
 };
 
 type Pemasukan = {
   id: number;
-  bukti_transfer: string;
+  jabatan_id: number;
   status: "PENDING" | "VERIFIED" | "REJECTED";
   alasan_tolak: string | null;
   details: Detail[];
 };
 
-type ResubmitItem = {
-  anggota_id: number;
-  nominal_bayar: number;
-};
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID").format(value);
 }
 
 function normalizeKategori(value: unknown): Jabatan["kategori"] {
-  if (value === "DIVISI" || value === "DEPARTEMEN" || value === "INTI") {
-    return value;
-  }
+  if (value === "DIVISI" || value === "DEPARTEMEN" || value === "INTI") return value;
   return "DIVISI";
 }
 
 function toNumber(value: unknown) {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : 0;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
 }
 
-function toString(value: unknown) {
+function toStr(value: unknown) {
   if (typeof value === "string") return value;
   if (value === null || value === undefined) return "";
   return String(value);
 }
 
 function mapJabatan(raw: unknown): Jabatan {
-  const data = raw as Record<string, unknown>;
+  const d = raw as Record<string, unknown>;
   return {
-    id: toNumber(data.id),
-    nama_jabatan: toString(data.nama_jabatan ?? data.namaJabatan),
-    kategori: normalizeKategori(data.kategori),
+    id: toNumber(d.id),
+    nama_jabatan: toStr(d.nama_jabatan ?? d.namaJabatan),
+    kategori: normalizeKategori(d.kategori),
   };
 }
 
 function mapAnggota(raw: unknown): Anggota {
-  const data = raw as Record<string, unknown>;
+  const d = raw as Record<string, unknown>;
   return {
-    id: toNumber(data.id),
-    nim: toString(data.nim),
-    nama: toString(data.nama),
-    no_telepon: toString(data.no_telepon ?? data.noTelepon),
-    jabatan_id: toNumber(data.jabatan_id ?? data.jabatanId),
-    jabatan: data.jabatan ? mapJabatan(data.jabatan) : undefined,
+    id: toNumber(d.id),
+    nim: toStr(d.nim),
+    nama: toStr(d.nama),
+    no_telepon: toStr(d.no_telepon ?? d.noTelepon),
+    jabatan_id: toNumber(d.jabatan_id ?? d.jabatanId),
+    jabatan: d.jabatan ? mapJabatan(d.jabatan) : undefined,
   };
 }
 
 function mapDetail(raw: unknown): Detail {
-  const data = raw as Record<string, unknown>;
+  const d = raw as Record<string, unknown>;
   return {
-    id: toNumber(data.id),
-    nominal_bayar: toNumber(data.nominal_bayar ?? data.nominalBayar),
-    anggota: mapAnggota(data.anggota ?? {}),
+    id: toNumber(d.id),
+    nominal_bayar: toNumber(d.nominal_bayar ?? d.nominalBayar),
+    link_bukti: toStr(d.link_bukti ?? d.linkBukti),
+    anggota: mapAnggota(d.anggota ?? {}),
   };
 }
 
 function mapPemasukan(raw: unknown): Pemasukan {
-  const data = raw as Record<string, unknown>;
-  const detailsRaw = Array.isArray(data.details) ? data.details : [];
+  const d = raw as Record<string, unknown>;
+  const detailsRaw = Array.isArray(d.details) ? d.details : [];
   return {
-    id: toNumber(data.id),
-    bukti_transfer: toString(data.bukti_transfer ?? data.buktiTransfer),
-    status: (data.status as Pemasukan["status"]) ?? "PENDING",
-    alasan_tolak: (data.alasan_tolak ?? data.alasanTolak ?? null) as
-      | string
-      | null,
-    details: detailsRaw.map((detail: unknown) => mapDetail(detail)),
+    id: toNumber(d.id),
+    jabatan_id: toNumber(d.jabatan_id ?? d.jabatanId),
+    status: (d.status as Pemasukan["status"]) ?? "PENDING",
+    alasan_tolak: (d.alasan_tolak ?? d.alasanTolak ?? null) as string | null,
+    details: detailsRaw.map(mapDetail),
   };
 }
+
+/** Reads a File and returns a base64 data URL */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Gagal membaca file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ResubmitKasPage() {
   const router = useRouter();
@@ -117,72 +133,55 @@ export default function ResubmitKasPage() {
 
   const [jabatans, setJabatans] = useState<Jabatan[]>([]);
   const [anggotas, setAnggotas] = useState<Anggota[]>([]);
+  const [loadingAnggota, setLoadingAnggota] = useState(false);
   const [selectedJabatanId, setSelectedJabatanId] = useState<string>("");
   const [query, setQuery] = useState("");
-  const [loadingAnggota, setLoadingAnggota] = useState(false);
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
+
   const [loadingData, setLoadingData] = useState(true);
   const [pemasukan, setPemasukan] = useState<Pemasukan | null>(null);
-  const [buktiTransfer, setBuktiTransfer] = useState("");
-  const [buktiFileName, setBuktiFileName] = useState<string | null>(null);
+
+  // Per-row states
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [nominalById, setNominalById] = useState<Record<number, string>>({});
+  const [existingBuktiById, setExistingBuktiById] = useState<Record<number, string>>({});
+  const [newBuktiFileById, setNewBuktiFileById] = useState<Record<number, File | null>>({});
+
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // File input refs
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  // ── Fetch current user ──────────────────────────────────────────────────────
+  useEffect(() => {
+    let active = true;
+    fetch("/api/me")
+      .then((r) => r.json())
+      .then((res) => {
+        if (!active) return;
+        const isAdmin = res.user?.roles?.includes("Superadmin") ?? false;
+        setIsSuperadmin(isAdmin);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  // ── Fetch jabatans ──────────────────────────────────────────────────────────
   useEffect(() => {
     let active = true;
     fetch("/api/jabatans")
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data: { data?: unknown[] }) => {
         if (!active) return;
-        const list = Array.isArray(data.data)
-          ? data.data.map((item: unknown) => mapJabatan(item))
-          : [];
-        setJabatans(list);
+        setJabatans(Array.isArray(data.data) ? data.data.map(mapJabatan) : []);
       })
-      .catch(() => {
-        if (!active) return;
-        setJabatans([]);
-      });
-    return () => {
-      active = false;
-    };
+      .catch(() => { if (active) setJabatans([]); });
+    return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    let active = true;
-    setLoadingAnggota(true);
-    const params = new URLSearchParams();
-    if (selectedJabatanId) {
-      params.set("jabatanId", selectedJabatanId);
-    }
-    if (query.trim()) {
-      params.set("q", query.trim());
-    }
-    const url = `/api/anggotas${params.toString() ? `?${params}` : ""}`;
-    fetch(url)
-      .then((res) => res.json())
-      .then((data: { data?: unknown[] }) => {
-        if (!active) return;
-        const list = Array.isArray(data.data)
-          ? data.data.map((item: unknown) => mapAnggota(item))
-          : [];
-        setAnggotas(list);
-      })
-      .catch(() => {
-        if (!active) return;
-        setAnggotas([]);
-      })
-      .finally(() => {
-        if (!active) return;
-        setLoadingAnggota(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [selectedJabatanId, query]);
-
+  // ── Fetch existing pemasukan data ───────────────────────────────────────────
   useEffect(() => {
     let active = true;
     if (!Number.isFinite(pemasukanId)) {
@@ -196,54 +195,83 @@ export default function ResubmitKasPage() {
       .then((payload: { data?: unknown[] }) => {
         if (!active) return;
         const list = Array.isArray(payload.data)
-          ? payload.data.map((item: unknown) => mapPemasukan(item))
+          ? payload.data.map(mapPemasukan)
           : [];
-        const found = list.find((item: Pemasukan) => item.id === pemasukanId);
+        const found = list.find((item) => item.id === pemasukanId);
+        
         if (!found) {
-          setError("Data tidak ditemukan.");
+          setError("Data setoran tidak ditemukan atau tidak berstatus Ditolak.");
         } else {
           setPemasukan(found);
-          setBuktiTransfer(found.bukti_transfer ?? "");
+          setSelectedJabatanId(String(found.jabatan_id));
+          
           const nextSelected = new Set<number>();
           const nextNominal: Record<number, string> = {};
-          found.details.forEach((detail: Detail) => {
-            nextSelected.add(detail.anggota.id);
-            nextNominal[detail.anggota.id] = String(detail.nominal_bayar);
+          const nextExistingBukti: Record<number, string> = {};
+          
+          found.details.forEach((d) => {
+            const aId = d.anggota.id;
+            nextSelected.add(aId);
+            nextNominal[aId] = String(d.nominal_bayar);
+            if (d.link_bukti) nextExistingBukti[aId] = d.link_bukti;
           });
+          
           setSelectedIds(nextSelected);
           setNominalById(nextNominal);
+          setExistingBuktiById(nextExistingBukti);
         }
       })
       .catch(() => {
-        if (!active) return;
-        setError("Gagal memuat data.");
+        if (active) setError("Gagal memuat data revisi.");
       })
       .finally(() => {
-        if (!active) return;
-        setLoadingData(false);
+        if (active) setLoadingData(false);
       });
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [pemasukanId]);
 
+  // ── Fetch anggota list (reactive to selectedJabatanId search/filter) ────────
+  useEffect(() => {
+    let active = true;
+    setLoadingAnggota(true);
+    const filters = new URLSearchParams();
+    if (selectedJabatanId) filters.set("jabatanId", selectedJabatanId);
+    if (query.trim()) filters.set("q", query.trim());
+    
+    fetch(`/api/anggotas${filters.toString() ? `?${filters}` : ""}`)
+      .then((r) => r.json())
+      .then((data: { data?: unknown[] }) => {
+        if (!active) return;
+        setAnggotas(Array.isArray(data.data) ? data.data.map(mapAnggota) : []);
+      })
+      .catch(() => { if (active) setAnggotas([]); })
+      .finally(() => { if (active) setLoadingAnggota(false); });
+    return () => { active = false; };
+  }, [selectedJabatanId, query]);
+
+  // ── Computed ────────────────────────────────────────────────────────────────
   const totalNominal = useMemo(() => {
     let total = 0;
-    selectedIds.forEach((id: number) => {
-      const raw = nominalById[id];
-      const value = raw ? Number(raw) : 0;
-      if (Number.isFinite(value) && value > 0) {
-        total += value;
-      }
+    selectedIds.forEach((id) => {
+      const v = Number(nominalById[id] ?? 0);
+      if (Number.isFinite(v) && v > 0) total += v;
     });
     return total;
   }, [selectedIds, nominalById]);
 
+  const selectedList = useMemo(
+    () => anggotas.filter((a) => selectedIds.has(a.id)),
+    [anggotas, selectedIds],
+  );
+
+  // ── Handlers ────────────────────────────────────────────────────────────────
   function toggleAnggota(id: number) {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
+        setNewBuktiFileById((b) => { const nb = { ...b }; delete nb[id]; return nb; });
+        if (fileInputRefs.current[id]) fileInputRefs.current[id]!.value = "";
       } else {
         next.add(id);
       }
@@ -252,87 +280,91 @@ export default function ResubmitKasPage() {
   }
 
   function handleNominalChange(id: number, value: string) {
-    setNominalById((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    setNominalById((prev) => ({ ...prev, [id]: value }));
   }
 
-  async function handleFileChange(file: File | null) {
-    if (!file) {
-      setBuktiFileName(null);
-      setBuktiTransfer("");
+  function handleFileChange(id: number, file: File | null) {
+    if (file && !["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+      setError("Hanya file PNG, JPG, dan JPEG yang diizinkan.");
+      if (fileInputRefs.current[id]) fileInputRefs.current[id]!.value = "";
       return;
     }
-    setBuktiFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === "string" ? reader.result : "";
-      setBuktiTransfer(result);
-    };
-    reader.readAsDataURL(file);
+    setNewBuktiFileById((prev) => ({ ...prev, [id]: file }));
+    setError(null);
   }
 
   async function handleSubmit() {
     setMessage(null);
     setError(null);
 
-    const items = Array.from(selectedIds)
-      .map((id: number) => ({
-        anggota_id: id,
-        nominal_bayar: Number(nominalById[id]),
-      }))
-      .filter(
-        (item: ResubmitItem) =>
-          Number.isFinite(item.nominal_bayar) && item.nominal_bayar > 0,
-      );
-
-    if (!buktiTransfer) {
-      setError("Bukti transfer wajib diisi.");
+    if (selectedIds.size === 0) {
+      setError("Pilih minimal satu anggota terlebih dahulu.");
       return;
     }
 
-    if (items.length === 0) {
-      setError("Pilih anggota dan isi nominalnya terlebih dahulu.");
+    const missingNominal = Array.from(selectedIds).find(
+      (id) => !(Number(nominalById[id]) > 0),
+    );
+    if (missingNominal !== undefined) {
+      setError("Semua anggota yang dipilih harus memiliki nominal > 0.");
       return;
     }
 
-    const itemsPayload = items.map((item: ResubmitItem) => ({
-      anggota_id: item.anggota_id,
-      nominal_bayar: item.nominal_bayar,
-      anggotaId: item.anggota_id,
-      nominalBayar: item.nominal_bayar,
-    }));
+    // Every selected member must either have an existing link_bukti OR a newly uploaded file
+    const missingBukti = Array.from(selectedIds).find(
+      (id) => !existingBuktiById[id] && !newBuktiFileById[id]
+    );
+    if (missingBukti !== undefined) {
+      setError("Semua anggota yang dipilih harus memiliki bukti transfer.");
+      return;
+    }
 
     setSubmitting(true);
     try {
+      const items: { anggotaId: number; nominalBayar: number; buktiBase64?: string }[] = [];
+      
+      for (const id of Array.from(selectedIds)) {
+        const file = newBuktiFileById[id];
+        let buktiBase64: string | undefined = undefined;
+        if (file) {
+          buktiBase64 = await fileToBase64(file);
+        }
+        
+        items.push({
+          anggotaId: id,
+          nominalBayar: Math.floor(Number(nominalById[id])),
+          buktiBase64,
+        });
+      }
+
+      const body: Record<string, unknown> = { items };
+      if (isSuperadmin && selectedJabatanId) {
+        body.jabatanId = Number(selectedJabatanId);
+      }
+
       const response = await fetch(`/api/kas/resubmit/${pemasukanId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bukti_transfer: buktiTransfer,
-          buktiTransfer: buktiTransfer,
-          items: itemsPayload,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
+
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.error || "Gagal mengirim ulang.");
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(errBody.error || "Gagal mengirim setoran.");
       }
-      setMessage("Setoran berhasil dikirim ulang. Menunggu verifikasi.");
+
+      setMessage("Setoran berhasil dikirim ulang. Mengalihkan...");
       setTimeout(() => {
         router.push("/kas/history");
-      }, 1200);
+      }, 1500);
+
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Terjadi kesalahan.";
-      setError(message);
-    } finally {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
       setSubmitting(false);
     }
   }
 
+  // ── Render Validation ───────────────────────────────────────────────────────
   if (loadingData) {
     return (
       <div className="space-y-6">
@@ -355,27 +387,27 @@ export default function ResubmitKasPage() {
     );
   }
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
-      <PageBreadcrumb pageTitle={`Revisi Setoran #${pemasukan.id}`} />
+      <PageBreadcrumb pageTitle={`Revisi Setoran #KAS-${pemasukan.id}`} />
 
-      <ComponentCard
-        title="Ringkasan Revisi"
-        desc="Perbaiki data setoran yang ditolak lalu kirim ulang."
-      >
-        {pemasukan.alasan_tolak ? (
+      {pemasukan.alasan_tolak && (
+        <ComponentCard title="Alasan Penolakan dari Internal" desc="Harap perbaiki data berdasarkan catatan ini.">
           <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
-            Alasan penolakan: {pemasukan.alasan_tolak}
+            {pemasukan.alasan_tolak}
           </div>
-        ) : null}
-      </ComponentCard>
+        </ComponentCard>
+      )}
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
+        {/* ── Left: Anggota Table ─────────────────────────────────────────── */}
         <div className="col-span-12 xl:col-span-8 space-y-6">
           <ComponentCard
             title="Daftar Anggota"
-            desc="Perbarui anggota dan nominal untuk setoran ini."
+            desc="Sesuaikan anggota, ubah nominal, atau ganti bukti transfer per anggota."
           >
+            {/* Filters */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label>Cari anggota</Label>
@@ -383,197 +415,278 @@ export default function ResubmitKasPage() {
                   placeholder="Cari nama atau NIM"
                   type="text"
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(e) => setQuery(e.target.value)}
                 />
               </div>
               <div>
                 <Label>Filter jabatan</Label>
-                <select
-                  value={selectedJabatanId}
-                  onChange={(event) => setSelectedJabatanId(event.target.value)}
-                  className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
-                >
-                  <option value="">Semua jabatan</option>
-                  {jabatans.map((jabatan: Jabatan) => (
-                    <option key={jabatan.id} value={String(jabatan.id)}>
-                      {jabatan.nama_jabatan}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-              <Table>
-                <TableHeader className="bg-gray-50 dark:bg-gray-800">
-                  <TableRow>
-                    <TableCell
-                      isHeader
-                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
-                    >
-                      Pilih
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
-                    >
-                      Nama
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
-                    >
-                      NIM
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
-                    >
-                      Jabatan
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400"
-                    >
-                      Nominal
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loadingAnggota ? (
-                    <TableRow>
-                      <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        Memuat data anggota...
-                      </TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                    </TableRow>
-                  ) : anggotas.length === 0 ? (
-                    <TableRow>
-                      <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        Tidak ada anggota ditemukan.
-                      </TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                      <TableCell className="px-4 py-4">-</TableCell>
-                    </TableRow>
-                  ) : (
-                    anggotas.map((anggota: Anggota) => {
-                      const checked = selectedIds.has(anggota.id);
-                      return (
-                        <TableRow key={anggota.id}>
-                          <TableCell className="px-4 py-3">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleAnggota(anggota.id)}
-                              className="h-4 w-4 rounded border-gray-300"
-                            />
-                          </TableCell>
-                          <TableCell className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">
-                            <div className="font-semibold">{anggota.nama}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {anggota.no_telepon || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                            {anggota.nim}
-                          </TableCell>
-                          <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                            {anggota.jabatan?.nama_jabatan ?? "-"}
-                          </TableCell>
-                          <TableCell className="px-4 py-3">
-                            <input
-                              type="number"
-                              min={0}
-                              disabled={!checked}
-                              value={nominalById[anggota.id] ?? ""}
-                              onChange={(event) =>
-                                handleNominalChange(
-                                  anggota.id,
-                                  event.target.value,
-                                )
-                              }
-                              className="h-10 w-32 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </ComponentCard>
-
-          <ComponentCard
-            title="Bukti Transfer"
-            desc="Upload bukti transfer baru atau perbarui link."
-          >
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label>Upload bukti transfer</Label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) =>
-                    handleFileChange(event.target.files?.[0] ?? null)
-                  }
-                  className="h-11 w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-600 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                />
-                {buktiFileName ? (
-                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    File terpilih: {buktiFileName}
+                {isSuperadmin ? (
+                  <select
+                    value={selectedJabatanId}
+                    onChange={(e) => setSelectedJabatanId(e.target.value)}
+                    className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                  >
+                    <option value="">Semua jabatan</option>
+                    {jabatans.map((j) => (
+                      <option key={j.id} value={String(j.id)}>
+                        {j.nama_jabatan}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="flex h-11 w-full items-center rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+                    {jabatans.find((j) => String(j.id) === selectedJabatanId)
+                      ?.nama_jabatan || "Memuat jabatan..."}
                   </div>
-                ) : null}
+                )}
               </div>
-              <div>
-                <Label>URL bukti transfer</Label>
-                <Input
-                  placeholder="Masukkan URL bukti transfer"
-                  type="text"
-                  value={buktiTransfer}
-                  onChange={(event) => setBuktiTransfer(event.target.value)}
-                />
+            </div>
+
+            {/* Table */}
+            <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-gray-50 dark:bg-gray-800">
+                    <TableRow>
+                      {["Pilih", "Nama", "NIM", "Jabatan", "Nominal (Rp)", "Bukti Transfer"].map(
+                        (h) => (
+                          <TableCell
+                            key={h}
+                            isHeader
+                            className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400"
+                          >
+                            {h}
+                          </TableCell>
+                        ),
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loadingAnggota ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+                            Memuat data anggota...
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : anggotas.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
+                          Tidak ada anggota ditemukan.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      anggotas.map((anggota) => {
+                        const checked = selectedIds.has(anggota.id);
+                        const newFile = newBuktiFileById[anggota.id] ?? null;
+                        const existingLink = existingBuktiById[anggota.id];
+
+                        return (
+                          <TableRow
+                            key={anggota.id}
+                            className={`border-b border-gray-100 dark:border-gray-800 ${
+                              checked ? "bg-brand-50/30 dark:bg-brand-500/5" : ""
+                            }`}
+                          >
+                            <TableCell className="px-4 py-3">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleAnggota(anggota.id)}
+                                className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-brand-500"
+                              />
+                            </TableCell>
+
+                            <TableCell className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">
+                              <div className="font-medium">{anggota.nama}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {anggota.no_telepon || "—"}
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">
+                              {anggota.nim}
+                            </TableCell>
+
+                            <TableCell className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                              {anggota.jabatan?.nama_jabatan ?? "—"}
+                            </TableCell>
+
+                            <TableCell className="px-4 py-3">
+                              <input
+                                type="number"
+                                min={0}
+                                disabled={!checked}
+                                value={nominalById[anggota.id] ?? ""}
+                                onChange={(e) =>
+                                  handleNominalChange(anggota.id, e.target.value)
+                                }
+                                placeholder="0"
+                                className="h-10 w-32 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:disabled:bg-gray-800"
+                              />
+                            </TableCell>
+
+                            <TableCell className="px-4 py-3">
+                              {!checked ? (
+                                <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
+                              ) : newFile ? (
+                                /* New file selected */
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1.5 rounded-lg border border-success-200 bg-success-50 px-2.5 py-1.5 text-xs text-success-700 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400">
+                                    <ImageIcon className="h-3.5 w-3.5 shrink-0" />
+                                    <span className="max-w-[100px] truncate">{newFile.name}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      setNewBuktiFileById((prev) => {
+                                        const nb = { ...prev };
+                                        delete nb[anggota.id];
+                                        return nb;
+                                      });
+                                      if (fileInputRefs.current[anggota.id]) {
+                                        fileInputRefs.current[anggota.id]!.value = "";
+                                      }
+                                    }}
+                                    className="rounded-full p-0.5 text-gray-400 hover:text-error-500"
+                                    title="Hapus file"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              ) : existingLink ? (
+                                /* Existing DB file */
+                                <div className="flex items-center gap-2">
+                                  <a
+                                    href={existingLink}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-brand-600 hover:bg-gray-50 dark:border-gray-700 dark:text-brand-400 dark:hover:bg-gray-800"
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                    Tersimpan
+                                  </a>
+                                  <label
+                                    className="cursor-pointer text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
+                                    title="Ganti gambar"
+                                  >
+                                    Ganti
+                                    <input
+                                      type="file"
+                                      accept="image/png, image/jpeg, image/jpg"
+                                      className="hidden"
+                                      ref={(el) => {
+                                        fileInputRefs.current[anggota.id] = el;
+                                      }}
+                                      onChange={(e) =>
+                                        handleFileChange(anggota.id, e.target.files?.[0] ?? null)
+                                      }
+                                    />
+                                  </label>
+                                </div>
+                              ) : (
+                                /* Need file */
+                                <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 transition-colors hover:border-brand-400 hover:text-brand-600 dark:border-gray-600 dark:text-gray-400 dark:hover:border-brand-500 dark:hover:text-brand-400">
+                                  <ImageIcon className="h-3.5 w-3.5 shrink-0" />
+                                  <span>Pilih gambar</span>
+                                  <input
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/jpg"
+                                    className="hidden"
+                                    ref={(el) => {
+                                      fileInputRefs.current[anggota.id] = el;
+                                    }}
+                                    onChange={(e) =>
+                                      handleFileChange(anggota.id, e.target.files?.[0] ?? null)
+                                    }
+                                  />
+                                </label>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </ComponentCard>
         </div>
 
+        {/* ── Right: Summary ─────────────────────────────────────────────── */}
         <div className="col-span-12 xl:col-span-4 space-y-6">
-          <ComponentCard title="Ringkasan" desc="Pastikan data sudah lengkap.">
-            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-              <span>Jumlah anggota dipilih</span>
-              <span className="font-semibold text-gray-800 dark:text-white/90">
-                {selectedIds.size}
-              </span>
+          <ComponentCard title="Ringkasan" desc="Pastikan semua data sudah lengkap.">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>Anggota dipilih</span>
+                <span className="font-semibold text-gray-800 dark:text-white/90">
+                  {selectedIds.size}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>Bukti diunggah</span>
+                <span className="font-semibold text-gray-800 dark:text-white/90">
+                  {Object.values(newBuktiFileById).filter(Boolean).length} baru
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>Total nominal</span>
+                <span className="font-semibold text-gray-800 dark:text-white/90">
+                  Rp {formatRupiah(totalNominal)}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-              <span>Total nominal</span>
-              <span className="font-semibold text-gray-800 dark:text-white/90">
-                Rp {formatRupiah(totalNominal)}
-              </span>
-            </div>
-            {error ? (
+
+            {selectedList.length > 0 && (
+              <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-800/50">
+                <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Anggota dipilih:
+                </p>
+                <ul className="space-y-1">
+                  {selectedList.map((a) => {
+                    const hasBukti =
+                      newBuktiFileById[a.id] != null || existingBuktiById[a.id] != null;
+                    return (
+                      <li key={a.id} className="flex items-center justify-between text-xs">
+                        <span className="truncate text-gray-700 dark:text-gray-300">
+                          {a.nama}
+                        </span>
+                        <span
+                          className={`ml-2 shrink-0 ${
+                            hasBukti
+                              ? "text-success-600 dark:text-success-400"
+                              : "text-error-500"
+                          }`}
+                        >
+                          {hasBukti ? "✓ Bukti" : "✗ Belum"}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {error && (
               <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">
                 {error}
               </div>
-            ) : null}
-            {message ? (
+            )}
+            {message && (
               <div className="rounded-lg bg-success-50 px-4 py-3 text-sm text-success-600 dark:bg-success-500/10 dark:text-success-400">
                 {message}
               </div>
-            ) : null}
+            )}
+
             <Button
               onClick={handleSubmit}
               disabled={submitting}
               className="w-full"
               size="sm"
             >
-              {submitting ? "Mengirim..." : "Kirim Ulang"}
+              {submitting ? "Kirim Ulang..." : "Kirim Revisi Setoran"}
             </Button>
           </ComponentCard>
         </div>

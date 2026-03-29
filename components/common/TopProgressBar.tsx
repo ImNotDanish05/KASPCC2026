@@ -22,9 +22,6 @@ export default function TopProgressBar() {
         shadow="0 0 10px #465fff,0 0 5px rgba(70, 95, 255, 0.5)"
         template='<div class="bar" role="bar"><div class="peg"></div></div>'
         zIndex={1600}
-        showAtLeast={200}
-        autoIncrement={true}
-        disableSameRouteProgress={false}
       />
     </>
   );
