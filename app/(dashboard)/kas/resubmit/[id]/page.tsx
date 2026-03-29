@@ -42,6 +42,7 @@ type Detail = {
 
 type Pemasukan = {
   id: number;
+  userId: number;
   jabatan_id: number;
   status: "PENDING" | "VERIFIED" | "REJECTED";
   alasan_tolak: string | null;
@@ -106,6 +107,7 @@ function mapPemasukan(raw: unknown): Pemasukan {
   const detailsRaw = Array.isArray(d.details) ? d.details : [];
   return {
     id: toNumber(d.id),
+    userId: toNumber(d.userId ?? d.user_id),
     jabatan_id: toNumber(d.jabatan_id ?? d.jabatanId),
     status: (d.status as Pemasukan["status"]) ?? "PENDING",
     alasan_tolak: (d.alasan_tolak ?? d.alasanTolak ?? null) as string | null,
@@ -137,6 +139,7 @@ export default function ResubmitKasPage() {
   const [selectedJabatanId, setSelectedJabatanId] = useState<string>("");
   const [query, setQuery] = useState("");
   const [isSuperadmin, setIsSuperadmin] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   const [loadingData, setLoadingData] = useState(true);
   const [pemasukan, setPemasukan] = useState<Pemasukan | null>(null);
@@ -163,6 +166,7 @@ export default function ResubmitKasPage() {
         if (!active) return;
         const isAdmin = res.user?.roles?.includes("Superadmin") ?? false;
         setIsSuperadmin(isAdmin);
+        setCurrentUserId(res.user?.id ?? null);
       })
       .catch(() => {});
     return () => { active = false; };
@@ -382,6 +386,45 @@ export default function ResubmitKasPage() {
         <PageBreadcrumb pageTitle="Revisi Setoran" />
         <div className="rounded-2xl border border-error-200 bg-error-50 p-6 text-center text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
           {error ?? "Data tidak ditemukan."}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Authorization Check ─────────────────────────────────────────────────────
+  if (currentUserId !== null && pemasukan.userId !== currentUserId) {
+    return (
+      <div className="space-y-6">
+        <PageBreadcrumb pageTitle="Akses Ditolak" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-error-200 bg-error-50 p-8 text-center dark:border-error-500/30 dark:bg-error-500/10">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-100 dark:bg-error-500/20">
+            <svg
+              className="h-8 w-8 text-error-600 dark:text-error-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-error-700 dark:text-error-400">
+            Akses Ditolak
+          </h3>
+          <p className="mb-6 max-w-md text-sm text-error-600 dark:text-error-400">
+            Anda tidak memiliki izin untuk mengubah data setoran ini.
+          </p>
+          <Button
+            onClick={() => router.push("/kas/history")}
+            size="sm"
+            className="bg-gray-800 hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+          >
+            Kembali ke Riwayat
+          </Button>
         </div>
       </div>
     );

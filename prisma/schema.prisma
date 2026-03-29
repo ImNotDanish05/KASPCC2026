@@ -116,6 +116,7 @@ model DetailPemasukanKas {
 model PengeluaranKas {
   id          Int               @id @default(autoincrement())
   userId      Int               @map("user_id")
+  jabatanId   Int               @map("jabatan_id")
   nominal     Int
   keterangan  String
   buktiNota   String            @map("bukti_nota")
@@ -123,6 +124,7 @@ model PengeluaranKas {
   alasanTolak String?           @map("alasan_tolak")
   createdAt   DateTime          @default(now()) @map("created_at")
   user        User              @relation(fields: [userId], references: [id])
+  jabatan     Jabatan           @relation(fields: [jabatanId], references: [id])
 
   @@map("pengeluaran_kas")
 }

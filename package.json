@@ -21,6 +21,7 @@
     "nextjs-toploader": "^3.9.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-zoom-pan-pinch": "^3.7.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

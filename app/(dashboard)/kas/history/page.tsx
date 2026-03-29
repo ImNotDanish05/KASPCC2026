@@ -37,6 +37,7 @@ type User = {
 
 type Pemasukan = {
   id: number;
+  userId: number;
   nominal_total: number;
   bukti_transfer: string;
   status: "PENDING" | "VERIFIED" | "REJECTED";
@@ -118,6 +119,7 @@ function mapPemasukan(raw: unknown): Pemasukan {
   const detailsRaw = Array.isArray(data.details) ? data.details : [];
   return {
     id: toNumber(data.id),
+    userId: toNumber(data.userId ?? data.user_id),
     nominal_total: toNumber(data.nominal_total ?? data.nominalTotal),
     bukti_transfer: toString(data.bukti_transfer ?? data.buktiTransfer),
     status: (data.status as Pemasukan["status"]) ?? "PENDING",
@@ -135,6 +137,20 @@ export default function KasHistoryPage() {
   const [data, setData] = useState<Pemasukan[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  // ── Fetch current user ──────────────────────────────────────────────────────
+  useEffect(() => {
+    let active = true;
+    fetch("/api/me")
+      .then((r) => r.json())
+      .then((res) => {
+        if (!active) return;
+        setCurrentUserId(res.user?.id ?? null);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -303,9 +319,9 @@ export default function KasHistoryPage() {
                         : "-"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      {item.status === "REJECTED" ? (
+                      {item.status === "REJECTED" && currentUserId === item.userId ? (
                         <Link href={`/kas/resubmit/${item.id}`}>
-                          <Button size="sm">Resubmit</Button>
+                          <Button size="sm">Perbaiki</Button>
                         </Link>
                       ) : (
                         <span className="text-xs text-gray-400">-</span>
@@ -329,8 +345,15 @@ export default function KasHistoryPage() {
                   <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
                     Detail Setoran #{item.id}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {item.user?.anggota?.nama ?? item.user?.username}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">
+                      {item.user?.anggota?.nama ?? item.user?.username}
+                    </span>
+                    {item.user?.anggota?.jabatan?.nama_jabatan && (
+                      <span className="inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
+                        {item.user.anggota.jabatan.nama_jabatan}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="mt-3 space-y-2">

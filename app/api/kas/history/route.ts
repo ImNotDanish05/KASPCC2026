@@ -37,7 +37,9 @@ export async function GET(req: NextRequest) {
       },
       user: {
         include: {
-          anggota: true,
+          anggota: {
+            include: { jabatan: true },
+          },
         },
       },
     },
