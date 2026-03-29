@@ -90,6 +90,7 @@ export default function SetorKasPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -100,8 +101,12 @@ export default function SetorKasPage() {
       })
       .then((res) => {
         if (!active) return;
+
+        // 1. Cek apakah ada role 'Superadmin'
+        const isAdmin = res.user?.roles?.includes("Superadmin");
+        setIsSuperadmin(isAdmin);
+
         const userJabatanId = res.user?.anggota?.jabatanId; 
-        
         if (userJabatanId) {
           setSelectedJabatanId(String(userJabatanId));
         }
@@ -298,18 +303,26 @@ export default function SetorKasPage() {
               </div>
               <div>
                 <Label>Filter jabatan</Label>
-                <select
-                  value={selectedJabatanId}
-                  onChange={(event) => setSelectedJabatanId(event.target.value)}
-                  className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
-                >
-                  <option value="">Semua jabatan</option>
-                  {jabatans.map((jabatan: Jabatan) => (
-                    <option key={jabatan.id} value={String(jabatan.id)}>
-                      {jabatan.nama_jabatan}
-                    </option>
-                  ))}
-                </select>
+                {isSuperadmin ? (
+                  // JIKA SUPERADMIN: Tampilkan Select aslinya
+                  <select
+                    value={selectedJabatanId}
+                    onChange={(event) => setSelectedJabatanId(event.target.value)}
+                    className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                  >
+                    <option value="">Semua jabatan</option>
+                    {jabatans.map((jabatan: Jabatan) => (
+                      <option key={jabatan.id} value={String(jabatan.id)}>
+                        {jabatan.nama_jabatan}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  // JIKA BUKAN SUPERADMIN: Tampilkan teks jabatannya saja (Read Only)
+                  <div className="h-11 w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400 flex items-center">
+                    {jabatans.find(j => String(j.id) === selectedJabatanId)?.nama_jabatan || "Memuat jabatan..."}
+                  </div>
+                )}
               </div>
             </div>
 
