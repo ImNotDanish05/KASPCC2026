@@ -90,41 +90,38 @@ function getCurrentMonthIndex(startDateStr: string): number {
  * Compute plain-text payment status for a given column month.
  * Uses anggota.lunas_sampai directly instead of accumulated payment totals.
  *
- * Column month is identified by (year, month) — day is ignored.
- * - LUNAS     → column month ≤ lunasSampai
- * - TERLAMBAT → column month > lunasSampai (or null) AND column month ≤ today
- * - Belum     → column month > today
+ * Priority (highest → lowest):
+ *  1. LUNAS     → column month ≤ lunasSampai  (even if month is in the future)
+ *  2. TERLAMBAT → column month > lunasSampai AND column month ≤ today
+ *  3. Belum     → column month > lunasSampai AND column month > today
  */
 function computeMonthStatusByLunas(
   lunasSampaiStr: string | null,
   colYear: number,
   colMonth: number, // 0-based JS month
 ): "LUNAS" | "TERLAMBAT" | "Belum" {
+  // 1. Check lunas_sampai coverage FIRST — LUNAS always takes priority
+  if (lunasSampaiStr) {
+    const lunas = new Date(lunasSampaiStr);
+    if (!isNaN(lunas.getTime())) {
+      const lunasYear = lunas.getFullYear();
+      const lunasMonth = lunas.getMonth(); // 0-based
+      const isCovered =
+        colYear < lunasYear ||
+        (colYear === lunasYear && colMonth <= lunasMonth);
+      if (isCovered) return "LUNAS";
+    }
+  }
+
+  // 2. Not covered by lunas_sampai — decide Belum vs TERLAMBAT based on today
   const now = new Date();
-  const nowYear = now.getFullYear();
-  const nowMonth = now.getMonth(); // 0-based
-
-  // Is this column month in the future relative to today?
   const isFuture =
-    colYear > nowYear || (colYear === nowYear && colMonth > nowMonth);
-  if (isFuture) return "Belum";
+    colYear > now.getFullYear() ||
+    (colYear === now.getFullYear() && colMonth > now.getMonth());
 
-  // Past or current month — check lunas_sampai
-  if (!lunasSampaiStr) return "TERLAMBAT"; // never paid
-
-  const lunas = new Date(lunasSampaiStr);
-  if (isNaN(lunas.getTime())) return "TERLAMBAT";
-
-  const lunasYear = lunas.getFullYear();
-  const lunasMonth = lunas.getMonth(); // 0-based
-
-  // Column month is covered if it is ≤ lunas_sampai (year+month)
-  const isCovered =
-    colYear < lunasYear ||
-    (colYear === lunasYear && colMonth <= lunasMonth);
-
-  return isCovered ? "LUNAS" : "TERLAMBAT";
+  return isFuture ? "Belum" : "TERLAMBAT";
 }
+
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
