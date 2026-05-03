@@ -50,7 +50,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  if (!auth.roles.includes("Superadmin")) {
+  if (!auth.roles.includes("Bendahara Inti") && !auth.roles.includes("Superadmin")) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
