@@ -149,23 +149,23 @@ async function main() {
     { username: "superadmin", nim: "0.00.00.0.16", role: "Superadmin" }, // Danish Mahdi
 
     // === BENDAHARA INTERNAL ===
-    { username: "davin.alifianda", nim: "0.00.00.0.18", role: "Bendahara Internal" },
-    { username: "nabila.proletariati", nim: "0.00.00.0.45", role: "Bendahara Internal" },
+    { username: "davin.alifianda", nim: "0.00.00.0.18", role: "Bendahara Inti" },
+    { username: "nabila.proletariati", nim: "0.00.00.0.45", role: "Bendahara Inti" },
 
 
     // === BENDAHARA EKSTERNAL (Per Jabatan) ===
-    { username: "agung.hadi", nim: "0.00.00.0.03", role: "Bendahara Eksternal" }, // Litbang
-    { username: "rameyza.proletariati", nim: "0.00.00.0.54", role: "Bendahara Eksternal" },
-    { username: "nabila.munir", nim: "0.00.00.0.44", role: "Bendahara Eksternal" }, // Humas
-    { username: "danicha.husna", nim: "0.00.00.0.15", role: "Bendahara Eksternal" }, // HRD
-    { username: "ilham.rijal", nim: "0.00.00.0.42", role: "Bendahara Eksternal" }, // KRT
-    { username: "hafizh.iman", nim: "0.00.00.0.27", role: "Bendahara Eksternal" }, // Danus
-    { username: "ihsan.naufal", nim: "0.00.00.0.41", role: "Bendahara Eksternal" }, // Maintenance
-    { username: "feby.yuanggi", nim: "0.00.00.0.23", role: "Bendahara Eksternal" }, // Redaksi
-    { username: "warseno.bambang", nim: "0.00.00.0.68", role: "Bendahara Eksternal" }, // Workshop
-    { username: "ummi.imaroh", nim: "0.00.00.0.66", role: "Bendahara Eksternal" }, // Network
-    { username: "abimanyu.gilar", nim: "0.00.00.0.01", role: "Bendahara Eksternal" }, // Software
-    { username: "irine.luthfia", nim: "0.00.00.0.33", role: "Bendahara Eksternal" }, // Multimedia
+    { username: "agung.hadi", nim: "0.00.00.0.03", role: "Bendahara DivisiDept" }, // Litbang
+    { username: "rameyza.proletariati", nim: "0.00.00.0.54", role: "Bendahara DivisiDept" },
+    { username: "nabila.munir", nim: "0.00.00.0.44", role: "Bendahara DivisiDept" }, // Humas
+    { username: "danicha.husna", nim: "0.00.00.0.15", role: "Bendahara DivisiDept" }, // HRD
+    { username: "ilham.rijal", nim: "0.00.00.0.42", role: "Bendahara DivisiDept" }, // KRT
+    { username: "hafizh.iman", nim: "0.00.00.0.27", role: "Bendahara DivisiDept" }, // Danus
+    { username: "ihsan.naufal", nim: "0.00.00.0.41", role: "Bendahara DivisiDept" }, // Maintenance
+    { username: "feby.yuanggi", nim: "0.00.00.0.23", role: "Bendahara DivisiDept" }, // Redaksi
+    { username: "warseno.bambang", nim: "0.00.00.0.68", role: "Bendahara DivisiDept" }, // Workshop
+    { username: "ummi.imaroh", nim: "0.00.00.0.66", role: "Bendahara DivisiDept" }, // Network
+    { username: "abimanyu.gilar", nim: "0.00.00.0.01", role: "Bendahara DivisiDept" }, // Software
+    { username: "irine.luthfia", nim: "0.00.00.0.33", role: "Bendahara DivisiDept" }, // Multimedia
   ];
 
   for (const config of userConfigs) {
