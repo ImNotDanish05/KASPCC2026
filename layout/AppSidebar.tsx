@@ -88,6 +88,11 @@ const navItems: NavItem[] = [
         path: "/tarik-dana/approve",
         roles: [ROLE_INTERNAL, ROLE_SUPER],
       },
+      {
+        name: "Pengeluaran KAS",
+        path: "/kas/pengeluaran",
+        roles: [ROLE_INTERNAL, ROLE_SUPER],
+      },
     ],
   },
   {

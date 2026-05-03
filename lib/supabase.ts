@@ -16,6 +16,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 // ── Storage Helpers ──────────────────────────────────────────────────────────
 
 const BUCKET = "bukti_pemasukan_kas";
+const PENGELUARAN_BUCKET = "bukti_pengeluaran_kas";
 
 /**
  * Uploads a base64 data-URL image to Supabase Storage.
@@ -47,5 +48,31 @@ export async function uploadBuktiImage(
   }
 
   const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return urlData.publicUrl;
+}
+
+/**
+ * Uploads a raw File/Blob directly to the bukti_pengeluaran_kas bucket.
+ * Use this from API routes that receive multipart/form-data.
+ * Returns the public URL string, or throws on failure.
+ */
+export async function uploadPengeluaranFile(
+  file: File | Blob,
+  path: string,
+): Promise<string> {
+  const contentType =
+    file instanceof File ? (file.type || "image/jpeg") : "image/jpeg";
+
+  const { error } = await supabase.storage
+    .from(PENGELUARAN_BUCKET)
+    .upload(path, file, { contentType, upsert: true });
+
+  if (error) {
+    throw new Error(`Gagal mengunggah file: ${error.message}`);
+  }
+
+  const { data: urlData } = supabase.storage
+    .from(PENGELUARAN_BUCKET)
+    .getPublicUrl(path);
   return urlData.publicUrl;
 }

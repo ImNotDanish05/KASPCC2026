@@ -36,6 +36,7 @@ const MENU: MenuSection[] = [
       { label: "Ajukan Tarik Dana", href: "/tarik-dana", roles: ["Bendahara DivisiDept"] },
       { label: "Riwayat Tarik Dana", href: "/tarik-dana/history", roles: ["Superadmin", "Bendahara Inti", "Bendahara DivisiDept"] },
       { label: "Persetujuan Tarik Dana", href: "/tarik-dana/approve", roles: ["Bendahara Inti"] },
+      { label: "Pengeluaran KAS", href: "/kas/pengeluaran", roles: ["Superadmin", "Bendahara Inti"] },
     ],
   },
   {

@@ -17,6 +17,8 @@ const roleRules: Array<{
     roles: ["Bendahara DivisiDept"],
     methods: ["POST"],
   },
+  { pattern: /^\/api\/pengeluaran(\/|$)/, roles: ["Bendahara Inti"], methods: ["POST"] },
+  { pattern: /^\/api\/pengeluaran\/.+/, roles: ["Bendahara Inti"], methods: ["PUT", "DELETE"] },
 ];
 
 export async function middleware(req: NextRequest) {

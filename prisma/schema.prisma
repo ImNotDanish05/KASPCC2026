@@ -94,17 +94,35 @@ model DetailPemasukanKas {
 }
 
 model PengeluaranKas {
-  id          Int               @id @default(autoincrement())
-  userId      Int               @map("user_id")
-  nominal     Int
-  keterangan  String
-  buktiNota   String            @map("bukti_nota")
-  status      PengeluaranStatus
-  alasanTolak String?           @map("alasan_tolak")
-  createdAt   DateTime          @default(now()) @map("created_at")
-  user        User              @relation(fields: [userId], references: [id])
+  id            Int                    @id @default(autoincrement())
+  userId        Int                    @map("user_id")
+  namaKegiatan  String                 @map("nama_kegiatan")
+  totalNominal  Int                    @map("total_nominal")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  user          User                   @relation(fields: [userId], references: [id])
+  details       DetailPengeluaranKas[]
+  buktis        BuktiNotaPengeluaran[]
 
   @@map("pengeluaran_kas")
+}
+
+model DetailPengeluaranKas {
+  id               Int            @id @default(autoincrement())
+  pengeluaranKasId Int            @map("pengeluaran_kas_id")
+  keterangan       String
+  nominal          Int
+  pengeluaranKas   PengeluaranKas @relation(fields: [pengeluaranKasId], references: [id], onDelete: Cascade)
+
+  @@map("detail_pengeluaran_kas")
+}
+
+model BuktiNotaPengeluaran {
+  id               Int            @id @default(autoincrement())
+  pengeluaranKasId Int            @map("pengeluaran_kas_id")
+  urlBukti         String         @map("url_bukti")
+  pengeluaranKas   PengeluaranKas @relation(fields: [pengeluaranKasId], references: [id], onDelete: Cascade)
+
+  @@map("bukti_nota_pengeluaran")
 }
 
 model Pengaturan {
@@ -128,8 +146,4 @@ enum PemasukanStatus {
   REJECTED
 }
 
-enum PengeluaranStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
+
