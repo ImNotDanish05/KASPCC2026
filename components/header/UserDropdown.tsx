@@ -13,8 +13,8 @@ type UserDropdownProps = {
 function getRoleLabel(roles?: string[]) {
   if (!roles || roles.length === 0) return "User";
   if (roles.includes("Superadmin")) return "Superadmin";
-  if (roles.includes("Bendahara Internal")) return "Bendahara Internal";
-  if (roles.includes("Bendahara Eksternal")) return "Bendahara Eksternal";
+  if (roles.includes("Bendahara Inti")) return "Bendahara Inti";
+  if (roles.includes("Bendahara DivisiDept")) return "Bendahara DivisiDept";
   return roles[0];
 }
 

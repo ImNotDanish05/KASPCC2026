@@ -25,8 +25,8 @@ type NavItem = {
 };
 
 const ROLE_SUPER = "Superadmin";
-const ROLE_INTERNAL = "Bendahara Internal";
-const ROLE_EXTERNAL = "Bendahara Eksternal";
+const ROLE_INTERNAL = "Bendahara Inti";
+const ROLE_EXTERNAL = "Bendahara DivisiDept";
 
 const navItems: NavItem[] = [
   {

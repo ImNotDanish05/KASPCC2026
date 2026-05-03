@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     : undefined;
 
   const isInternal =
-    auth.roles.includes("Bendahara Internal") || auth.roles.includes("Superadmin");
+    auth.roles.includes("Bendahara Inti") || auth.roles.includes("Superadmin");
 
   const pengajuan = await prisma.pengeluaranKas.findMany({
     where: {

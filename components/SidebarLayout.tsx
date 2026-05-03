@@ -19,23 +19,23 @@ const MENU: MenuSection[] = [
   {
     title: "Overview",
     items: [
-      { label: "Dashboard", href: "/", roles: ["Superadmin", "Bendahara Internal", "Bendahara Eksternal"] },
+      { label: "Dashboard", href: "/", roles: ["Superadmin", "Bendahara Inti", "Bendahara DivisiDept"] },
     ],
   },
   {
     title: "KAS Masuk",
     items: [
-      { label: "Setor KAS", href: "/kas/setor", roles: ["Bendahara Eksternal"] },
-      { label: "Riwayat Setoran", href: "/kas/history", roles: ["Superadmin", "Bendahara Internal", "Bendahara Eksternal"] },
-      { label: "Verifikasi Setoran", href: "/kas/verifikasi", roles: ["Bendahara Internal"] },
+      { label: "Setor KAS", href: "/kas/setor", roles: ["Bendahara DivisiDept"] },
+      { label: "Riwayat Setoran", href: "/kas/history", roles: ["Superadmin", "Bendahara Inti", "Bendahara DivisiDept"] },
+      { label: "Verifikasi Setoran", href: "/kas/verifikasi", roles: ["Bendahara Inti"] },
     ],
   },
   {
     title: "KAS Keluar",
     items: [
-      { label: "Ajukan Tarik Dana", href: "/tarik-dana", roles: ["Bendahara Eksternal"] },
-      { label: "Riwayat Tarik Dana", href: "/tarik-dana/history", roles: ["Superadmin", "Bendahara Internal", "Bendahara Eksternal"] },
-      { label: "Persetujuan Tarik Dana", href: "/tarik-dana/approve", roles: ["Bendahara Internal"] },
+      { label: "Ajukan Tarik Dana", href: "/tarik-dana", roles: ["Bendahara DivisiDept"] },
+      { label: "Riwayat Tarik Dana", href: "/tarik-dana/history", roles: ["Superadmin", "Bendahara Inti", "Bendahara DivisiDept"] },
+      { label: "Persetujuan Tarik Dana", href: "/tarik-dana/approve", roles: ["Bendahara Inti"] },
     ],
   },
   {

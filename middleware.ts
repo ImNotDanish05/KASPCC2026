@@ -8,13 +8,13 @@ const roleRules: Array<{
   roles: string[];
   methods?: string[];
 }> = [
-  { pattern: /^\/api\/kas\/verify(\/|$)/, roles: ["Bendahara Internal"] },
-  { pattern: /^\/api\/tarik-dana\/approve(\/|$)/, roles: ["Bendahara Internal"] },
-  { pattern: /^\/api\/kas\/setor(\/|$)/, roles: ["Bendahara Eksternal"] },
-  { pattern: /^\/api\/kas\/resubmit(\/|$)/, roles: ["Bendahara Eksternal"] },
+  { pattern: /^\/api\/kas\/verify(\/|$)/, roles: ["Bendahara Inti"] },
+  { pattern: /^\/api\/tarik-dana\/approve(\/|$)/, roles: ["Bendahara Inti"] },
+  { pattern: /^\/api\/kas\/setor(\/|$)/, roles: ["Bendahara DivisiDept"] },
+  { pattern: /^\/api\/kas\/resubmit(\/|$)/, roles: ["Bendahara DivisiDept"] },
   {
     pattern: /^\/api\/tarik-dana(\/|$)/,
-    roles: ["Bendahara Eksternal"],
+    roles: ["Bendahara DivisiDept"],
     methods: ["POST"],
   },
 ];
