@@ -33,6 +33,7 @@ type AnggotaRow = {
   jabatanId: number;
   statusAktif: boolean;
   tabungan: number;
+  lunasSampai: string | null; // ISO date string or null
   jabatan: JabatanOption;
   user: { id: number; username: string } | null;
 };
@@ -85,20 +86,44 @@ function getCurrentMonthIndex(startDateStr: string): number {
   return Math.max(0, diff);
 }
 
-/** Compute plain-text status for a given month index (0-based). */
-function computeMonthStatus(
-  anggotaId: number,
-  monthIndex: number,
-  pembayaranMap: Record<number, number>,
-  targetNominal: number,
-  currentMonthIdx: number,
+/**
+ * Compute plain-text payment status for a given column month.
+ * Uses anggota.lunas_sampai directly instead of accumulated payment totals.
+ *
+ * Column month is identified by (year, month) — day is ignored.
+ * - LUNAS     → column month ≤ lunasSampai
+ * - TERLAMBAT → column month > lunasSampai (or null) AND column month ≤ today
+ * - Belum     → column month > today
+ */
+function computeMonthStatusByLunas(
+  lunasSampaiStr: string | null,
+  colYear: number,
+  colMonth: number, // 0-based JS month
 ): "LUNAS" | "TERLAMBAT" | "Belum" {
-  const bulanKe = monthIndex + 1;
-  const totalBayar = pembayaranMap[anggotaId] ?? 0;
-  const isLunas = targetNominal > 0 && totalBayar >= bulanKe * targetNominal;
-  if (isLunas) return "LUNAS";
-  if (bulanKe <= currentMonthIdx) return "TERLAMBAT";
-  return "Belum";
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth(); // 0-based
+
+  // Is this column month in the future relative to today?
+  const isFuture =
+    colYear > nowYear || (colYear === nowYear && colMonth > nowMonth);
+  if (isFuture) return "Belum";
+
+  // Past or current month — check lunas_sampai
+  if (!lunasSampaiStr) return "TERLAMBAT"; // never paid
+
+  const lunas = new Date(lunasSampaiStr);
+  if (isNaN(lunas.getTime())) return "TERLAMBAT";
+
+  const lunasYear = lunas.getFullYear();
+  const lunasMonth = lunas.getMonth(); // 0-based
+
+  // Column month is covered if it is ≤ lunas_sampai (year+month)
+  const isCovered =
+    colYear < lunasYear ||
+    (colYear === lunasYear && colMonth <= lunasMonth);
+
+  return isCovered ? "LUNAS" : "TERLAMBAT";
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -110,13 +135,10 @@ export default function Rekapitulasi() {
   const [tanggalAkhir, setTanggalAkhir] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pembayaranMap, setPembayaranMap] = useState<Record<number, number>>({});
 
   // Derived values
   const monthLabels = generateMonthLabels(tanggalMulai, tanggalAkhir);
   const targetNominal = Number(targetKas) || 0;
-  const currentMonthIdx = getCurrentMonthIndex(tanggalMulai);
-  const kewajibanHinggaSaatIni = currentMonthIdx * targetNominal;
 
   // Fetch settings
   useEffect(() => {
@@ -134,35 +156,19 @@ export default function Rekapitulasi() {
     return () => { active = false; };
   }, []);
 
-  // Fetch anggota + kas history
+  // Fetch anggota only — month status is derived from anggota.lunas_sampai
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [anggotaResult, historyRes] = await Promise.all([
-        getAnggotas(),
-        fetch("/api/kas/history?status=VERIFIED").then((r) => r.json()),
-      ]);
+      const anggotaResult = await getAnggotas();
       if (anggotaResult.success) {
         setAnggotas(anggotaResult.data as AnggotaRow[]);
       } else {
         setError(anggotaResult.error);
       }
-      if (historyRes.data && Array.isArray(historyRes.data)) {
-        const acc: Record<number, number> = {};
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        historyRes.data.forEach((pemasukan: any) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          pemasukan.details?.forEach((detail: any) => {
-            const id = detail.anggota_id ?? detail.anggota?.id;
-            const nominal = Number(detail.nominal_bayar ?? detail.nominalBayar ?? 0);
-            if (id) acc[id] = (acc[id] ?? 0) + nominal;
-          });
-        });
-        setPembayaranMap(acc);
-      }
     } catch {
-      setError("Gagal memproses data riwayat.");
+      setError("Gagal memuat data anggota.");
     } finally {
       setLoading(false);
     }
@@ -173,21 +179,37 @@ export default function Rekapitulasi() {
   // ── Export helpers ──────────────────────────────────────────────────────────
 
   function buildExportRows() {
+    // Parse the column month dates once for efficiency
+    const colDates = monthLabels.map((label) => {
+      // label format: "Mar 2026" — find in MONTHS_ID
+      const [mon, yr] = label.split(" ");
+      const monthIdx = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"].indexOf(mon);
+      return { year: Number(yr), month: monthIdx };
+    });
+
     return anggotas.map((anggota, idx) => {
-      const totalBayar = pembayaranMap[anggota.id] ?? 0;
-      const sisa = kewajibanHinggaSaatIni - totalBayar;
       const tabungan = anggota.tabungan ?? 0;
+
+      // Count TERLAMBAT months to derive kurang
+      const terlambatCount = colDates.filter(
+        ({ year, month }) =>
+          computeMonthStatusByLunas(anggota.lunasSampai, year, month) === "TERLAMBAT"
+      ).length;
+      const kurang = terlambatCount * targetNominal;
+
       const row: Record<string, string | number> = {
         No: idx + 1,
         Nama: anggota.nama,
         Jabatan: anggota.jabatan.namaJabatan,
         Status: anggota.statusAktif ? "Aktif" : "Tidak Aktif",
-        "Rekap Saldo": `Rp ${new Intl.NumberFormat("id-ID").format(totalBayar)} ${sisa <= 0 ? "(Lunas)" : `(Kurang Rp ${new Intl.NumberFormat("id-ID").format(sisa)})`}`,
-        // Tabungan: plain number for Excel cell, Rupiah string for CSV
+        "Rekap Saldo": kurang === 0
+          ? `Lunas s.d ${anggota.lunasSampai ? new Date(anggota.lunasSampai).toLocaleDateString("id-ID", { month: "short", year: "numeric" }) : "-"}`
+          : `Kurang: Rp ${new Intl.NumberFormat("id-ID").format(kurang)} (${terlambatCount} bln)`,
         Tabungan: tabungan,
       };
-      monthLabels.forEach((label, i) => {
-        row[label] = computeMonthStatus(anggota.id, i, pembayaranMap, targetNominal, currentMonthIdx);
+
+      colDates.forEach(({ year, month }, i) => {
+        row[monthLabels[i]] = computeMonthStatusByLunas(anggota.lunasSampai, year, month);
       });
       return row;
     });
@@ -369,24 +391,29 @@ function handleExportExcel() {
       label: "Rekap Saldo",
       width: "min-w-[180px]",
       render: (_: unknown, anggota: AnggotaRow) => {
-        const totalBayar = pembayaranMap[anggota.id] ?? 0;
-        const sisa = kewajibanHinggaSaatIni - totalBayar;
         const tabungan = anggota.tabungan ?? 0;
+        // Count TERLAMBAT months for this anggota
+        const terlambatCount = monthLabels.filter((label, i) => {
+          const [mon, yr] = label.split(" ");
+          const monthIdx = MONTHS_ID.indexOf(mon);
+          return computeMonthStatusByLunas(anggota.lunasSampai, Number(yr), monthIdx) === "TERLAMBAT";
+        }).length;
+        const kurang = terlambatCount * targetNominal;
+        const lunasLabel = anggota.lunasSampai
+          ? new Date(anggota.lunasSampai).toLocaleDateString("id-ID", { month: "short", year: "numeric" })
+          : null;
         return (
           <div className="flex min-w-[180px] flex-col gap-1">
-            <div className="text-sm font-bold text-gray-800 dark:text-white">
-              Saldo Kas: Rp {new Intl.NumberFormat("id-ID").format(totalBayar)}
-            </div>
-            {sisa <= 0 ? (
+            {kurang === 0 ? (
               <span className="text-[10px] font-medium text-success-600 dark:text-success-400">
-                Lunas (s.d Bulan {currentMonthIdx})
+                Lunas s.d {lunasLabel ?? "-"}
               </span>
             ) : (
               <div className="flex flex-col">
                 <span className="text-[10px] font-medium text-error-500">
-                  Kurang: Rp {new Intl.NumberFormat("id-ID").format(sisa)}
+                  Kurang: Rp {new Intl.NumberFormat("id-ID").format(kurang)}
                 </span>
-                <span className="text-[8px] text-gray-400">Tunggakan s.d saat ini</span>
+                <span className="text-[8px] text-gray-400">{terlambatCount} bulan tunggakan</span>
               </div>
             )}
             <div className="mt-0.5 border-t border-gray-100 pt-0.5 text-[10px] text-gray-500 dark:border-gray-700 dark:text-gray-400">
@@ -396,29 +423,34 @@ function handleExportExcel() {
         );
       },
     },
-    // Dynamic month columns — labels are real month/year from settings
-    ...monthLabels.map((label, i) => ({
-      key: `bulan-${i}`,
-      label,
-      render: (_: unknown, anggota: AnggotaRow) => {
-        const status = computeMonthStatus(anggota.id, i, pembayaranMap, targetNominal, currentMonthIdx);
-        if (status === "LUNAS") {
-          return (
-            <span className="inline-flex items-center rounded-md bg-success-50 px-2 py-1 text-[10px] font-bold text-success-700 dark:bg-success-500/10 dark:text-success-400">
-              LUNAS
-            </span>
-          );
-        }
-        if (status === "TERLAMBAT") {
-          return (
-            <span className="inline-flex animate-pulse items-center rounded-md bg-error-50 px-2 py-1 text-[10px] font-bold text-error-700 dark:bg-error-500/10 dark:text-error-400">
-              TERLAMBAT
-            </span>
-          );
-        }
-        return <span className="text-[10px] font-medium italic text-gray-400">Belum</span>;
-      },
-    })),
+    // Dynamic month columns — status derived from anggota.lunas_sampai
+    ...monthLabels.map((label, i) => {
+      const [mon, yr] = label.split(" ");
+      const colMonth = MONTHS_ID.indexOf(mon);
+      const colYear = Number(yr);
+      return {
+        key: `bulan-${i}`,
+        label,
+        render: (_: unknown, anggota: AnggotaRow) => {
+          const status = computeMonthStatusByLunas(anggota.lunasSampai, colYear, colMonth);
+          if (status === "LUNAS") {
+            return (
+              <span className="inline-flex items-center rounded-md bg-success-50 px-2 py-1 text-[10px] font-bold text-success-700 dark:bg-success-500/10 dark:text-success-400">
+                LUNAS
+              </span>
+            );
+          }
+          if (status === "TERLAMBAT") {
+            return (
+              <span className="inline-flex animate-pulse items-center rounded-md bg-error-50 px-2 py-1 text-[10px] font-bold text-error-700 dark:bg-error-500/10 dark:text-error-400">
+                TERLAMBAT
+              </span>
+            );
+          }
+          return <span className="text-[10px] font-medium italic text-gray-400">Belum</span>;
+        },
+      };
+    }),
   ];
 
   // ── Render ──────────────────────────────────────────────────────────────────
