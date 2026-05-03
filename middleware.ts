@@ -9,14 +9,8 @@ const roleRules: Array<{
   methods?: string[];
 }> = [
   { pattern: /^\/api\/kas\/verify(\/|$)/, roles: ["Bendahara Inti"] },
-  { pattern: /^\/api\/tarik-dana\/approve(\/|$)/, roles: ["Bendahara Inti"] },
   { pattern: /^\/api\/kas\/setor(\/|$)/, roles: ["Bendahara DivisiDept"] },
   { pattern: /^\/api\/kas\/resubmit(\/|$)/, roles: ["Bendahara DivisiDept"] },
-  {
-    pattern: /^\/api\/tarik-dana(\/|$)/,
-    roles: ["Bendahara DivisiDept"],
-    methods: ["POST"],
-  },
   { pattern: /^\/api\/pengeluaran(\/|$)/, roles: ["Bendahara Inti"], methods: ["POST"] },
   { pattern: /^\/api\/pengeluaran\/.+/, roles: ["Bendahara Inti"], methods: ["PUT", "DELETE"] },
 ];

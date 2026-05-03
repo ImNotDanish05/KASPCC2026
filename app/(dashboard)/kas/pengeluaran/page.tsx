@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
-import { ZoomIn, ZoomOut, RotateCcw, X, Plus, Pencil, Trash2, Eye, ImageOff } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw, X, Plus, Pencil, Trash2, Eye } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -319,7 +319,85 @@ function PengeluaranFormModal({ editing, onClose, onSaved, onViewImage }: FormMo
   );
 }
 
+// ── PengeluaranDetailModal ────────────────────────────────────────────────────
+
+function PengeluaranDetailModal({ item, onClose, onViewImage }: {
+  item: Pengeluaran;
+  onClose: () => void;
+  onViewImage: (url: string, label: string) => void;
+}) {
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", fn);
+    return () => document.removeEventListener("keydown", fn);
+  }, [onClose]);
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  return createPortal(
+    <div
+      onClick={(e) => { if (e.currentTarget === e.target) onClose(); }}
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      role="dialog" aria-modal="true"
+    >
+      <div className="flex w-full max-w-2xl flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900 max-h-[90vh]">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+          <div>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">{item.nama_kegiatan}</h2>
+            <p className="mt-0.5 text-xs text-gray-400">{formatDate(item.created_at)} · {item.user.anggota.nama || item.user.username}</p>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-800"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          <div className="flex items-center justify-between rounded-xl bg-brand-50 px-4 py-3 dark:bg-brand-500/10">
+            <span className="text-sm font-medium text-brand-700 dark:text-brand-400">Total Pengeluaran</span>
+            <span className="text-lg font-bold text-brand-700 dark:text-brand-400">Rp {formatRupiah(item.total_nominal)}</span>
+          </div>
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Rincian</h3>
+            <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800">
+              {item.details.map((d, i) => (
+                <div key={d.id} className={`flex items-center justify-between px-4 py-3 ${i > 0 ? "border-t border-gray-100 dark:border-gray-800" : ""}`}>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{d.keterangan}</span>
+                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">Rp {formatRupiah(d.nominal)}</span>
+                </div>
+              ))}
+              {item.details.length === 0 && <div className="px-4 py-3 text-sm text-gray-400">Tidak ada rincian.</div>}
+            </div>
+          </div>
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Bukti Nota</h3>
+            {item.buktis.length > 0 ? (
+              <div className="flex flex-wrap gap-3">
+                {item.buktis.map((b, i) => (
+                  <button key={b.id} onClick={() => onViewImage(b.url_bukti, `${item.nama_kegiatan} — Nota ${i + 1}`)}
+                    className="group relative overflow-hidden rounded-xl border-2 border-transparent transition hover:border-brand-400" title={`Lihat nota ${i + 1}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={b.url_bukti} alt={`Bukti ${i + 1}`} className="h-24 w-24 object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/30">
+                      <Eye className="h-5 w-5 text-transparent transition group-hover:text-white" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">Tidak ada bukti nota.</p>
+            )}
+          </div>
+        </div>
+        <div className="flex justify-end border-t border-gray-100 px-6 py-4 dark:border-gray-800">
+          <button onClick={onClose} className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900">Tutup</button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
+
 
 export default function PengeluaranPage() {
   const [data, setData] = useState<Pengeluaran[]>([]);
@@ -338,6 +416,9 @@ export default function PengeluaranPage() {
   // Image viewer
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerLabel, setViewerLabel] = useState("");
+
+  // Detail modal
+  const [viewingItem, setViewingItem] = useState<Pengeluaran | null>(null);
 
   async function loadData() {
     setLoading(true);
@@ -407,6 +488,13 @@ export default function PengeluaranPage() {
           deleting={deleting}
         />
       )}
+      {viewingItem && (
+        <PengeluaranDetailModal
+          item={viewingItem}
+          onClose={() => setViewingItem(null)}
+          onViewImage={(url, label) => { setViewerUrl(url); setViewerLabel(label); }}
+        />
+      )}
 
       {/* Add/Edit form */}
       {formOpen && (
@@ -456,7 +544,7 @@ export default function PengeluaranPage() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    {["Nama Kegiatan", "Total Nominal", "Dicatat Oleh", "Tanggal", "Bukti Nota", "Aksi"].map((h) => (
+                    {["Nama Kegiatan", "Total Nominal", "Dicatat Oleh", "Tanggal", "Aksi"].map((h) => (
                       <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">{h}</th>
                     ))}
                   </tr>
@@ -478,44 +566,33 @@ export default function PengeluaranPage() {
                         {formatDate(item.created_at)}
                       </td>
                       <td className="px-4 py-3">
-                        {item.buktis.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {item.buktis.map((b) => (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setViewingItem(item)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-200 bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400"
+                            title="Lihat detail"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </button>
+                          {!isReadOnly && (
+                            <>
                               <button
-                                key={b.id}
-                                onClick={() => { setViewerUrl(b.url_bukti); setViewerLabel(item.nama_kegiatan); }}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
-                                title="Lihat bukti"
+                                onClick={() => openEdit(item)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                                title="Edit"
                               >
-                                <Eye className="h-3.5 w-3.5" />
+                                <Pencil className="h-3.5 w-3.5" />
                               </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-gray-400 dark:bg-gray-800">
-                            <ImageOff className="h-3.5 w-3.5" />
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        {!isReadOnly && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => openEdit(item)}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-                              title="Edit"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteId(item.id)}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-error-200 text-error-500 transition hover:bg-error-50 dark:border-error-500/30 dark:hover:bg-error-500/10"
-                              title="Hapus"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        )}
+                              <button
+                                onClick={() => setDeleteId(item.id)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-error-200 text-error-500 transition hover:bg-error-50 dark:border-error-500/30 dark:hover:bg-error-500/10"
+                                title="Hapus"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

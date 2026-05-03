@@ -71,23 +71,8 @@ const navItems: NavItem[] = [
   {
     name: "KAS Keluar",
     icon: <BoxCubeIcon />,
-    roles: [ROLE_SUPER, ROLE_INTERNAL, ROLE_EXTERNAL],
+    roles: [ROLE_SUPER, ROLE_INTERNAL],
     subItems: [
-      {
-        name: "Ajukan Tarik Dana",
-        path: "/tarik-dana",
-        roles: [ROLE_EXTERNAL, ROLE_SUPER],
-      },
-      {
-        name: "Riwayat Tarik Dana",
-        path: "/tarik-dana/history",
-        roles: [ROLE_EXTERNAL, ROLE_INTERNAL, ROLE_SUPER],
-      },
-      {
-        name: "Persetujuan Tarik Dana",
-        path: "/tarik-dana/approve",
-        roles: [ROLE_INTERNAL, ROLE_SUPER],
-      },
       {
         name: "Pengeluaran KAS",
         path: "/kas/pengeluaran",
