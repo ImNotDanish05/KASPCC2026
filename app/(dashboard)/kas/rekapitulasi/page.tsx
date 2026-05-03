@@ -32,6 +32,7 @@ type AnggotaRow = {
   noTelepon: string;
   jabatanId: number;
   statusAktif: boolean;
+  tabungan: number;
   jabatan: JabatanOption;
   user: { id: number; username: string } | null;
 };
@@ -175,12 +176,15 @@ export default function Rekapitulasi() {
     return anggotas.map((anggota, idx) => {
       const totalBayar = pembayaranMap[anggota.id] ?? 0;
       const sisa = kewajibanHinggaSaatIni - totalBayar;
+      const tabungan = anggota.tabungan ?? 0;
       const row: Record<string, string | number> = {
         No: idx + 1,
         Nama: anggota.nama,
         Jabatan: anggota.jabatan.namaJabatan,
         Status: anggota.statusAktif ? "Aktif" : "Tidak Aktif",
         "Rekap Saldo": `Rp ${new Intl.NumberFormat("id-ID").format(totalBayar)} ${sisa <= 0 ? "(Lunas)" : `(Kurang Rp ${new Intl.NumberFormat("id-ID").format(sisa)})`}`,
+        // Tabungan: plain number for Excel cell, Rupiah string for CSV
+        Tabungan: tabungan,
       };
       monthLabels.forEach((label, i) => {
         row[label] = computeMonthStatus(anggota.id, i, pembayaranMap, targetNominal, currentMonthIdx);
@@ -301,7 +305,8 @@ function handleExportExcel() {
       if (h === 'Nama') return { wch: 30 };
       if (h === 'Jabatan') return { wch: 20 };
       if (h === 'Status') return { wch: 12 };
-      if (h === 'Rekap Saldo') return { wch: 35 };
+      if (h === 'Rekap Saldo') return { wch: 38 };
+      if (h === 'Tabungan') return { wch: 20 };
       return { wch: 15 }; // Lebar untuk bulan
     });
 
@@ -362,13 +367,15 @@ function handleExportExcel() {
     {
       key: "total_bayar",
       label: "Rekap Saldo",
+      width: "min-w-[180px]",
       render: (_: unknown, anggota: AnggotaRow) => {
         const totalBayar = pembayaranMap[anggota.id] ?? 0;
         const sisa = kewajibanHinggaSaatIni - totalBayar;
+        const tabungan = anggota.tabungan ?? 0;
         return (
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-[180px] flex-col gap-1">
             <div className="text-sm font-bold text-gray-800 dark:text-white">
-              Rp {new Intl.NumberFormat("id-ID").format(totalBayar)}
+              Saldo Kas: Rp {new Intl.NumberFormat("id-ID").format(totalBayar)}
             </div>
             {sisa <= 0 ? (
               <span className="text-[10px] font-medium text-success-600 dark:text-success-400">
@@ -382,6 +389,9 @@ function handleExportExcel() {
                 <span className="text-[8px] text-gray-400">Tunggakan s.d saat ini</span>
               </div>
             )}
+            <div className="mt-0.5 border-t border-gray-100 pt-0.5 text-[10px] text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              Tabungan: Rp {new Intl.NumberFormat("id-ID").format(tabungan)}
+            </div>
           </div>
         );
       },
