@@ -5,6 +5,8 @@ import { useCallback, useState, useEffect } from "react";
 import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
 import { UserCheck, UserX, Download, FileSpreadsheet } from "lucide-react";
 
+import * as XLSX from "xlsx-js-style";
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type SettingsResponse = {
@@ -187,15 +189,126 @@ export default function Rekapitulasi() {
     });
   }
 
-  function handleExportExcel() {
+function handleExportExcel() {
     const rows = buildExportRows();
     if (!rows.length) { alert("Tidak ada data untuk diekspor."); return; }
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const XLSX = require("xlsx");
-    const ws = XLSX.utils.json_to_sheet(rows);
+
+    const headers = Object.keys(rows[0]);
+    
+    // Array untuk menampung seluruh baris data beserta styling-nya
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wsData: any[][] = [];
+
+    // --- 1. MEMBUAT JUDUL LAPORAN (HEADER ATAS) ---
+    wsData.push([
+      {
+        v: 'REKAPITULASI PEMBAYARAN KAS KASPCC 2026',
+        t: 's',
+        s: {
+          font: { name: 'Arial', sz: 16, bold: true, color: { rgb: '1F2937' } }, // text-gray-800
+          alignment: { vertical: 'center', horizontal: 'left' }
+        }
+      }
+    ]);
+    
+    wsData.push([
+      {
+        v: `Target Kas per Bulan: Rp ${new Intl.NumberFormat("id-ID").format(targetNominal)}`,
+        t: 's',
+        s: {
+          font: { name: 'Arial', sz: 11, italic: true, color: { rgb: '6B7280' } } // text-gray-500
+        }
+      }
+    ]);
+    
+    wsData.push([]); // Baris kosong sebagai jarak
+
+    // --- 2. MEMBUAT HEADER TABEL ---
+    const headerRowData = headers.map(h => ({
+      v: h,
+      t: 's',
+      s: {
+        fill: { fgColor: { rgb: '2563EB' } }, // blue-600
+        font: { color: { rgb: 'FFFFFF' }, bold: true, sz: 11 },
+        alignment: { vertical: 'center', horizontal: 'center' },
+        border: {
+          top: { style: 'thin', color: { rgb: '1D4ED8' } },
+          bottom: { style: 'medium', color: { rgb: '1D4ED8' } },
+          left: { style: 'thin', color: { rgb: '1D4ED8' } },
+          right: { style: 'thin', color: { rgb: '1D4ED8' } }
+        }
+      }
+    }));
+    wsData.push(headerRowData);
+
+    // --- 3. MEMASUKKAN DATA & CONDITIONAL FORMATTING ---
+    rows.forEach((rowObj, index) => {
+      const rowData = headers.map(h => {
+        const val = rowObj[h];
+        const isEven = index % 2 === 0;
+        const bgColor = isEven ? 'F9FAFB' : 'FFFFFF'; // Zebra striping
+        
+        let fontColor = '1F2937'; // Default text color
+        let bold = false;
+        let italic = false;
+        let alignH = 'left';
+
+        // Conditional Formatting
+        if (h === 'No') {
+          alignH = 'center';
+        } else if (val === 'LUNAS') {
+          fontColor = '059669'; bold = true; alignH = 'center';
+        } else if (val === 'TERLAMBAT') {
+          fontColor = 'DC2626'; bold = true; alignH = 'center';
+        } else if (val === 'Belum') {
+          fontColor = '9CA3AF'; italic = true; alignH = 'center';
+        } else if (h === 'Status') {
+          alignH = 'center';
+          if (val === 'Aktif') fontColor = '059669';
+          else fontColor = '9CA3AF';
+        }
+
+        return {
+          v: val,
+          t: typeof val === 'number' ? 'n' : 's',
+          s: {
+            fill: { fgColor: { rgb: bgColor } },
+            font: { color: { rgb: fontColor }, bold, italic },
+            alignment: { vertical: 'center', horizontal: alignH, wrapText: true },
+            border: {
+              top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              right: { style: 'thin', color: { rgb: 'E5E7EB' } }
+            }
+          }
+        };
+      });
+      wsData.push(rowData);
+    });
+
+    // --- 4. GENERATE WORKSHEET & MENGATUR LEBAR/MERGE ---
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Merge untuk Judul (baris 0) dan Subjudul (baris 1) dari kolom 0 s.d 6
+    if (!ws['!merges']) ws['!merges'] = [];
+    ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } });
+    ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 6 } });
+
+    // Lebar kolom
+    ws['!cols'] = headers.map(h => {
+      if (h === 'No') return { wch: 5 };
+      if (h === 'Nama') return { wch: 30 };
+      if (h === 'Jabatan') return { wch: 20 };
+      if (h === 'Status') return { wch: 12 };
+      if (h === 'Rekap Saldo') return { wch: 35 };
+      return { wch: 15 }; // Lebar untuk bulan
+    });
+
+    // --- 5. BUNGKUS DAN DOWNLOAD ---
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Rekapitulasi");
-    XLSX.writeFile(wb, "rekapitulasi-kas.xlsx");
+    XLSX.writeFile(wb, `Rekapitulasi-Kas-KASPCC-${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   function handleExportCSV() {
