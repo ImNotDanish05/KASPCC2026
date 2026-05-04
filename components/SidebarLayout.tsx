@@ -39,7 +39,6 @@ const MENU: MenuSection[] = [
   {
     title: "Superadmin",
     items: [
-      { label: "Manajemen Roles", href: "/superadmin/roles", roles: ["Superadmin"] },
       { label: "Manajemen Jabatan", href: "/superadmin/jabatan", roles: ["Superadmin"] },
       { label: "Manajemen Anggota", href: "/superadmin/anggota", roles: ["Superadmin"] },
       { label: "Manajemen Users", href: "/superadmin/users", roles: ["Superadmin"] },

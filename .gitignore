@@ -5,6 +5,7 @@ app_summary.md
 app_revision.md
 .danish05/
 .env copy
+.env local
 .env proc
 
 # dependencies

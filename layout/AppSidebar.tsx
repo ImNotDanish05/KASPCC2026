@@ -86,11 +86,6 @@ const navItems: NavItem[] = [
     roles: [ROLE_SUPER],
     subItems: [
       {
-        name: "Manajemen Roles",
-        path: "/superadmin/roles",
-        roles: [ROLE_SUPER],
-      },
-      {
         name: "Manajemen Jabatan",
         path: "/superadmin/jabatan",
         roles: [ROLE_SUPER],

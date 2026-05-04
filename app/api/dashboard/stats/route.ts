@@ -27,39 +27,37 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
+  // ── Aggregate totals ──────────────────────────────────────────────────────
+
   const pemasukanAgg = await prisma.pemasukanKas.aggregate({
     _sum: { nominalTotal: true },
     where: { status: "VERIFIED" },
   });
 
+  // PengeluaranKas uses totalNominal; no status filter (all records count)
   const pengeluaranAgg = await prisma.pengeluaranKas.aggregate({
-    _sum: { nominal: true },
-    where: { status: "APPROVED" },
+    _sum: { totalNominal: true },
+  });
+
+  // Sum of all anggota tabungan (accumulated savings)
+  const tabunganAgg = await prisma.anggota.aggregate({
+    _sum: { tabungan: true },
   });
 
   const pendingSetoran = await prisma.pemasukanKas.count({
     where: { status: "PENDING" },
   });
 
-  const pendingTarikDana = await prisma.pengeluaranKas.count({
-    where: { status: "PENDING" },
-  });
-
   const anggotaTotal = await prisma.anggota.count();
 
-  const nunggakTotal = await prisma.anggota.count({
-    where: {
-      detailKas: {
-        none: {
-          pemasukanKas: { status: "VERIFIED" },
-        },
-      },
-    },
-  });
-
   const pemasukanTotal = pemasukanAgg._sum.nominalTotal ?? 0;
-  const pengeluaranTotal = pengeluaranAgg._sum.nominal ?? 0;
-  const saldoKas = pemasukanTotal - pengeluaranTotal;
+  const pengeluaranTotal = pengeluaranAgg._sum.totalNominal ?? 0;
+  const tabunganTotal = tabunganAgg._sum.tabungan ?? 0;
+
+  // Saldo = Pemasukan (verified) - Pengeluaran + Tabungan (anggota savings)
+  const saldoKas = pemasukanTotal - pengeluaranTotal + tabunganTotal;
+
+  // ── Grafik 6 Bulan Terakhir ───────────────────────────────────────────────
 
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
@@ -79,37 +77,24 @@ export async function GET(_req: NextRequest) {
       status: "VERIFIED",
       createdAt: { gte: startDate },
     },
-    select: {
-      createdAt: true,
-      nominalTotal: true,
-    },
+    select: { createdAt: true, nominalTotal: true },
   });
 
   for (const row of pemasukanRows) {
     const key = buildMonthKey(row.createdAt);
     const bucket = monthBuckets.get(key);
-    if (bucket) {
-      bucket.pemasukan_total += row.nominalTotal;
-    }
+    if (bucket) bucket.pemasukan_total += row.nominalTotal;
   }
 
   const pengeluaranRows = await prisma.pengeluaranKas.findMany({
-    where: {
-      status: "APPROVED",
-      createdAt: { gte: startDate },
-    },
-    select: {
-      createdAt: true,
-      nominal: true,
-    },
+    where: { createdAt: { gte: startDate } },
+    select: { createdAt: true, totalNominal: true },
   });
 
   for (const row of pengeluaranRows) {
     const key = buildMonthKey(row.createdAt);
     const bucket = monthBuckets.get(key);
-    if (bucket) {
-      bucket.pengeluaran_total += row.nominal;
-    }
+    if (bucket) bucket.pengeluaran_total += row.totalNominal;
   }
 
   const grafikKas: ChartPoint[] = Array.from(monthBuckets.values());
@@ -118,11 +103,9 @@ export async function GET(_req: NextRequest) {
     data: {
       saldo_kas: saldoKas,
       pemasukan_verified: pemasukanTotal,
-      pengeluaran_approved: pengeluaranTotal,
+      pengeluaran_total: pengeluaranTotal,
       pending_setoran: pendingSetoran,
-      pending_tarik_dana: pendingTarikDana,
       anggota_total: anggotaTotal,
-      nunggak_total: nunggakTotal,
       grafik_kas: grafikKas,
     },
   });
