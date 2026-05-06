@@ -137,14 +137,14 @@ export async function deleteJabatan(id: number): Promise<ActionResult> {
   try {
     await requireSuperadmin();
 
-    // Check if any anggota is assigned this jabatan
-    const anggotaWithJabatan = await prisma.anggota.findFirst({
+    const hasKasHistory = await prisma.pemasukanKas.findFirst({
       where: { jabatanId: id },
+      select: { id: true },
     });
-    if (anggotaWithJabatan) {
+    if (hasKasHistory) {
       return {
         success: false,
-        error: "Cannot delete jabatan: it is still assigned to one or more anggota. Reassign them first.",
+        error: "Cannot delete jabatan: it has existing kas history records.",
       };
     }
 
@@ -153,5 +153,113 @@ export async function deleteJabatan(id: number): Promise<ActionResult> {
     return { success: true, data: null };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
+// ---------- BULK IMPORT ----------
+
+export interface BulkImportJabatanInput {
+  namaJabatan: string;
+  kategori: string;
+}
+
+export interface BulkImportResult {
+  success: boolean;
+  createdCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  errorCount: number;
+  errors: Array<{
+    rowIndex: number;
+    namaJabatan?: string;
+    error: string;
+  }>;
+}
+
+export async function bulkCreateJabatans(
+  data: BulkImportJabatanInput[],
+): Promise<ActionResult<BulkImportResult>> {
+  try {
+    await requireSuperadmin();
+
+    let createdCount = 0;
+    let updatedCount = 0;
+    const skippedCount = 0;
+    let errorCount = 0;
+    const errors: Array<{ rowIndex: number; namaJabatan?: string; error: string }> = [];
+
+    for (let index = 0; index < data.length; index++) {
+      const row = data[index];
+      const namaJabatan = row.namaJabatan?.trim();
+      const kategori = row.kategori?.trim().toUpperCase();
+
+      if (!namaJabatan || !kategori) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          namaJabatan,
+          error: "Missing required fields (Nama Jabatan or Kategori)",
+        });
+        continue;
+      }
+
+      if (!VALID_KATEGORI.includes(kategori as JabatanKategori)) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          namaJabatan,
+          error: `Invalid kategori. Must be one of: ${VALID_KATEGORI.join(", ")}`,
+        });
+        continue;
+      }
+
+      try {
+        const existing = await prisma.jabatan.findFirst({
+          where: {
+            namaJabatan,
+            kategori: kategori as JabatanKategori,
+          },
+        });
+
+        if (existing) {
+          await prisma.jabatan.update({
+            where: { id: existing.id },
+            data: { namaJabatan, kategori: kategori as JabatanKategori },
+          });
+          updatedCount++;
+        } else {
+          await prisma.jabatan.create({
+            data: { namaJabatan, kategori: kategori as JabatanKategori },
+          });
+          createdCount++;
+        }
+      } catch (rowErr) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          namaJabatan,
+          error: rowErr instanceof Error ? rowErr.message : "Unknown error",
+        });
+      }
+    }
+
+    revalidatePath("/superadmin/jabatan");
+
+    return {
+      success: true,
+      data: {
+        success: errorCount === 0,
+        createdCount,
+        updatedCount,
+        skippedCount,
+        errorCount,
+        errors,
+      },
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
   }
 }

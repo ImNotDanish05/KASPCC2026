@@ -25,9 +25,9 @@ model Anggota {
   tabungan    Int                  @default(0)
   lunasSampai DateTime?            @map("lunas_sampai")
   noTelepon   String               @map("no_telepon")
-  jabatanId   Int                  @map("jabatan_id")
+  jabatanId   Int?                 @map("jabatan_id")
   statusAktif Boolean              @default(true) @map("status_aktif")
-  jabatan     Jabatan              @relation(fields: [jabatanId], references: [id])
+  jabatan     Jabatan?             @relation(fields: [jabatanId], references: [id], onDelete: SetNull)
   detailKas   DetailPemasukanKas[]
   user        User?
 
@@ -36,13 +36,13 @@ model Anggota {
 
 model User {
   id          Int              @id @default(autoincrement())
-  anggotaId   Int              @unique @map("anggota_id")
+  anggotaId   Int?             @unique @map("anggota_id")
   username    String           @unique
   password    String
   roles       ModelHasRole[]
   pemasukan   PemasukanKas[]
   pengeluaran PengeluaranKas[]
-  anggota     Anggota          @relation(fields: [anggotaId], references: [id])
+  anggota     Anggota?         @relation(fields: [anggotaId], references: [id], onDelete: SetNull)
 
   @@map("users")
 }

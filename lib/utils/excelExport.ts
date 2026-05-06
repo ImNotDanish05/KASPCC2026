@@ -7,8 +7,19 @@
 export interface ExportColumnDef {
   key: string;
   label: string;
+  valueGetter?: (row: Record<string, any>) => any;
   // For relational fields, specify how to flatten them
   relationshipType?: "simple" | "anggota" | "jabatan" | "user" | "roles";
+}
+
+export interface ImportTemplateColumnDef {
+  key: string;
+  label: string;
+  sample?: string | number | boolean;
+}
+
+function getNestedValue(obj: Record<string, any>, path: string) {
+  return path.split(".").reduce((acc, part) => acc?.[part], obj);
 }
 
 /**
@@ -70,7 +81,7 @@ export function exportToExcel(
   const transformedData = data.map((row) => {
     const newRow: Record<string, any> = {};
     columns.forEach((col) => {
-      const value = row[col.key];
+      const value = col.valueGetter ? col.valueGetter(row) : getNestedValue(row, col.key);
 
       // Flatten relational data based on type
       if (col.relationshipType) {
@@ -94,6 +105,27 @@ export function exportToExcel(
   worksheet["!cols"] = columnWidths;
 
   // Generate file
+  XLSX.writeFile(workbook, `${filename}.xlsx`);
+}
+
+export function exportImportTemplate(
+  filename: string,
+  columns: ImportTemplateColumnDef[],
+) {
+  const XLSX = require("xlsx");
+
+  const sampleRow = columns.reduce<Record<string, any>>((acc, column) => {
+    acc[column.label] = column.sample ?? "";
+    return acc;
+  }, {});
+
+  const worksheet = XLSX.utils.json_to_sheet([sampleRow]);
+  worksheet["!cols"] = columns.map((column) => ({
+    wch: Math.max(column.label.length, String(column.sample ?? "").length, 15),
+  }));
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
   XLSX.writeFile(workbook, `${filename}.xlsx`);
 }
 

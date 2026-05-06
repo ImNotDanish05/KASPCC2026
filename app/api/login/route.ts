@@ -43,11 +43,18 @@ export async function POST(req: NextRequest) {
   }
 
   const roles = user.roles.map((entry: { role: { name: string } }) => entry.role.name);
+  if (!user.anggota) {
+    return NextResponse.json(
+      { error: "User account is not linked to an anggota record." },
+      { status: 403 },
+    );
+  }
+
   const { token, expiresIn } = await signAuthToken({
     userId: user.id,
     username: user.username,
     roles,
-    anggotaId: user.anggotaId,
+    anggotaId: user.anggota.id,
   });
 
   const response = NextResponse.json({

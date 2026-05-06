@@ -72,6 +72,7 @@ type AnggotaInput = {
   noTelepon: string;
   jabatanId: number;
   statusAktif: boolean;
+  tabungan?: number;
 };
 
 export async function createAnggota(input: AnggotaInput): Promise<ActionResult> {
@@ -81,11 +82,15 @@ export async function createAnggota(input: AnggotaInput): Promise<ActionResult> 
     const nim = input.nim.trim();
     const nama = input.nama.trim();
     const noTelepon = input.noTelepon.trim();
+    const tabungan = input.tabungan ?? 0;
 
     if (!nim) return { success: false, error: "NIM is required" };
     if (!nama) return { success: false, error: "Nama is required" };
     if (!noTelepon) return { success: false, error: "No. Telepon is required" };
     if (!input.jabatanId) return { success: false, error: "Jabatan is required" };
+    if (!Number.isFinite(tabungan) || tabungan < 0) {
+      return { success: false, error: "Tabungan must be a non-negative number" };
+    }
 
     // Check NIM uniqueness
     const existingNim = await prisma.anggota.findUnique({ where: { nim } });
@@ -106,6 +111,7 @@ export async function createAnggota(input: AnggotaInput): Promise<ActionResult> 
         noTelepon,
         jabatanId: input.jabatanId,
         statusAktif: input.statusAktif,
+        tabungan,
       },
     });
 
@@ -128,11 +134,15 @@ export async function updateAnggota(
     const nim = input.nim.trim();
     const nama = input.nama.trim();
     const noTelepon = input.noTelepon.trim();
+    const tabungan = input.tabungan;
 
     if (!nim) return { success: false, error: "NIM is required" };
     if (!nama) return { success: false, error: "Nama is required" };
     if (!noTelepon) return { success: false, error: "No. Telepon is required" };
     if (!input.jabatanId) return { success: false, error: "Jabatan is required" };
+    if (tabungan !== undefined && (!Number.isFinite(tabungan) || tabungan < 0)) {
+      return { success: false, error: "Tabungan must be a non-negative number" };
+    }
 
     // Check NIM uniqueness (excluding current)
     const existingNim = await prisma.anggota.findFirst({
@@ -156,6 +166,7 @@ export async function updateAnggota(
         noTelepon,
         jabatanId: input.jabatanId,
         statusAktif: input.statusAktif,
+        ...(tabungan !== undefined ? { tabungan } : {}),
       },
     });
 
@@ -171,15 +182,6 @@ export async function updateAnggota(
 export async function deleteAnggota(id: number): Promise<ActionResult> {
   try {
     await requireSuperadmin();
-
-    // Check if anggota has a linked user account
-    const linkedUser = await prisma.user.findUnique({ where: { anggotaId: id } });
-    if (linkedUser) {
-      return {
-        success: false,
-        error: "Cannot delete anggota: they have a linked user account. Delete the user first.",
-      };
-    }
 
     // Check if anggota has payment detail records
     const hasPayments = await prisma.detailPemasukanKas.findFirst({
@@ -208,6 +210,7 @@ export interface BulkImportAnggotaInput {
   noTelepon: string;
   jabatan?: string; // Will be looked up by namaJabatan
   statusAktif?: boolean;
+  tabungan?: number;
 }
 
 export interface BulkImportResult {
@@ -239,6 +242,7 @@ export async function bulkCreateAnggota(
       const nama = row.nama?.trim();
       const noTelepon = row.noTelepon?.trim();
       const statusAktif = row.statusAktif !== false;
+      const tabungan = row.tabungan ?? 0;
 
       // Validation
       if (!nim || !nama || !noTelepon) {
@@ -250,20 +254,17 @@ export async function bulkCreateAnggota(
         });
         continue;
       }
+      if (!Number.isFinite(tabungan) || tabungan < 0) {
+        errorCount++;
+        errors.push({
+          rowIndex: index + 1,
+          nim,
+          error: "Tabungan must be a non-negative number",
+        });
+        continue;
+      }
 
       try {
-        // Check if NIM already exists
-        const existingNim = await prisma.anggota.findUnique({ where: { nim } });
-        if (existingNim) {
-          skippedCount++;
-          errors.push({
-            rowIndex: index + 1,
-            nim,
-            error: `NIM "${nim}" already exists (skipped)`,
-          });
-          continue;
-        }
-
         // Lookup jabatan by name (required field)
         let jabatanId: number | null = null;
         if (row.jabatan) {
@@ -293,6 +294,22 @@ export async function bulkCreateAnggota(
           continue;
         }
 
+        const existingNim = await prisma.anggota.findUnique({ where: { nim } });
+        if (existingNim) {
+          await prisma.anggota.update({
+            where: { nim },
+            data: {
+              nama,
+              noTelepon,
+              jabatanId,
+              statusAktif,
+              tabungan,
+            },
+          });
+          skippedCount++;
+          continue;
+        }
+
         // Create anggota (jabatanId is guaranteed to be a number here)
         await prisma.anggota.create({
           data: {
@@ -301,6 +318,7 @@ export async function bulkCreateAnggota(
             noTelepon,
             jabatanId,
             statusAktif,
+            tabungan,
           },
         });
 

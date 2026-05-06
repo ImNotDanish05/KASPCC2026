@@ -21,7 +21,12 @@ import {
   ArrowDown,
   ArrowUpDown,
 } from "lucide-react";
-import { exportToExcel, ExportColumnDef } from "@/lib/utils/excelExport";
+import {
+  exportImportTemplate,
+  exportToExcel,
+  ExportColumnDef,
+  ImportTemplateColumnDef,
+} from "@/lib/utils/excelExport";
 import { parseExcelFile } from "@/lib/utils/excelImport";
 
 // ─────────────────────────────────────────────────────────────────
@@ -29,7 +34,7 @@ import { parseExcelFile } from "@/lib/utils/excelImport";
 export interface FilterConfig {
   key: string;      // Kolom yang akan difilter (misal: 'jabatan.kategori')
   label: string;    // Label di samping dropdown
-  options: { label: string; value: string }[];
+  options?: { label: string; value: string }[];
 }
 
 export interface ColumnDef {
@@ -53,6 +58,9 @@ export interface EnhancedDataTableProps {
   importMapping?: Record<string, string>; // Maps import columns to data keys
   exportFilename?: string;
   exportColumns?: ExportColumnDef[]; // Special export column definitions with relationship types
+  onExportCSV?: (data: Record<string, any>[]) => void;
+  importTemplateColumns?: ImportTemplateColumnDef[];
+  importTemplateFilename?: string;
   createButtonLabel?: string;
   showExport?: boolean;
   showImport?: boolean;
@@ -77,6 +85,9 @@ export default function EnhancedDataTable({
   importMapping = {},
   exportFilename = "export",
   exportColumns,
+  onExportCSV,
+  importTemplateColumns,
+  importTemplateFilename,
   createButtonLabel = "Add",
   showExport = true,
   showImport = true,
@@ -205,6 +216,14 @@ export default function EnhancedDataTable({
     exportToExcel(exportFilename, sortedData, cols);
   }
 
+  function handleTemplateDownload() {
+    if (!importTemplateColumns?.length) return;
+    exportImportTemplate(
+      importTemplateFilename || `${exportFilename}_import_template`,
+      importTemplateColumns,
+    );
+  }
+
   // Handle import
   async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -280,6 +299,16 @@ export default function EnhancedDataTable({
               onClick={handleExport}
             >
               Export
+            </Button>
+          )}
+          {showExport && onExportCSV && (
+            <Button
+              variant="outline"
+              size="sm"
+              startIcon={<Download className="h-4 w-4" />}
+              onClick={() => onExportCSV(sortedData)}
+            >
+              Export CSV
             </Button>
           )}
           {showImport && (
@@ -447,6 +476,17 @@ export default function EnhancedDataTable({
         </p>
 
         <div className="mb-4 space-y-4">
+          {importTemplateColumns && importTemplateColumns.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              startIcon={<Download className="h-4 w-4" />}
+              onClick={handleTemplateDownload}
+            >
+              Download Template
+            </Button>
+          )}
+
           {/* File Input */}
           <div>
             <label

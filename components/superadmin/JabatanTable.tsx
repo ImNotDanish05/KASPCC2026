@@ -7,11 +7,13 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
 import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
+import { ExportColumnDef } from "@/lib/utils/excelExport";
 import {
   getJabatans,
   createJabatan,
   updateJabatan,
   deleteJabatan,
+  bulkCreateJabatans,
 } from "@/lib/actions/jabatan.actions";
 import { Pencil, Trash2, Plus, AlertCircle } from "lucide-react";
 
@@ -37,6 +39,14 @@ const KATEGORI_BADGE: Record<string, string> = {
     "bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400",
   INTI:
     "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+};
+
+const readImportValue = (row: Record<string, any>, keys: string[]) => {
+  for (const key of keys) {
+    const value = row[key];
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return undefined;
 };
 
 // ----- component -----
@@ -160,6 +170,30 @@ export default function JabatanTable() {
     }
   }
 
+  // ----- IMPORT -----
+
+  async function handleImport(importedData: Record<string, any>[]) {
+    try {
+      const mappedData = importedData.map((row) => ({
+        namaJabatan: String(readImportValue(row, ["Nama Jabatan", "namaJabatan"]) ?? ""),
+        kategori: String(readImportValue(row, ["Kategori", "kategori"]) ?? ""),
+      }));
+
+      const result = await bulkCreateJabatans(mappedData);
+      if (result.success && result.data) {
+        const summary = result.data;
+        setError(
+          `Import selesai: ${summary.createdCount} dibuat, ${summary.updatedCount} diperbarui, ${summary.errorCount} gagal.`,
+        );
+        fetchData();
+      } else {
+        setError(result.success ? "Import failed" : result.error);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import error");
+    }
+  }
+
   // ----- RENDER -----
 
   // Define columns for EnhancedDataTable
@@ -217,6 +251,16 @@ export default function JabatanTable() {
     },
   ];
 
+  const jabatanExportColumns: ExportColumnDef[] = [
+    { key: "namaJabatan", label: "Nama Jabatan" },
+    { key: "kategori", label: "Kategori" },
+    {
+      key: "anggotas",
+      label: "Jumlah Anggota",
+      valueGetter: (jabatan) => Array.isArray(jabatan.anggotas) ? jabatan.anggotas.length : 0,
+    },
+  ];
+
   return (
     <div className="space-y-6">
 
@@ -236,6 +280,14 @@ export default function JabatanTable() {
         description="Kelola jabatan, kredensial, dan jabatan assignments"
         loading={loading}
         onCreateClick={openCreateModal}
+        onImport={handleImport}
+        exportFilename="jabatan_export"
+        exportColumns={jabatanExportColumns}
+        importTemplateFilename="jabatan_import_template"
+        importTemplateColumns={[
+          { key: "namaJabatan", label: "Nama Jabatan", sample: "Ketua Divisi" },
+          { key: "kategori", label: "Kategori", sample: "DIVISI" },
+        ]}
         searchPlaceholder="Cari berdasarkan jabatan name..."
       />
 

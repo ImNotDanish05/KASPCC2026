@@ -39,18 +39,22 @@ export async function GET(req: NextRequest) {
       id: user.id,
       username: user.username,
       roles,
-      anggota: {
-        id: user.anggota.id,
-        nim: user.anggota.nim,
-        nama: user.anggota.nama,
-        noTelepon: user.anggota.noTelepon,
-        jabatanId: user.anggota.jabatanId,
-        jabatan: {
-          id: user.anggota.jabatan.id,
-          namaJabatan: user.anggota.jabatan.namaJabatan,
-          kategori: user.anggota.jabatan.kategori,
-        },
-      },
+      anggota: user.anggota
+        ? {
+            id: user.anggota.id,
+            nim: user.anggota.nim,
+            nama: user.anggota.nama,
+            noTelepon: user.anggota.noTelepon,
+            jabatanId: user.anggota.jabatanId,
+            jabatan: user.anggota.jabatan
+              ? {
+                  id: user.anggota.jabatan.id,
+                  namaJabatan: user.anggota.jabatan.namaJabatan,
+                  kategori: user.anggota.jabatan.kategori,
+                }
+              : null,
+          }
+        : null,
     },
   });
 }

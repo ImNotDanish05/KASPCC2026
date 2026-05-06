@@ -56,6 +56,14 @@ type RoleOption = {
   name: string;
 };
 
+const readImportValue = (row: Record<string, any>, keys: string[]) => {
+  for (const key of keys) {
+    const value = row[key];
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return undefined;
+};
+
 // ----- component -----
 
 export default function UsersTable() {
@@ -171,7 +179,8 @@ export default function UsersTable() {
 
   const usersExportColumns: ExportColumnDef[] = [
     { key: "username", label: "Username" },
-    { key: "anggota", label: "NIM", relationshipType: "anggota" },
+    { key: "anggota.nama", label: "Nama Anggota" },
+    { key: "anggota.nim", label: "NIM" },
     { key: "roles", label: "Roles", relationshipType: "roles" },
   ];
 
@@ -342,10 +351,10 @@ export default function UsersTable() {
     try {
       // Map imported data to BulkImportUserInput format
       const mappedData = importedData.map((row) => ({
-        username: row.username || row.Username,
-        password: row.password || row.Password || "pcc2026", // Default password if not provided
-        anggota: row.nim || row.NIM || undefined,
-        roles: row.roles || row.Roles || undefined,
+        username: String(readImportValue(row, ["Username", "username"]) ?? ""),
+        password: readImportValue(row, ["Password", "password"])?.toString(),
+        anggota: readImportValue(row, ["NIM", "nim"])?.toString(),
+        roles: readImportValue(row, ["Roles", "roles"])?.toString(),
       }));
 
       const result = await bulkCreateUsers(mappedData);
@@ -354,10 +363,10 @@ export default function UsersTable() {
         const summary = result.data;
         if (summary.errorCount > 0) {
           setError(
-            `Import completed with errors: ${summary.createdCount} created, ${summary.errorCount} failed, ${summary.skippedCount} skipped. Check errors below.`
+            `Import completed with errors: ${summary.createdCount} created, ${summary.updatedCount ?? 0} updated, ${summary.errorCount} failed, ${summary.skippedCount} skipped.`
           );
         } else {
-          setError(`Successfully imported ${summary.createdCount} users!`);
+          setError(`Successfully imported ${summary.createdCount} created and ${summary.updatedCount ?? 0} updated users!`);
         }
         fetchData();
       } else {
@@ -451,6 +460,13 @@ export default function UsersTable() {
         onImport={handleImport}
         exportFilename="users_export"
         exportColumns={usersExportColumns}
+        importTemplateFilename="users_import_template"
+        importTemplateColumns={[
+          { key: "username", label: "Username", sample: "ahmad.fauzi" },
+          { key: "password", label: "Password", sample: "password" },
+          { key: "nim", label: "NIM", sample: "12345678" },
+          { key: "roles", label: "Roles", sample: "Superadmin" },
+        ]}
         createButtonLabel="Add User"
         showExport={true}
         showImport={true}

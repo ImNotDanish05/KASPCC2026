@@ -14,6 +14,7 @@ import {
   createAnggota,
   updateAnggota,
   deleteAnggota,
+  bulkCreateAnggota,
 } from "@/lib/actions/anggota.actions";
 import {
   Pencil,
@@ -37,9 +38,10 @@ type AnggotaRow = {
   nim: string;
   nama: string;
   noTelepon: string;
-  jabatanId: number;
+  tabungan: number;
+  jabatanId: number | null;
   statusAktif: boolean;
-  jabatan: JabatanOption;
+  jabatan: JabatanOption | null;
   user: { id: number; username: string } | null;
 };
 
@@ -47,6 +49,36 @@ const KATEGORI_BADGE: Record<string, string> = {
   DIVISI: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
   DEPARTEMEN: "bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400",
   INTI: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+};
+
+const formatRupiah = (value: number) =>
+  `Rp ${new Intl.NumberFormat("id-ID").format(value || 0)}`;
+
+const escapeCSVValue = (value: string | number | boolean | null | undefined) => {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+const readImportValue = (row: Record<string, any>, keys: string[]) => {
+  for (const key of keys) {
+    const value = row[key];
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return undefined;
+};
+
+const parseImportNumber = (value: unknown, fallback = 0) => {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "number") return value;
+  const normalized = String(value).replace(/[^\d-]/g, "");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const parseStatusAktif = (value: unknown) => {
+  if (value === undefined || value === null || value === "") return true;
+  const normalized = String(value).trim().toLowerCase();
+  return !["false", "0", "tidak aktif", "nonaktif", "inactive"].includes(normalized);
 };
 
 // ----- component -----
@@ -150,7 +182,7 @@ export default function AnggotaTable() {
     setFormNim(anggota.nim);
     setFormNama(anggota.nama);
     setFormTelepon(anggota.noTelepon);
-    setFormJabatanId(String(anggota.jabatanId));
+    setFormJabatanId(anggota.jabatanId ? String(anggota.jabatanId) : "");
     setFormStatusAktif(anggota.statusAktif);
     setFormError("");
     setShowEditModal(true);
@@ -201,6 +233,62 @@ export default function AnggotaTable() {
       fetchData();
     } else {
       setFormError(result.error);
+    }
+  }
+
+  // ----- IMPORT / EXPORT -----
+
+  function handleExportCSV(rows: Record<string, any>[]) {
+    const headers = ["NIM", "Nama", "No. Telepon", "Jabatan", "Status Aktif", "User Account", "Tabungan"];
+    const csvRows = [
+      headers.map(escapeCSVValue).join(","),
+      ...(rows as AnggotaRow[]).map((anggota) =>
+        [
+          anggota.nim,
+          anggota.nama,
+          anggota.noTelepon,
+          anggota.jabatan?.namaJabatan ?? "",
+          anggota.statusAktif ? "Aktif" : "Tidak Aktif",
+          anggota.user?.username ?? "",
+          formatRupiah(anggota.tabungan),
+        ]
+          .map(escapeCSVValue)
+          .join(","),
+      ),
+    ];
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "anggota_export.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImport(importedData: Record<string, any>[]) {
+    try {
+      const mappedData = importedData.map((row) => ({
+        nim: String(readImportValue(row, ["NIM", "nim"]) ?? ""),
+        nama: String(readImportValue(row, ["Nama", "nama"]) ?? ""),
+        noTelepon: String(readImportValue(row, ["No. Telepon", "noTelepon", "No Telepon"]) ?? ""),
+        jabatan: String(readImportValue(row, ["Jabatan", "jabatan"]) ?? ""),
+        statusAktif: parseStatusAktif(readImportValue(row, ["Status Aktif", "statusAktif"])),
+        tabungan: parseImportNumber(readImportValue(row, ["Tabungan", "tabungan"]), 0),
+      }));
+
+      const result = await bulkCreateAnggota(mappedData);
+      if (result.success && result.data) {
+        const summary = result.data;
+        setError(
+          `Import selesai: ${summary.createdCount} dibuat, ${summary.skippedCount} diperbarui/dilewati, ${summary.errorCount} gagal.`,
+        );
+        fetchData();
+      } else {
+        setError(result.success ? "Import failed" : result.error);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import error");
     }
   }
 
@@ -303,16 +391,28 @@ export default function AnggotaTable() {
       render: (value: any, anggota: AnggotaRow) => (
         <div className="flex flex-col gap-1">
           <span className="font-medium text-gray-700 dark:text-white/80">
-            {anggota.jabatan.namaJabatan}
+            {anggota.jabatan?.namaJabatan ?? "Tanpa Jabatan"}
           </span>
-          <span
-            className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-              KATEGORI_BADGE[anggota.jabatan.kategori] ?? ""
-            }`}
-          >
-            {anggota.jabatan.kategori}
-          </span>
+          {anggota.jabatan ? (
+            <span
+              className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                KATEGORI_BADGE[anggota.jabatan.kategori] ?? ""
+              }`}
+            >
+              {anggota.jabatan.kategori}
+            </span>
+          ) : null}
         </div>
+      ),
+    },
+    {
+      key: "tabungan",
+      label: "Tabungan",
+      sortable: true,
+      render: (value: any, anggota: AnggotaRow) => (
+        <span className="font-medium text-gray-700 dark:text-white/80">
+          {formatRupiah(anggota.tabungan)}
+        </span>
       ),
     },
     {
@@ -378,6 +478,7 @@ export default function AnggotaTable() {
     { key: "jabatan", label: "Jabatan", relationshipType: "jabatan" },
     { key: "statusAktif", label: "Status Aktif" },
     { key: "user", label: "User Account", relationshipType: "user" },
+    { key: "tabungan", label: "Tabungan" },
   ];
 
   return (
@@ -399,7 +500,19 @@ export default function AnggotaTable() {
         description="Kelola anggota, kredensial, dan anggota assignments"
         loading={loading}
         onCreateClick={openCreateModal}
+        onImport={handleImport}
+        onExportCSV={handleExportCSV}
+        exportFilename="anggota_export"
         exportColumns={anggotaExportColumns}
+        importTemplateFilename="anggota_import_template"
+        importTemplateColumns={[
+          { key: "nim", label: "NIM", sample: "12345678" },
+          { key: "nama", label: "Nama", sample: "Ahmad Fauzi" },
+          { key: "noTelepon", label: "No. Telepon", sample: "081234567890" },
+          { key: "jabatan", label: "Jabatan", sample: "Ketua Divisi" },
+          { key: "statusAktif", label: "Status Aktif", sample: "Aktif" },
+          { key: "tabungan", label: "Tabungan", sample: 0 },
+        ]}
         searchPlaceholder="Cari berdasarkan anggota name..."
       />
 

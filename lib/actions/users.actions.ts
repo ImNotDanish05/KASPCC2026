@@ -375,8 +375,22 @@ export async function deleteUser(userId: number): Promise<ActionResult> {
       return { success: false, error: "User not found" };
     }
 
-    // Delete user (cascade will handle ModelHasRole)
-    await prisma.user.delete({ where: { id: userId } });
+    const [hasPemasukan, hasPengeluaran] = await Promise.all([
+      prisma.pemasukanKas.findFirst({ where: { userId }, select: { id: true } }),
+      prisma.pengeluaranKas.findFirst({ where: { userId }, select: { id: true } }),
+    ]);
+
+    if (hasPemasukan || hasPengeluaran) {
+      return {
+        success: false,
+        error: "Cannot delete user: they have existing kas history records.",
+      };
+    }
+
+    await prisma.$transaction([
+      prisma.modelHasRole.deleteMany({ where: { userId } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
 
     revalidatePath("/superadmin/users");
     return { success: true, data: { id: userId } };
@@ -400,6 +414,7 @@ export interface BulkImportUserInput {
 export interface BulkImportResult {
   success: boolean;
   createdCount: number;
+  updatedCount?: number;
   skippedCount: number;
   errorCount: number;
   errors: Array<{
@@ -416,6 +431,7 @@ export async function bulkCreateUsers(
     await requireSuperadmin();
 
     let createdCount = 0;
+    let updatedCount = 0;
     let skippedCount = 0;
     let errorCount = 0;
     const errors: Array<{ rowIndex: number; username?: string; error: string }> = [];
@@ -426,17 +442,17 @@ export async function bulkCreateUsers(
       const password = row.password?.trim();
 
       // Validation
-      if (!username || !password) {
+      if (!username) {
         errorCount++;
         errors.push({
           rowIndex: index + 1,
           username,
-          error: "Missing required fields (username or password)",
+          error: "Missing required field (username)",
         });
         continue;
       }
 
-      if (password.length < 6) {
+      if (password && password.length < 6) {
         errorCount++;
         errors.push({
           rowIndex: index + 1,
@@ -447,32 +463,26 @@ export async function bulkCreateUsers(
       }
 
       try {
-        // Check username uniqueness
-        const existingUsername = await prisma.user.findUnique({
+        const existingUserByUsername = await prisma.user.findUnique({
           where: { username },
         });
-        if (existingUsername) {
-          skippedCount++;
-          errors.push({
-            rowIndex: index + 1,
-            username,
-            error: `Username "${username}" already exists (skipped)`,
-          });
-          continue;
-        }
 
         // Lookup anggota by NIM
         let anggotaId: number | null = null;
+        let shouldUpdateAnggota = false;
         if (row.anggota) {
           const anggota = await prisma.anggota.findUnique({
             where: { nim: row.anggota.trim() },
           });
           if (anggota) {
             // Check anggota not already linked to another user
-            const existingUser = await prisma.user.findUnique({
+            const existingLinkedUser = await prisma.user.findUnique({
               where: { anggotaId: anggota.id },
             });
-            if (existingUser) {
+            if (
+              existingLinkedUser &&
+              existingLinkedUser.id !== existingUserByUsername?.id
+            ) {
               errorCount++;
               errors.push({
                 rowIndex: index + 1,
@@ -482,6 +492,7 @@ export async function bulkCreateUsers(
               continue;
             }
             anggotaId = anggota.id;
+            shouldUpdateAnggota = true;
           } else {
             // Gracefully skip if anggota not found
             errorCount++;
@@ -523,43 +534,66 @@ export async function bulkCreateUsers(
           }
         }
 
-        // At least one role is required if anggota is provided
-        if (anggotaId && roleIds.length === 0) {
+        if (!existingUserByUsername && roleIds.length === 0) {
           errorCount++;
           errors.push({
             rowIndex: index + 1,
             username,
-            error: "At least one role is required when anggota is provided",
+            error: "At least one role is required for new users",
           });
           continue;
         }
 
-        // Hash password
-        const hashedPassword = await bcryptjs.hash(password, 10);
+        if (existingUserByUsername) {
+          const updateData: any = {};
+          if (password) {
+            updateData.password = await bcryptjs.hash(password, 10);
+          }
+          if (shouldUpdateAnggota) {
+            updateData.anggotaId = anggotaId;
+          }
 
-        // Create user with optional anggota and roles
-        const createData: any = {
-          username,
-          password: hashedPassword,
-        };
+          await prisma.$transaction(async (tx) => {
+            if (Object.keys(updateData).length > 0) {
+              await tx.user.update({
+                where: { id: existingUserByUsername.id },
+                data: updateData,
+              });
+            }
 
-        if (anggotaId) {
-          createData.anggotaId = anggotaId;
-        }
+            if (row.roles !== undefined) {
+              await tx.modelHasRole.deleteMany({
+                where: { userId: existingUserByUsername.id },
+              });
+              if (roleIds.length > 0) {
+                await tx.modelHasRole.createMany({
+                  data: roleIds.map((roleId) => ({
+                    userId: existingUserByUsername.id,
+                    roleId,
+                  })),
+                });
+              }
+            }
+          });
 
-        if (roleIds.length > 0) {
-          createData.roles = {
-            createMany: {
-              data: roleIds.map((roleId) => ({ roleId })),
+          updatedCount++;
+        } else {
+          const hashedPassword = await bcryptjs.hash(password || "password", 10);
+          await prisma.user.create({
+            data: {
+              username,
+              password: hashedPassword,
+              ...(shouldUpdateAnggota ? { anggotaId } : {}),
+              roles: {
+                createMany: {
+                  data: roleIds.map((roleId) => ({ roleId })),
+                },
+              },
             },
-          };
+          });
+
+          createdCount++;
         }
-
-        await prisma.user.create({
-          data: createData,
-        });
-
-        createdCount++;
       } catch (rowErr) {
         errorCount++;
         errors.push({
@@ -577,6 +611,7 @@ export async function bulkCreateUsers(
       data: {
         success: errorCount === 0,
         createdCount,
+        updatedCount,
         skippedCount,
         errorCount,
         errors,
