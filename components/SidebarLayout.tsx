@@ -45,6 +45,13 @@ const MENU: MenuSection[] = [
       { label: "Pengaturan Sistem", href: "/admin/settings", roles: ["Superadmin"] },
     ],
   },
+  {
+    title: "Informasi",
+    items: [
+      { label: "Tutorial", href: "/informasi/tutorial", roles: ["Superadmin", "Bendahara Inti", "Bendahara DivisiDept"] },
+      { label: "Credits", href: "/informasi/credits", roles: ["Superadmin", "Bendahara Inti", "Bendahara DivisiDept"] },
+    ],
+  },
 ];
 
 type SidebarLayoutProps = {

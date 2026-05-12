@@ -11,6 +11,7 @@ import {
   DocsIcon,
   GridIcon,
   HorizontaLDots,
+  InfoIcon,
   ListIcon,
   UserCircleIcon,
 } from "@/icons";
@@ -77,6 +78,23 @@ const navItems: NavItem[] = [
         name: "Pengeluaran KAS",
         path: "/kas/pengeluaran",
         roles: [ROLE_INTERNAL, ROLE_SUPER],
+      },
+    ],
+  },
+  {
+    name: "Informasi",
+    icon: <InfoIcon />,
+    roles: [ROLE_SUPER, ROLE_INTERNAL, ROLE_EXTERNAL],
+    subItems: [
+      {
+        name: "Tutorial",
+        path: "/informasi/tutorial",
+        roles: [ROLE_SUPER, ROLE_INTERNAL, ROLE_EXTERNAL],
+      },
+      {
+        name: "Credits",
+        path: "/informasi/credits",
+        roles: [ROLE_SUPER, ROLE_INTERNAL, ROLE_EXTERNAL],
       },
     ],
   },
