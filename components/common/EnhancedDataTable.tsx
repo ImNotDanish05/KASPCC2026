@@ -354,8 +354,8 @@ export default function EnhancedDataTable({
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="overflow-x-auto">
+      <div className="w-full max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="w-full max-w-full overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="border-b border-gray-100 dark:border-gray-800">

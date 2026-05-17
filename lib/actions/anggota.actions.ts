@@ -38,6 +38,14 @@ export async function getAnggotas(): Promise<ActionResult> {
         user: {
           select: { id: true, username: true },
         },
+        detailKas: {
+          where: {
+            pemasukanKas: { status: "VERIFIED" }
+          },
+          select: {
+            nominalBayar: true
+          }
+        }
       },
     });
 

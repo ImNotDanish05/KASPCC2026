@@ -1,7 +1,7 @@
 'use client'
 
 import { getAnggotas } from "@/lib/actions/anggota.actions";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import EnhancedDataTable, { ColumnDef } from "@/components/common/EnhancedDataTable";
 import { UserCheck, UserX, Download, FileSpreadsheet } from "lucide-react";
 
@@ -36,6 +36,8 @@ type AnggotaRow = {
   lunasSampai: string | null; // ISO date string or null
   jabatan: JabatanOption;
   user: { id: number; username: string } | null;
+  detailKas?: { nominalBayar: number }[];
+  totalBayar: number;
 };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -50,6 +52,17 @@ const MONTHS_ID = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep"
 
 // ── Pure Helpers ──────────────────────────────────────────────────────────────
 
+/** Parse YYYY-MM-DD cleanly without timezone shift issues */
+function parseSafeDate(dateStr: string | Date | unknown): Date {
+  if (!dateStr) return new Date("");
+  if (dateStr instanceof Date) return dateStr;
+  if (typeof dateStr !== "string") return new Date(dateStr as string);
+  const datePart = dateStr.split("T")[0];
+  const [year, month, day] = datePart.split("-");
+  if (!year || !month || !day) return new Date(dateStr);
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
 function toDateInput(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
@@ -62,8 +75,8 @@ function toDateInput(value: string) {
  */
 function generateMonthLabels(start: string, end: string): string[] {
   if (!start || !end) return [];
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const startDate = parseSafeDate(start);
+  const endDate = parseSafeDate(end);
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return [];
 
   const labels: string[] = [];
@@ -77,15 +90,6 @@ function generateMonthLabels(start: string, end: string): string[] {
   return labels;
 }
 
-/** How many months have elapsed since tanggalMulai (0-based). */
-function getCurrentMonthIndex(startDateStr: string): number {
-  if (!startDateStr) return 0;
-  const start = new Date(startDateStr);
-  const now = new Date();
-  const diff = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-  return Math.max(0, diff);
-}
-
 /**
  * Compute plain-text payment status for a given column month.
  * Uses anggota.lunas_sampai directly instead of accumulated payment totals.
@@ -95,31 +99,71 @@ function getCurrentMonthIndex(startDateStr: string): number {
  *  2. TERLAMBAT → column month > lunasSampai AND column month ≤ today
  *  3. Belum     → column month > lunasSampai AND column month > today
  */
-function computeMonthStatusByLunas(
-  lunasSampaiStr: string | null,
+function getDynamicLunasDate(
+  startStr: string,
+  totalBayar: number,
+  targetNominal: number
+): Date | null {
+  if (!startStr || targetNominal <= 0 || totalBayar <= 0) return null;
+  const start = parseSafeDate(startStr);
+  const monthsPaid = Math.floor(totalBayar / targetNominal);
+  if (monthsPaid <= 0) return null;
+
+  return new Date(start.getFullYear(), start.getMonth() + monthsPaid - 1, 1);
+}
+
+function computeMonthStatusByDynamicLunas(
+  dynamicLunas: Date | null,
   colYear: number,
   colMonth: number, // 0-based JS month
 ): "LUNAS" | "TERLAMBAT" | "Belum" {
-  // 1. Check lunas_sampai coverage FIRST — LUNAS always takes priority
-  if (lunasSampaiStr) {
-    const lunas = new Date(lunasSampaiStr);
-    if (!isNaN(lunas.getTime())) {
-      const lunasYear = lunas.getFullYear();
-      const lunasMonth = lunas.getMonth(); // 0-based
-      const isCovered =
-        colYear < lunasYear ||
-        (colYear === lunasYear && colMonth <= lunasMonth);
-      if (isCovered) return "LUNAS";
-    }
+  // 1. Check dynamic lunas coverage FIRST
+  if (dynamicLunas) {
+    const lunasYear = dynamicLunas.getFullYear();
+    const lunasMonth = dynamicLunas.getMonth(); // 0-based
+    const isCovered =
+      colYear < lunasYear ||
+      (colYear === lunasYear && colMonth <= lunasMonth);
+    if (isCovered) return "LUNAS";
   }
 
-  // 2. Not covered by lunas_sampai — decide Belum vs TERLAMBAT based on today
+  // 2. Not covered by lunas — decide Belum vs TERLAMBAT based on today
   const now = new Date();
   const isFuture =
     colYear > now.getFullYear() ||
-    (colYear === now.getFullYear() && colMonth > now.getMonth());
+    (colYear === now.getFullYear() && colMonth >= now.getMonth()); // Bulan berjalan dianggap Belum
 
   return isFuture ? "Belum" : "TERLAMBAT";
+}
+
+/** Calculate true total arrears independent of UI column visibility */
+function computeTotalTunggakan(
+  dynamicLunas: Date | null,
+  startStr: string,
+  endStr: string,
+  targetKas: number
+): { kurang: number; bulan: number } {
+  if (!startStr || !endStr) return { kurang: 0, bulan: 0 };
+  const startDate = parseSafeDate(startStr);
+  const endDate = parseSafeDate(endStr);
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return { kurang: 0, bulan: 0 };
+
+  const now = new Date();
+  const limit = now < endDate ? now : endDate; // Capped at today or end of period
+  
+  let terlambatBulan = 0;
+  const cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const last = new Date(limit.getFullYear(), limit.getMonth(), 1);
+
+  while (cur <= last) {
+    const status = computeMonthStatusByDynamicLunas(dynamicLunas, cur.getFullYear(), cur.getMonth());
+    if (status === "TERLAMBAT") {
+      terlambatBulan++;
+    }
+    cur.setMonth(cur.getMonth() + 1);
+  }
+
+  return { kurang: terlambatBulan * targetKas, bulan: terlambatBulan };
 }
 
 
@@ -160,7 +204,14 @@ export default function Rekapitulasi() {
     try {
       const anggotaResult = await getAnggotas();
       if (anggotaResult.success) {
-        setAnggotas(anggotaResult.data as AnggotaRow[]);
+        const mapped = (anggotaResult.data as any[]).map(anggota => ({
+          ...anggota,
+          totalBayar: (anggota.detailKas ?? []).reduce(
+            (acc: number, d: any) => acc + (d.nominalBayar || 0),
+            0
+          )
+        }));
+        setAnggotas(mapped as AnggotaRow[]);
       } else {
         setError(anggotaResult.error);
       }
@@ -185,14 +236,14 @@ export default function Rekapitulasi() {
     });
 
     return anggotas.map((anggota, idx) => {
-      const tabungan = anggota.tabungan ?? 0;
+      const totalBayar = anggota.totalBayar ?? 0;
+      const dynamicTabungan = targetNominal > 0 ? totalBayar % targetNominal : 0;
 
-      // Count TERLAMBAT months to derive kurang
-      const terlambatCount = colDates.filter(
-        ({ year, month }) =>
-          computeMonthStatusByLunas(anggota.lunasSampai, year, month) === "TERLAMBAT"
-      ).length;
-      const kurang = terlambatCount * targetNominal;
+      // Calculate dynamic lunas date and true tunggakan
+      const dynamicLunas = getDynamicLunasDate(tanggalMulai, totalBayar, targetNominal);
+      const tunggakan = computeTotalTunggakan(dynamicLunas, tanggalMulai, tanggalAkhir, targetNominal);
+      const kurang = tunggakan.kurang;
+      const terlambatCount = tunggakan.bulan;
 
       const row: Record<string, string | number> = {
         No: idx + 1,
@@ -200,13 +251,14 @@ export default function Rekapitulasi() {
         Jabatan: anggota.jabatan.namaJabatan,
         Status: anggota.statusAktif ? "Aktif" : "Tidak Aktif",
         "Rekap Saldo": kurang === 0
-          ? `Lunas s.d ${anggota.lunasSampai ? new Date(anggota.lunasSampai).toLocaleDateString("id-ID", { month: "short", year: "numeric" }) : "-"}`
+          ? `Lunas s.d ${dynamicLunas ? dynamicLunas.toLocaleDateString("id-ID", { month: "short", year: "numeric" }) : "-"}`
           : `Kurang: Rp ${new Intl.NumberFormat("id-ID").format(kurang)} (${terlambatCount} bln)`,
-        Tabungan: tabungan,
+        "Total Bayar": totalBayar,
+        Tabungan: dynamicTabungan,
       };
 
       colDates.forEach(({ year, month }, i) => {
-        row[monthLabels[i]] = computeMonthStatusByLunas(anggota.lunasSampai, year, month);
+        row[monthLabels[i]] = computeMonthStatusByDynamicLunas(dynamicLunas, year, month);
       });
       return row;
     });
@@ -279,6 +331,8 @@ function handleExportExcel() {
         // Conditional Formatting
         if (h === 'No') {
           alignH = 'center';
+        } else if (h === 'Total Bayar' || h === 'Tabungan') {
+          alignH = 'right';
         } else if (val === 'LUNAS') {
           fontColor = '059669'; bold = true; alignH = 'center';
         } else if (val === 'TERLAMBAT') {
@@ -313,10 +367,10 @@ function handleExportExcel() {
     // --- 4. GENERATE WORKSHEET & MENGATUR LEBAR/MERGE ---
     const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-    // Merge untuk Judul (baris 0) dan Subjudul (baris 1) dari kolom 0 s.d 6
+    // Merge untuk Judul (baris 0) dan Subjudul (baris 1) dari kolom 0 s.d 7
     if (!ws['!merges']) ws['!merges'] = [];
-    ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } });
-    ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 6 } });
+    ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } });
+    ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 7 } });
 
     // Lebar kolom
     ws['!cols'] = headers.map(h => {
@@ -325,6 +379,7 @@ function handleExportExcel() {
       if (h === 'Jabatan') return { wch: 20 };
       if (h === 'Status') return { wch: 12 };
       if (h === 'Rekap Saldo') return { wch: 38 };
+      if (h === 'Total Bayar') return { wch: 18 };
       if (h === 'Tabungan') return { wch: 20 };
       return { wch: 15 }; // Lebar untuk bulan
     });
@@ -354,7 +409,7 @@ function handleExportExcel() {
 
   // ── Column definitions ──────────────────────────────────────────────────────
 
-  const anggotaColumns: ColumnDef[] = [
+  const anggotaColumns: ColumnDef[] = useMemo(() => [
     { key: "nama", label: "Nama", sortable: true },
     {
       key: "jabatan",
@@ -388,16 +443,16 @@ function handleExportExcel() {
       label: "Rekap Saldo",
       width: "min-w-[180px]",
       render: (_: unknown, anggota: AnggotaRow) => {
-        const tabungan = anggota.tabungan ?? 0;
-        // Count TERLAMBAT months for this anggota
-        const terlambatCount = monthLabels.filter((label, i) => {
-          const [mon, yr] = label.split(" ");
-          const monthIdx = MONTHS_ID.indexOf(mon);
-          return computeMonthStatusByLunas(anggota.lunasSampai, Number(yr), monthIdx) === "TERLAMBAT";
-        }).length;
-        const kurang = terlambatCount * targetNominal;
-        const lunasLabel = anggota.lunasSampai
-          ? new Date(anggota.lunasSampai).toLocaleDateString("id-ID", { month: "short", year: "numeric" })
+        const totalBayar = anggota.totalBayar ?? 0;
+        const dynamicTabungan = targetNominal > 0 ? totalBayar % targetNominal : 0;
+
+        // Calculate dynamic lunas date and true tunggakan
+        const dynamicLunas = getDynamicLunasDate(tanggalMulai, totalBayar, targetNominal);
+        const tunggakan = computeTotalTunggakan(dynamicLunas, tanggalMulai, tanggalAkhir, targetNominal);
+        const kurang = tunggakan.kurang;
+        const terlambatCount = tunggakan.bulan;
+        const lunasLabel = dynamicLunas
+          ? dynamicLunas.toLocaleDateString("id-ID", { month: "short", year: "numeric" })
           : null;
         return (
           <div className="flex min-w-[180px] flex-col gap-1">
@@ -414,13 +469,23 @@ function handleExportExcel() {
               </div>
             )}
             <div className="mt-0.5 border-t border-gray-100 pt-0.5 text-[10px] text-gray-500 dark:border-gray-700 dark:text-gray-400">
-              Tabungan: Rp {new Intl.NumberFormat("id-ID").format(tabungan)}
+              Tabungan: Rp {new Intl.NumberFormat("id-ID").format(dynamicTabungan)}
             </div>
           </div>
         );
       },
     },
-    // Dynamic month columns — status derived from anggota.lunas_sampai
+    {
+      key: "totalBayar",
+      label: "Total Bayar",
+      sortable: true,
+      render: (_: unknown, anggota: AnggotaRow) => (
+        <span className="font-semibold text-gray-800 dark:text-white/90 text-sm">
+          Rp {new Intl.NumberFormat("id-ID").format(anggota.totalBayar ?? 0)}
+        </span>
+      ),
+    },
+    // Dynamic month columns — status derived dynamically
     ...monthLabels.map((label, i) => {
       const [mon, yr] = label.split(" ");
       const colMonth = MONTHS_ID.indexOf(mon);
@@ -429,7 +494,9 @@ function handleExportExcel() {
         key: `bulan-${i}`,
         label,
         render: (_: unknown, anggota: AnggotaRow) => {
-          const status = computeMonthStatusByLunas(anggota.lunasSampai, colYear, colMonth);
+          const totalBayar = anggota.totalBayar ?? 0;
+          const dynamicLunas = getDynamicLunasDate(tanggalMulai, totalBayar, targetNominal);
+          const status = computeMonthStatusByDynamicLunas(dynamicLunas, colYear, colMonth);
           if (status === "LUNAS") {
             return (
               <span className="inline-flex items-center rounded-md bg-success-50 px-2 py-1 text-[10px] font-bold text-success-700 dark:bg-success-500/10 dark:text-success-400">
@@ -448,7 +515,7 @@ function handleExportExcel() {
         },
       };
     }),
-  ];
+  ], [monthLabels, targetNominal, tanggalMulai, tanggalAkhir]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
