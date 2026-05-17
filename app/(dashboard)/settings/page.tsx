@@ -150,6 +150,7 @@ export default function SettingsPage() {
                   type="date"
                   value={tanggalMulai}
                   onChange={(event) => setTanggalMulai(event.target.value)}
+                  onClick={(e) => "showPicker" in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
                   className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
                 />
               </div>
@@ -159,6 +160,7 @@ export default function SettingsPage() {
                   type="date"
                   value={tanggalAkhir}
                   onChange={(event) => setTanggalAkhir(event.target.value)}
+                  onClick={(e) => "showPicker" in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
                   className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
                 />
               </div>
