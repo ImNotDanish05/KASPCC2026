@@ -4,6 +4,7 @@ import { getRequestAuth } from "@/lib/request-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Mencegah timeout di Vercel (default 10-15s)
 
 type VerifyPayload = {
   status?: "VERIFIED" | "REJECTED";

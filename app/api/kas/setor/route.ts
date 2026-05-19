@@ -5,6 +5,7 @@ import { uploadBuktiImage } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Mencegah timeout di Vercel saat upload banyak bukti
 
 type SetorItem = {
   anggotaId: number;
