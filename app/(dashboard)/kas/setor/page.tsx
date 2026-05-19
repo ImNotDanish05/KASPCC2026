@@ -176,6 +176,18 @@ export default function SetorKasPage() {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
+  function toggleAllAnggota(checked: boolean) {
+    if (checked) {
+      setSelectedIds(new Set(anggotas.map((a) => a.id)));
+    } else {
+      setSelectedIds(new Set());
+      setBuktiById({});
+      Object.values(fileInputRefs.current).forEach((ref) => {
+        if (ref) ref.value = "";
+      });
+    }
+  }
+
   function toggleAnggota(id: number) {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -333,7 +345,22 @@ export default function SetorKasPage() {
                 <Table>
                   <TableHeader className="bg-gray-50 dark:bg-gray-800">
                     <TableRow>
-                      {["Pilih", "Nama", "NIM", "Jabatan", "Nominal (Rp)", "Bukti Transfer"].map(
+                      <TableCell
+                        isHeader
+                        className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400"
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={anggotas.length > 0 && selectedIds.size === anggotas.length}
+                            onChange={(e) => toggleAllAnggota(e.target.checked)}
+                            className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-brand-500"
+                            title="Pilih Semua"
+                          />
+                          <span>Pilih</span>
+                        </div>
+                      </TableCell>
+                      {["Nama", "NIM", "Jabatan", "Nominal (Rp)", "Bukti Transfer"].map(
                         (h) => (
                           <TableCell
                             key={h}
