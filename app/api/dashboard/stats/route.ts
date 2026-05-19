@@ -39,10 +39,32 @@ export async function GET(_req: NextRequest) {
     _sum: { totalNominal: true },
   });
 
-  // Sum of all anggota tabungan (accumulated savings)
-  const tabunganAgg = await prisma.anggota.aggregate({
-    _sum: { tabungan: true },
+  // Calculate dynamic tabungan for all members
+  const anggotas = await prisma.anggota.findMany({
+    select: {
+      detailKas: {
+        where: { pemasukanKas: { status: "VERIFIED" } },
+        select: { nominalBayar: true },
+      },
+    },
   });
+
+  const pengaturan = await prisma.pengaturan.findFirst();
+  const targetNominal = pengaturan?.targetKasPerBulan ?? 0;
+  const start = pengaturan?.tanggalMulai ? new Date(pengaturan.tanggalMulai) : new Date();
+  const end = pengaturan?.tanggalAkhir ? new Date(pengaturan.tanggalAkhir) : new Date();
+  const maxMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+
+  let tabunganTotal = 0;
+  for (const a of anggotas) {
+    const totalBayar = a.detailKas.reduce((acc, d) => acc + d.nominalBayar, 0);
+    let monthsPaid = targetNominal > 0 ? Math.floor(totalBayar / targetNominal) : 0;
+    let dynamicTabungan = targetNominal > 0 ? totalBayar % targetNominal : totalBayar;
+    if (monthsPaid > maxMonths) {
+      dynamicTabungan += (monthsPaid - maxMonths) * targetNominal;
+    }
+    tabunganTotal += dynamicTabungan;
+  }
 
   const pendingSetoran = await prisma.pemasukanKas.count({
     where: { status: "PENDING" },
@@ -52,10 +74,11 @@ export async function GET(_req: NextRequest) {
 
   const pemasukanTotal = pemasukanAgg._sum.nominalTotal ?? 0;
   const pengeluaranTotal = pengeluaranAgg._sum.totalNominal ?? 0;
-  const tabunganTotal = tabunganAgg._sum.tabungan ?? 0;
 
-  // Saldo = Pemasukan (verified) - Pengeluaran + Tabungan (anggota savings)
-  const saldoKas = pemasukanTotal - pengeluaranTotal + tabunganTotal;
+  // Saldo = Pemasukan (verified) - Pengeluaran
+  // Note: Pemasukan ALREADY includes tabungan because it's the total money received.
+  // DO NOT add tabunganTotal to saldoKas to avoid double-counting.
+  const saldoKas = pemasukanTotal - pengeluaranTotal;
 
   // ── Grafik 6 Bulan Terakhir ───────────────────────────────────────────────
 

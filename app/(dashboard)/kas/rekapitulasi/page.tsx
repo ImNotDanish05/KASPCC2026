@@ -91,25 +91,38 @@ function generateMonthLabels(start: string, end: string): string[] {
 }
 
 /**
- * Compute plain-text payment status for a given column month.
- * Uses anggota.lunas_sampai directly instead of accumulated payment totals.
- *
- * Priority (highest → lowest):
- *  1. LUNAS     → column month ≤ lunasSampai  (even if month is in the future)
- *  2. TERLAMBAT → column month > lunasSampai AND column month ≤ today
- *  3. Belum     → column month > lunasSampai AND column month > today
+ * Menghitung status pembayaran dan tabungan dengan membatasi lunas sampai tanggal akhir kas.
+ * Jika bulan yang dibayar melebihi rentang tanggal kas (hingga tanggalAkhir), 
+ * maka kelebihan bulan tersebut akan dikonversi menjadi tabungan.
  */
-function getDynamicLunasDate(
+function computePaymentStats(
   startStr: string,
+  endStr: string,
   totalBayar: number,
   targetNominal: number
-): Date | null {
-  if (!startStr || targetNominal <= 0 || totalBayar <= 0) return null;
+): { dynamicLunas: Date | null; dynamicTabungan: number } {
+  if (!startStr || !endStr || targetNominal <= 0 || totalBayar <= 0) {
+    return { dynamicLunas: null, dynamicTabungan: totalBayar };
+  }
   const start = parseSafeDate(startStr);
-  const monthsPaid = Math.floor(totalBayar / targetNominal);
-  if (monthsPaid <= 0) return null;
+  const end = parseSafeDate(endStr);
+  
+  const maxMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
 
-  return new Date(start.getFullYear(), start.getMonth() + monthsPaid - 1, 1);
+  let monthsPaid = Math.floor(totalBayar / targetNominal);
+  let dynamicTabungan = totalBayar % targetNominal;
+
+  if (monthsPaid > maxMonths) {
+    const excess = monthsPaid - maxMonths;
+    dynamicTabungan += excess * targetNominal;
+    monthsPaid = maxMonths;
+  }
+
+  const dynamicLunas = monthsPaid > 0 
+    ? new Date(start.getFullYear(), start.getMonth() + monthsPaid - 1, 1)
+    : null;
+
+  return { dynamicLunas, dynamicTabungan };
 }
 
 function computeMonthStatusByDynamicLunas(
@@ -237,10 +250,9 @@ export default function Rekapitulasi() {
 
     return anggotas.map((anggota, idx) => {
       const totalBayar = anggota.totalBayar ?? 0;
-      const dynamicTabungan = targetNominal > 0 ? totalBayar % targetNominal : 0;
 
-      // Calculate dynamic lunas date and true tunggakan
-      const dynamicLunas = getDynamicLunasDate(tanggalMulai, totalBayar, targetNominal);
+      // Calculate dynamic lunas date, tabungan, and true tunggakan
+      const { dynamicLunas, dynamicTabungan } = computePaymentStats(tanggalMulai, tanggalAkhir, totalBayar, targetNominal);
       const tunggakan = computeTotalTunggakan(dynamicLunas, tanggalMulai, tanggalAkhir, targetNominal);
       const kurang = tunggakan.kurang;
       const terlambatCount = tunggakan.bulan;
@@ -444,10 +456,9 @@ function handleExportExcel() {
       width: "min-w-[180px]",
       render: (_: unknown, anggota: AnggotaRow) => {
         const totalBayar = anggota.totalBayar ?? 0;
-        const dynamicTabungan = targetNominal > 0 ? totalBayar % targetNominal : 0;
 
-        // Calculate dynamic lunas date and true tunggakan
-        const dynamicLunas = getDynamicLunasDate(tanggalMulai, totalBayar, targetNominal);
+        // Calculate dynamic lunas date, tabungan, and true tunggakan
+        const { dynamicLunas, dynamicTabungan } = computePaymentStats(tanggalMulai, tanggalAkhir, totalBayar, targetNominal);
         const tunggakan = computeTotalTunggakan(dynamicLunas, tanggalMulai, tanggalAkhir, targetNominal);
         const kurang = tunggakan.kurang;
         const terlambatCount = tunggakan.bulan;
@@ -495,7 +506,7 @@ function handleExportExcel() {
         label,
         render: (_: unknown, anggota: AnggotaRow) => {
           const totalBayar = anggota.totalBayar ?? 0;
-          const dynamicLunas = getDynamicLunasDate(tanggalMulai, totalBayar, targetNominal);
+          const { dynamicLunas } = computePaymentStats(tanggalMulai, tanggalAkhir, totalBayar, targetNominal);
           const status = computeMonthStatusByDynamicLunas(dynamicLunas, colYear, colMonth);
           if (status === "LUNAS") {
             return (

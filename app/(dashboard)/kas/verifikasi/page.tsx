@@ -286,6 +286,26 @@ export default function VerifikasiKasPage() {
   const [error, setError] = useState<string | null>(null);
   const [commentById, setCommentById] = useState<Record<number, string>>({});
 
+  // Timer loading state
+  const [verifyingId, setVerifyingId] = useState<number | null>(null);
+  const [verifyType, setVerifyType] = useState<"VERIFIED" | "REJECTED" | null>(null);
+  const [timer, setTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (verifyingId !== null) {
+      setTimer(0);
+      interval = setInterval(() => {
+        setTimer((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setTimer(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [verifyingId]);
+
   // Image viewer
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerNama, setViewerNama] = useState<string>("");
@@ -318,6 +338,8 @@ export default function VerifikasiKasPage() {
       return;
     }
     setError(null);
+    setVerifyingId(id);
+    setVerifyType(status);
     try {
       const res = await fetch(`/api/kas/verify/${id}`, {
         method: "PUT",
@@ -331,6 +353,9 @@ export default function VerifikasiKasPage() {
       await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally {
+      setVerifyingId(null);
+      setVerifyType(null);
     }
   }
 
@@ -467,15 +492,31 @@ export default function VerifikasiKasPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => handleVerify(item.id, "VERIFIED")}
-                      className="inline-flex items-center justify-center rounded-lg bg-success-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-success-600"
+                      disabled={verifyingId !== null}
+                      className="inline-flex min-w-[100px] items-center justify-center gap-1.5 rounded-lg bg-success-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-success-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      ✓ Setujui
+                      {verifyingId === item.id && verifyType === "VERIFIED" ? (
+                        <>
+                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Memproses... ({timer}s)
+                        </>
+                      ) : (
+                        "✓ Setujui"
+                      )}
                     </button>
                     <button
                       onClick={() => handleVerify(item.id, "REJECTED")}
-                      className="inline-flex items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-error-600"
+                      disabled={verifyingId !== null}
+                      className="inline-flex min-w-[100px] items-center justify-center gap-1.5 rounded-lg bg-error-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-error-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      ✕ Tolak
+                      {verifyingId === item.id && verifyType === "REJECTED" ? (
+                        <>
+                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Memproses... ({timer}s)
+                        </>
+                      ) : (
+                        "✕ Tolak"
+                      )}
                     </button>
                   </div>
                 </div>

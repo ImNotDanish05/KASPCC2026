@@ -66,81 +66,17 @@ export async function PUT(
     );
   }
 
-  // ── If VERIFIED: compute and update lunas_sampai + tabungan per anggota ──────
+  // ── If VERIFIED: Update status (dynamic calculation on view side) ─────────
 
   if (status === "VERIFIED") {
-    // Fetch Pengaturan (settings) once
-    const pengaturan = await prisma.pengaturan.findUnique({ where: { id: 1 } });
-    if (!pengaturan) {
-      return NextResponse.json(
-        { error: "Pengaturan belum dikonfigurasi." },
-        { status: 500 },
-      );
-    }
-
-    const targetPerBulan = pengaturan.targetKasPerBulan;
-    const tanggalMulai = pengaturan.tanggalMulai;
-
-    // Run everything in a single transaction with extended timeout for large members
-    const updated = await prisma.$transaction(
-      async (tx) => {
-        // 1. Update the pemasukan status
-        const updatedPemasukan = await tx.pemasukanKas.update({
-          where: { id: pemasukanId },
-          data: { status: "VERIFIED", alasanTolak: null },
-          include: {
-            details: { include: { anggota: true } },
-            user: true,
-          },
-        });
-
-        // 2. For each detail line, update the corresponding anggota
-        for (const detail of existing.details) {
-          const anggota = detail.anggota;
-          const nominalPembayaran = detail.nominalBayar;
-          const tabunganSaatIni = anggota.tabungan ?? 0;
-          const lunasSaatIni = anggota.lunasSampai; // DateTime | null
-
-          const totalEfektif = nominalPembayaran + tabunganSaatIni;
-          const bulanBertambah = Math.floor(totalEfektif / targetPerBulan);
-          const sisaTabungan = totalEfektif % targetPerBulan;
-
-          if (bulanBertambah > 0) {
-            // Base date: use lunasSaatIni if set, otherwise fall back to tanggalMulai
-            const baseDate = lunasSaatIni ?? tanggalMulai;
-            // Add bulanBertambah months to baseDate (preserve day=1 for clean month arithmetic)
-            const base = new Date(baseDate);
-            const newLunasSampai = new Date(
-              base.getFullYear(),
-              base.getMonth() + bulanBertambah,
-              base.getDate(),
-            );
-
-            await tx.anggota.update({
-              where: { id: anggota.id },
-              data: {
-                lunasSampai: newLunasSampai,
-                tabungan: sisaTabungan,
-              },
-            });
-          } else {
-            // Not enough to cover a full month — accumulate into tabungan only
-            await tx.anggota.update({
-              where: { id: anggota.id },
-              data: {
-                tabungan: tabunganSaatIni + nominalPembayaran,
-              },
-            });
-          }
-        }
-
-        return updatedPemasukan;
+    const updated = await prisma.pemasukanKas.update({
+      where: { id: pemasukanId },
+      data: { status: "VERIFIED", alasanTolak: null },
+      include: {
+        details: { include: { anggota: true } },
+        user: true,
       },
-      {
-        maxWait: 10000, // 10 seconds
-        timeout: 30000, // 30 seconds (default is 5 seconds)
-      }
-    );
+    });
 
     return NextResponse.json({ data: updated });
   }

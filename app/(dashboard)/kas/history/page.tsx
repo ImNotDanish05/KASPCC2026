@@ -7,6 +7,8 @@ import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { Eye } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 
 type Jabatan = {
   id: number;
@@ -138,6 +140,7 @@ export default function KasHistoryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [selectedDetail, setSelectedDetail] = useState<Pemasukan | null>(null);
 
   // ── Fetch current user ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -320,13 +323,20 @@ export default function KasHistoryPage() {
                         : "-"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      {item.status === "REJECTED" && currentUserId === item.userId ? (
-                        <Link href={`/kas/resubmit/${item.id}`}>
-                          <Button size="sm">Perbaiki</Button>
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelectedDetail(item)}
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-brand-500 dark:hover:bg-gray-800 dark:hover:text-brand-400 transition-colors"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        {item.status === "REJECTED" && currentUserId === item.userId && (
+                          <Link href={`/kas/resubmit/${item.id}`}>
+                            <Button size="sm">Perbaiki</Button>
+                          </Link>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -335,48 +345,47 @@ export default function KasHistoryPage() {
           </Table>
         </div>
 
-        {data.length > 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {data.map((item: Pemasukan) => (
-              <div
-                key={`detail-${item.id}`}
-                className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/40"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
-                    Detail Setoran #{item.id}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">
-                      {item.user?.anggota?.nama ?? item.user?.username}
-                    </span>
-                    {item.user?.anggota?.jabatan?.nama_jabatan && (
-                      <span className="inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
-                        {item.user.anggota.jabatan.nama_jabatan}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-3 space-y-2">
-                  {item.details.map((detail: Detail) => (
-                    <div
-                      key={detail.id}
-                      className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-gray-800/60 dark:text-gray-400"
-                    >
-                      <span>
-                        {detail.anggota.nama} ({detail.anggota.nim})
-                      </span>
-                      <span className="font-semibold text-gray-800 dark:text-white/90">
-                        Rp {formatRupiah(detail.nominal_bayar)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
       </ComponentCard>
+
+      {/* Modal Detail */}
+      <Modal
+        isOpen={!!selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+        className="max-w-md p-6"
+      >
+        {selectedDetail && (
+          <div>
+            <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white/90">
+              Detail Setoran #{selectedDetail.id}
+            </h3>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                {selectedDetail.user?.anggota?.nama ?? selectedDetail.user?.username}
+              </span>
+              {selectedDetail.user?.anggota?.jabatan?.nama_jabatan && (
+                <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
+                  {selectedDetail.user.anggota.jabatan.nama_jabatan}
+                </span>
+              )}
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-2 custom-scrollbar">
+              {selectedDetail.details.map((detail: Detail) => (
+                <div
+                  key={detail.id}
+                  className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:bg-gray-800/60 dark:text-gray-400"
+                >
+                  <span className="font-medium">
+                    {detail.anggota.nama} ({detail.anggota.nim})
+                  </span>
+                  <span className="font-semibold text-gray-800 dark:text-white/90">
+                    Rp {formatRupiah(detail.nominal_bayar)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

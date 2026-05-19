@@ -49,7 +49,34 @@ export async function getAnggotas(): Promise<ActionResult> {
       },
     });
 
-    return { success: true, data: anggotas };
+    // Ambil pengaturan untuk perhitungan dinamis
+    const pengaturan = await prisma.pengaturan.findFirst();
+    const targetNominal = pengaturan?.targetKasPerBulan ?? 0;
+    const start = pengaturan?.tanggalMulai ? new Date(pengaturan.tanggalMulai) : new Date();
+    const end = pengaturan?.tanggalAkhir ? new Date(pengaturan.tanggalAkhir) : new Date();
+    const maxMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+
+    // Override tabungan dengan perhitungan dinamis dari total setoran
+    const mappedAnggotas = anggotas.map(anggota => {
+      const totalBayar = (anggota.detailKas ?? []).reduce(
+        (acc, d) => acc + (d.nominalBayar || 0),
+        0
+      );
+      
+      let monthsPaid = targetNominal > 0 ? Math.floor(totalBayar / targetNominal) : 0;
+      let dynamicTabungan = targetNominal > 0 ? totalBayar % targetNominal : totalBayar;
+      
+      if (monthsPaid > maxMonths) {
+        dynamicTabungan += (monthsPaid - maxMonths) * targetNominal;
+      }
+      
+      return {
+        ...anggota,
+        tabungan: dynamicTabungan,
+      };
+    });
+
+    return { success: true, data: mappedAnggotas };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
   }
