@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestAuth } from "@/lib/request-auth";
-import { uploadBuktiImage } from "@/lib/supabase";
+import { uploadBuktiImage } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
