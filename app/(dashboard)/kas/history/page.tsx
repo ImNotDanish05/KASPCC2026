@@ -379,36 +379,31 @@ export default function KasHistoryPage() {
 
   const isInternal = userRoles.includes("Bendahara Inti") || userRoles.includes("Superadmin");
 
-  useEffect(() => {
-    let active = true;
+  async function loadData() {
     setLoading(true);
     setError(null);
-    const params = new URLSearchParams();
-    if (status) {
-      params.set("status", status);
+    try {
+      const params = new URLSearchParams();
+      if (status) {
+        params.set("status", status);
+      }
+      const url = `/api/kas/history${params.toString() ? `?${params}` : ""}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Gagal memuat data.");
+      const payload = (await res.json()) as { data?: unknown[] };
+      const list = Array.isArray(payload.data)
+        ? payload.data.map((item: unknown) => mapPemasukan(item))
+        : [];
+      setData(list);
+    } catch {
+      setError("Gagal memuat data.");
+    } finally {
+      setLoading(false);
     }
-    const url = `/api/kas/history${params.toString() ? `?${params}` : ""}`;
-    console.log(url)
-    fetch(url)
-      .then((res) => res.json())
-      .then((payload: { data?: unknown[] }) => {
-        if (!active) return;
-        const list = Array.isArray(payload.data)
-          ? payload.data.map((item: unknown) => mapPemasukan(item))
-          : [];
-        setData(list);
-      })
-      .catch(() => {
-        if (!active) return;
-        setError("Gagal memuat data.");
-      })
-      .finally(() => {
-        if (!active) return;
-        setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+  }
+
+  useEffect(() => {
+    loadData();
   }, [status]);
 
   return (
