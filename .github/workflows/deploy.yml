@@ -1,0 +1,41 @@
+name: Deploy Next.js to cPanel
+
+on:
+  push:
+    branches:
+      - migrate-to-mysql # Ganti dengan nama branch yang Anda inginkan (misal: staging, dev, atau production)
+
+jobs:
+  web-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout kode dari GitHub
+      - name: Get latest code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js di server GitHub
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Sesuaikan dengan versi Node.js project Anda
+          cache: 'npm'
+
+      # 3. Install dependencies dan Build project Next.js
+      - name: Install dependencies & Build
+        run: |
+          npm ci
+          npm run build
+
+      # 4. Upload file hasil build ke cPanel via FTP
+      - name: Sync files to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets::FTP_SERVER }}
+          username: ${{ secrets::FTP_USERNAME }}
+          password: ${{ secrets::FTP_PASSWORD }}
+          # Tentukan file apa saja yang perlu di-upload. 
+          # Jika Anda menggunakan output 'export' (Static HTML), arahkan ke folder 'out'.
+          # Jika menggunakan SSR standar, Anda perlu mengupload seluruh file termasuk .next, public, package.json, dll.
+          local-dir: ./
