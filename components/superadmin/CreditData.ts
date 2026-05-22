@@ -30,14 +30,5 @@ export const originalDevelopers20252026: CreditMember[] = [
       instagram: "https://www.instagram.com/gira.ichi/",
       github: "https://github.com/AbimanyuGilar",
     },
-  },
-  {
-    name: "Alfin Rozzaq Nirwana",
-    role: "Infrastructure",
-    image: `/images/credits/alfin.png?v=${CREDITS_IMAGE_VERSION}`,
-    socials: {
-      instagram: "https://www.instagram.com/algaray_02/",
-      github: "https://github.com/Algaray02",
-    },
-  },
+  }
 ];
