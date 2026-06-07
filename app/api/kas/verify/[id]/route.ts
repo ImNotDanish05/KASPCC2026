@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60; // Mencegah timeout di Vercel (default 10-15s)
 
 type VerifyPayload = {
-  status?: "VERIFIED" | "REJECTED";
+  status?: "VERIFIED" | "REJECTED" | "PENDING";
   alasanTolak?: string;
 };
 
@@ -21,6 +21,12 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
+  const isInternal =
+    auth.roles.includes("Bendahara Inti") || auth.roles.includes("Superadmin");
+  if (!isInternal) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
   const pemasukanId = Number(id);
   if (!Number.isFinite(pemasukanId)) {
     return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
@@ -29,9 +35,9 @@ export async function PUT(
   const payload = (await req.json().catch(() => null)) as VerifyPayload | null;
   const status = payload?.status;
 
-  if (status !== "VERIFIED" && status !== "REJECTED") {
+  if (status !== "VERIFIED" && status !== "REJECTED" && status !== "PENDING") {
     return NextResponse.json(
-      { error: "Status harus VERIFIED atau REJECTED." },
+      { error: "Status harus PENDING, VERIFIED, atau REJECTED." },
       { status: 400 },
     );
   }
@@ -44,48 +50,20 @@ export async function PUT(
     );
   }
 
-  // Fetch the pemasukan with its details and each anggota's current state
   const existing = await prisma.pemasukanKas.findUnique({
     where: { id: pemasukanId },
-    include: {
-      details: {
-        include: { anggota: true },
-      },
-      user: true,
-    },
   });
 
   if (!existing) {
     return NextResponse.json({ error: "Data tidak ditemukan." }, { status: 404 });
   }
 
-  if (existing.status !== "PENDING") {
-    return NextResponse.json(
-      { error: "Status sudah diproses sebelumnya." },
-      { status: 409 },
-    );
-  }
-
-  // ── If VERIFIED: Update status (dynamic calculation on view side) ─────────
-
-  if (status === "VERIFIED") {
-    const updated = await prisma.pemasukanKas.update({
-      where: { id: pemasukanId },
-      data: { status: "VERIFIED", alasanTolak: null },
-      include: {
-        details: { include: { anggota: true } },
-        user: true,
-      },
-    });
-
-    return NextResponse.json({ data: updated });
-  }
-
-  // ── REJECTED path (no anggota updates needed) ─────────────────────────────
-
   const updated = await prisma.pemasukanKas.update({
     where: { id: pemasukanId },
-    data: { status: "REJECTED", alasanTolak },
+    data: {
+      status,
+      alasanTolak: status === "REJECTED" ? alasanTolak : null,
+    },
     include: {
       details: { include: { anggota: true } },
       user: true,

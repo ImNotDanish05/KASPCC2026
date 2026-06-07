@@ -19,6 +19,7 @@ type StatsPayload = {
   pending_setoran: number;
   anggota_total: number;
   grafik_kas: ChartPoint[];
+  tabungan_total: number;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -149,6 +150,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<StatsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [includeTabungan, setIncludeTabungan] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -170,6 +172,7 @@ export default function DashboardPage() {
           grafik_kas: Array.isArray(d.grafik_kas)
             ? (d.grafik_kas as ChartPoint[])
             : [],
+          tabungan_total: toNumber(d.tabungan_total),
         });
       })
       .catch(() => { if (active) setError("Gagal memuat data dashboard."); })
@@ -201,7 +204,7 @@ export default function DashboardPage() {
           value={val("pemasukan_verified")}
           icon={<TrendingUp className="h-6 w-6 text-blue-600" />}
           iconBg="bg-blue-50 dark:bg-blue-500/10"
-          sub="Hanya setoran terverifikasi"
+          sub="Termasuk tabungan anggota"
           subColor="text-blue-500 dark:text-blue-400"
         />
         <SummaryCard
@@ -212,14 +215,55 @@ export default function DashboardPage() {
           sub="Semua pengeluaran kas"
           subColor="text-red-400 dark:text-red-400"
         />
-        <SummaryCard
-          title="Saldo"
-          value={val("saldo_kas")}
-          icon={<Wallet className="h-6 w-6 text-emerald-600" />}
-          iconBg="bg-emerald-50 dark:bg-emerald-500/10"
-          sub="Pemasukan − Pengeluaran + Tabungan"
-          subColor="text-emerald-600 dark:text-emerald-400"
-        />
+        
+        {/* Custom Saldo Card with dynamic toggle */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+              <Wallet className="h-6 w-6 text-emerald-600" />
+            </div>
+            {/* Toggle Switch */}
+            <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800">
+              <button
+                onClick={() => setIncludeTabungan(true)}
+                className={`rounded-md px-2 py-1 text-[10px] font-semibold transition ${
+                  includeTabungan
+                    ? "bg-white text-gray-800 shadow-xs dark:bg-gray-700 dark:text-white"
+                    : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
+                }`}
+              >
+                + Tabungan
+              </button>
+              <button
+                onClick={() => setIncludeTabungan(false)}
+                className={`rounded-md px-2 py-1 text-[10px] font-semibold transition ${
+                  !includeTabungan
+                    ? "bg-white text-gray-800 shadow-xs dark:bg-gray-700 dark:text-white"
+                    : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
+                }`}
+              >
+                - Tabungan
+              </button>
+            </div>
+          </div>
+          <div className="mt-5">
+            <span className="text-sm text-gray-500 dark:text-gray-400">Saldo</span>
+            <h4 className="mt-2 text-xl font-bold text-gray-800 dark:text-white/90">
+              {loading || !stats
+                ? "—"
+                : formatRupiah(
+                    includeTabungan
+                      ? stats.saldo_kas
+                      : stats.saldo_kas - stats.tabungan_total
+                  )}
+            </h4>
+            <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+              {includeTabungan
+                ? "Saldo riil kas (termasuk tabungan)"
+                : `Saldo tanpa tabungan (dikurangi Rp ${new Intl.NumberFormat("id-ID").format(stats?.tabungan_total ?? 0)})`}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ── Secondary Info + Chart ────────────────────────────────────────── */}

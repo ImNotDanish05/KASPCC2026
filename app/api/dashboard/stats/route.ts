@@ -130,6 +130,7 @@ export async function GET(_req: NextRequest) {
       pending_setoran: pendingSetoran,
       anggota_total: anggotaTotal,
       grafik_kas: grafikKas,
+      tabungan_total: tabunganTotal,
     },
   });
 }
