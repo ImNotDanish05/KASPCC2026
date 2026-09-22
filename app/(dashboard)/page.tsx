@@ -158,10 +158,16 @@ export default function DashboardPage() {
     setError(null);
 
     fetch("/api/dashboard/stats")
-      .then((res) => res.json())
+      .then(async (res) => {
+        const payload = await res.json().catch(() => null);
+        if (!res.ok) {
+          throw new Error(payload?.error || `HTTP ${res.status}`);
+        }
+        return payload;
+      })
       .then((payload) => {
         if (!active) return;
-        const d = payload.data as Record<string, unknown>;
+        const d = payload?.data as Record<string, unknown>;
         if (!d) { setError("Data tidak tersedia."); return; }
         setStats({
           saldo_kas: toNumber(d.saldo_kas),
@@ -175,7 +181,9 @@ export default function DashboardPage() {
           tabungan_total: toNumber(d.tabungan_total),
         });
       })
-      .catch(() => { if (active) setError("Gagal memuat data dashboard."); })
+      .catch((err: any) => {
+        if (active) setError(err?.message ? `Gagal memuat data dashboard: ${err.message}` : "Gagal memuat data dashboard.");
+      })
       .finally(() => { if (active) setLoading(false); });
 
     return () => { active = false; };
